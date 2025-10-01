@@ -34,7 +34,7 @@ model User {
 }
 
 model Session {
-  id                   String   @id
+  id                   String   @id @default(cuid(2))
   expiresAt            DateTime
   token                String
   createdAt            DateTime @default(now())
@@ -50,7 +50,7 @@ model Session {
 }
 
 model Account {
-  id                    String    @id
+  id                    String    @id @default(cuid(2))
   accountId             String
   providerId            String
   userId                String
@@ -69,7 +69,7 @@ model Account {
 }
 
 model Verification {
-  id         String   @id
+  id         String   @id @default(cuid(2))
   identifier String
   value      String
   expiresAt  DateTime
@@ -90,7 +90,7 @@ model TwoFactor {
 }
 
 model Organization {
-  id          String       @id
+  id          String        @id @default(cuid(2))
   name        String
   slug        String?
   logo        String?
@@ -98,13 +98,15 @@ model Organization {
   metadata    String?
   members     Member[]
   invitations Invitation[]
+  Collection  Collection[]
+  Environment Environment[]
 
   @@unique([slug])
   @@map("organization")
 }
 
 model Member {
-  id             String       @id
+  id             String       @id @default(cuid(2))
   organizationId String
   organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   userId         String
@@ -116,7 +118,7 @@ model Member {
 }
 
 model Invitation {
-  id             String       @id
+  id             String       @id @default(cuid(2))
   organizationId String
   organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   email          String
@@ -127,4 +129,53 @@ model Invitation {
   user           User         @relation(fields: [inviterId], references: [id], onDelete: Cascade)
 
   @@map("invitation")
+}
+
+model Collection {
+  id          String   @id @default(cuid(2))
+  name        String
+  description String?
+  workspaceId String
+  parentId    String?
+  auth        Json?
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  workspace Organization @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  parent    Collection?  @relation("CollectionHierarchy", fields: [parentId], references: [id], onDelete: Cascade)
+  children  Collection[] @relation("CollectionHierarchy")
+  requests  Request[]
+
+  @@index([workspaceId])
+  @@index([parentId])
+}
+
+model Request {
+  id           String   @id @default(cuid(2))
+  name         String
+  type         String // http, websocket, socketio, grpc, graphql
+  collectionId String
+  config       Json // Stores the full request configuration
+  order        Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  collection Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+
+  @@index([collectionId])
+}
+
+model Environment {
+  id          String   @id @default(cuid(2))
+  name        String
+  workspaceId String
+  variables   Json // Array of variables
+  isActive    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  workspace Organization @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId])
 }

@@ -53,6 +53,10 @@
 	--shadow-lg: var(--shadow-lg);
 	--shadow-xl: var(--shadow-xl);
 	--shadow-2xl: var(--shadow-2xl);
+	--animate-accordion-down: accordion-down 0.2s ease-out;
+	--animate-accordion-up: accordion-up 0.2s ease-out;
+	--animate-collapsible-down: smoothDown 0.2s ease-out;
+	--animate-collapsible-up: smoothUp 0.2s ease-out;
 }
 
 :root {
@@ -62,7 +66,7 @@
 	--card-foreground: oklch(0.3961 0.0168 294.7901);
 	--popover: oklch(1 0 0);
 	--popover-foreground: oklch(0.3803 0.0137 297.1839);
-	--primary: oklch(0.555 0.1628 284.331);
+	--primary: oklch(55.687% 0.21911 285.194);
 	--primary-foreground: oklch(0.9723 0.0074 260.7315);
 	--secondary: oklch(1 0 0);
 	--secondary-foreground: oklch(0.4178 0.0215 285.4335);
@@ -82,7 +86,7 @@
 	--chart-5: oklch(0.6381 0.239 303.1362);
 	--sidebar: oklch(0.9758 0.0057 264.5326);
 	--sidebar-foreground: oklch(0.406 0.015 290.8207);
-	--sidebar-primary: oklch(0.5232 0.1601 284.0998);
+	--sidebar-primary: oklch(55.687% 0.21911 285.194);
 	--sidebar-primary-foreground: oklch(1 0 0);
 	--sidebar-accent: oklch(1 0 0);
 	--sidebar-accent-foreground: oklch(0.3803 0.0137 297.1839);
@@ -113,7 +117,7 @@
 	--card-foreground: oklch(0.9461 0 0);
 	--popover: oklch(0.2476 0.0132 291.9598);
 	--popover-foreground: oklch(0.9461 0 0);
-	--primary: oklch(0.4143 0.128 293.9114);
+	--primary: oklch(47.559% 0.17739 286.078);
 	--primary-foreground: oklch(1 0 0);
 	--secondary: oklch(0.3074 0.0223 304.0416);
 	--secondary-foreground: oklch(0.922 0.0108 291.9408);
@@ -125,7 +129,7 @@
 	--destructive-foreground: oklch(0.7885 0.0125 17.4225);
 	--border: oklch(0.2711 0.011 285.6414);
 	--input: oklch(0.3594 0.0295 295.6676);
-	--ring: oklch(0.3789 0.0903 293.5718);
+	--ring: oklch(38.862% 0.13011 287.242);
 	--chart-1: oklch(0.7127 0.188 7.9103);
 	--chart-2: oklch(0.7854 0.0947 60.508);
 	--chart-3: oklch(0.6972 0.1893 336.26);
@@ -133,12 +137,12 @@
 	--chart-5: oklch(0.6381 0.239 303.1362);
 	--sidebar: oklch(0.208 0.0099 294.6949);
 	--sidebar-foreground: oklch(0.7686 0.0156 294.3762);
-	--sidebar-primary: oklch(0.4143 0.128 293.9114);
+	--sidebar-primary: oklch(47.559% 0.17739 286.078);
 	--sidebar-primary-foreground: oklch(1 0 0);
 	--sidebar-accent: oklch(0.2349 0.0213 297.2344);
 	--sidebar-accent-foreground: oklch(0.9461 0 0);
 	--sidebar-border: oklch(0.2711 0.011 285.6414);
-	--sidebar-ring: oklch(0.3789 0.0903 293.5718);
+	--sidebar-ring: oklch(38.862% 0.13011 287.242);
 	--radius: 0.45rem;
 	--shadow-2xs: 0 1px 3px 0px hsl(0 0% 0% / 0.05);
 	--shadow-xs: 0 1px 3px 0px hsl(0 0% 0% / 0.05);
@@ -165,7 +169,100 @@
 	}
 }
 
+/* Custom Keyframes declarations */
+@layer utilities {
+	/* Shadcn Accordion component animation */
+	@keyframes shiny-text {
+		0%,
+		90%,
+		100% {
+			background-position: calc(-100% - var(--shiny-width)) 0;
+		}
+		30%,
+		60% {
+			background-position: calc(100% + var(--shiny-width)) 0;
+		}
+	}
+
+	@keyframes accordion-down {
+		from {
+			height: 0;
+		}
+		to {
+			height: var(--radix-accordion-content-height);
+		}
+	}
+	@keyframes accordion-up {
+		from {
+			height: var(--radix-accordion-content-height);
+		}
+		to {
+			height: 0;
+		}
+	}
+
+	/* Shadcn Border Shine component animation */
+
+	@keyframes shine {
+		0% {
+			background-position: 0% 0%;
+		}
+		50% {
+			background-position: 100% 100%;
+		}
+		100% {
+			background-position: 0% 0%;
+		}
+	}
+
+	/* Shadcn collapsible component animation */
+	@keyframes smoothDown {
+		from {
+			max-height: 0;
+		}
+		to {
+			max-height: var(--radix-collapsible-content-height);
+		}
+	}
+
+	@keyframes smoothUp {
+		from {
+			max-height: var(--radix-collapsible-content-height);
+		}
+		to {
+			max-height: 0;
+		}
+	}
+}
+
 @layer base {
+	/* Enhanced smooth scroll behavior for all elements */
+	html {
+		scroll-behavior: smooth;
+		scroll-padding-top: 80px; /* Offset for fixed headers */
+	}
+
+	* {
+		scroll-behavior: smooth;
+	}
+
+	/* Custom scrollbar styling */
+	::-webkit-scrollbar {
+		@apply h-2 w-2;
+	}
+
+	::-webkit-scrollbar-track {
+		@apply bg-muted rounded-full;
+	}
+
+	::-webkit-scrollbar-thumb {
+		@apply bg-muted-foreground/30 hover:bg-muted-foreground/50 rounded-full;
+	}
+
+	::-webkit-scrollbar-thumb:hover {
+		@apply bg-muted-foreground/70;
+	}
+
 	* {
 		@apply border-border outline-ring/50;
 	}

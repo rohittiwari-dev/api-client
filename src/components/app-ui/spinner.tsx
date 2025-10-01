@@ -46,59 +46,14 @@ const Spinner = ({
 	...props
 }: SpinnerProps) => (
 	<div
-		className="inline-flex items-center gap-2"
+		className={cn(
+			'inline-flex items-center justify-center will-change-transform',
+			!!loadingLabel && 'gap-2',
+		)}
 		role="status"
 		aria-live="polite"
 	>
-		<svg
-			xmlns="http://www.w3.org/2000/svg"
-			viewBox="0 0 24 24"
-			className={cn(
-				sizeMap[size],
-				colorMap[color],
-				'animate-spin-cubic',
-				className,
-			)}
-			style={{
-				animationDuration: '0.8s',
-			}}
-			fill="none"
-			aria-hidden="true"
-			{...props}
-		>
-			<style>
-				{`
-				@keyframes spin-cubic {
-					0% { transform: rotate(0deg); }
-					100% { transform: rotate(360deg); }
-				}
-				.animate-spin-cubic {
-					animation: spin-cubic 0.8s linear infinite;
-				}
-				`}
-			</style>
-			<circle
-				className="opacity-25"
-				cx="12"
-				cy="12"
-				r="10"
-				stroke="currentColor"
-				strokeWidth={stroke}
-				fill="none"
-			/>
-			<circle
-				className="opacity-100"
-				cx="12"
-				cy="12"
-				r="10"
-				stroke="currentColor"
-				strokeWidth={stroke}
-				strokeDasharray="40, 200"
-				strokeDashoffset="0"
-				strokeLinecap="round"
-				fill="none"
-			/>
-		</svg>
+		<div className="border-muted border-t-primary h-7 w-7 animate-spin rounded-full border-[3px]" />
 		{loadingLabel &&
 			(typeof loadingLabel === 'string' ? (
 				<span className={cn('text-base', textClassName)}>

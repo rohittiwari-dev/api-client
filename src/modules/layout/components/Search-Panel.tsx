@@ -34,13 +34,14 @@ const SearchPanel = () => {
 				onChange={(e) => setSearchText(e.target.value)}
 				leftIcon={<SearchIcon />}
 				rightIcon={
-					<div className="flex items-center justify-center gap-1">
+					<div className="flex items-center justify-center gap-1.5">
 						<kbd className={'bg-secondary rounded p-1 px-2'}>
 							ctrl
 						</kbd>
 						<kbd className={'bg-secondary rounded p-1 px-2'}>k</kbd>
 					</div>
 				}
+				inputWrapperClassName="!py-1.5 !min-h-fit dark:!bg-muted bg-input dark:!border-input/40 border-slate-400/30"
 				containerClassName={'min-w-[450px] scale-90'}
 			/>
 			<CommandDialog open={open} onOpenChange={setOpen}>

@@ -1,5 +1,7 @@
 import { Session, User } from 'better-auth';
 import { create } from 'zustand';
+import { devtools, persist } from 'zustand/middleware';
+import { immer } from 'zustand/middleware/immer';
 
 export type AuthStoreState = {
 	data?: { session: Session | null; user: User | null } | null;
@@ -21,30 +23,35 @@ type AuthStoreActions = {
 	setTriggerRefetch: (triggerRefetch: boolean) => void;
 };
 
-export const useAuthStore = create<AuthStoreState & AuthStoreActions>(
-	(set) => ({
-		data: null,
-		isLoading: false,
-		error: null,
-		message: '',
-		triggerRefetch: false,
-		setError: (error) => {
-			set({ error });
-		},
-		setIsLoading: (val) => {
-			set({ isLoading: val });
-		},
-		setMessage: (val) => {
-			set({ message: val });
-		},
-		setAuthSession: (data) => {
-			set({ data });
-		},
-		setAuthStoreState: (state: AuthStoreState) => {
-			set(state);
-		},
-		setTriggerRefetch: (triggerRefetch: boolean) => {
-			set({ triggerRefetch });
-		},
-	}),
+export const useAuthStore = create<AuthStoreState & AuthStoreActions>()(
+	devtools(
+		persist(
+			immer((set) => ({
+				data: null,
+				isLoading: false,
+				error: null,
+				message: '',
+				triggerRefetch: false,
+				setError: (error) => {
+					set({ error });
+				},
+				setIsLoading: (val) => {
+					set({ isLoading: val });
+				},
+				setMessage: (val) => {
+					set({ message: val });
+				},
+				setAuthSession: (data) => {
+					set({ data });
+				},
+				setAuthStoreState: (state: AuthStoreState) => {
+					set(state);
+				},
+				setTriggerRefetch: (triggerRefetch: boolean) => {
+					set({ triggerRefetch });
+				},
+			})),
+			{ name: 'auth-store' },
+		),
+	),
 );

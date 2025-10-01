@@ -7,6 +7,7 @@ import auth from '@/lib/auth';
 import { currentUser } from '@/modules/authentication/server/auth.actions';
 import Header from '@/modules/layout/components/header';
 import { AppSidebar } from '@/modules/layout/components/sidebar/AppSidebar';
+import RightSidebar from '@/modules/layout/components/sidebar/right-sidebar';
 
 const WorkspaceLayout = async ({
 	children,
@@ -45,16 +46,19 @@ const WorkspaceLayout = async ({
 	}
 
 	return (
-		<div className="[--header-height:calc(--spacing(14))]">
-			<SidebarProvider className="flex flex-col">
+		<div className="flex flex-col w-full h-[100svh] [--header-height:calc(--spacing(14))]">
+			<SidebarProvider className="flex flex-col w-full h-full">
 				<Header
 					workspaces={(workspaces || []) as Organization[]}
 					activeWorkspace={activeWorkspace}
 					currentUserSession={currentUserSession!}
 				/>
-				<div className="flex flex-1">
+				<div className="flex flex-1 w-full h-full overflow-hidden">
 					<AppSidebar />
-					<SidebarInset>{children}</SidebarInset>
+					<SidebarInset className="h-full overflow-hidden overflow-y-auto">
+						{children}
+					</SidebarInset>
+					<RightSidebar />
 				</div>
 			</SidebarProvider>
 		</div>

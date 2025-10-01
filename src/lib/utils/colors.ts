@@ -1,3 +1,5 @@
+import { RequestMethod } from '@/modules/requests/types';
+
 function shuffleArray<T>(arr: T[]): T[] {
 	return [...arr].sort(() => Math.random() - arr.length / 2);
 }
@@ -286,3 +288,13 @@ export function oklchToHex(input: string, fallback = '#ffffff'): string {
 export function clamp(value: number, min: number, max: number): number {
 	return isNaN(value) ? min : Math.min(Math.max(value, min), max);
 }
+
+export const requestColorMap: Record<RequestMethod, string> = {
+	GET: 'text-green-500',
+	POST: 'text-blue-500',
+	PUT: 'text-yellow-500',
+	DELETE: 'text-red-500',
+	HEAD: 'text-purple-500',
+	OPTIONS: 'text-gray-500',
+	PATCH: 'text-orange-500',
+};

@@ -47,7 +47,9 @@ const WorkspaceSwitcher = ({
 			>
 				<SelectTrigger
 					type={'button'}
-					className={cn('!bg-muted/60 min-w-40 cursor-pointer')}
+					className={cn(
+						'bg-input dark:!bg-muted/60 dark:!border-input/40 min-w-40 cursor-pointer border-slate-400/30',
+					)}
 				>
 					<SelectValue />
 				</SelectTrigger>
@@ -64,7 +66,7 @@ const WorkspaceSwitcher = ({
 					<Button
 						onClick={() => setWorkspaceSetupModalOpen(true)}
 						className={
-							'hover:bg-primary mt-2 cursor-pointer text-sm'
+							'hover:bg-primary mt-2 cursor-pointer text-sm hover:text-white'
 						}
 						variant={'secondary'}
 						size={'sm'}
@@ -84,7 +86,7 @@ const WorkspaceSwitcher = ({
 					title={'Create Workspace'}
 					className={'max-w-7xl'}
 				>
-					<DialogTitle>Create New Workspace</DialogTitle>
+					<DialogTitle></DialogTitle>
 					<WorkspaceSetup type={'workspace-setup-modal'} />
 				</DialogContent>
 			</Dialog>

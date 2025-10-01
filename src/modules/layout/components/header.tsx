@@ -1,9 +1,11 @@
 import React from 'react';
 import { IconBrandSocketIo } from '@tabler/icons-react';
 import { Session, User } from 'better-auth';
+import ThemeSwitcher from '@/components/app-ui/theme-switcher';
 import { Organization } from '@/generated/prisma';
 import UserButton from '@/modules/authentication/components/user-button';
 import SearchPanel from '@/modules/layout/components/Search-Panel';
+import WorkspaceInvite from '@/modules/workspace/components/workspace-invite';
 import WorkspaceSwitcher from '@/modules/workspace/components/WorkspaceSwitcher';
 
 const Header = ({
@@ -22,24 +24,26 @@ const Header = ({
 			}
 		>
 			{/*Brand*/}
-			<div>
+			<div className="flex flex-1 items-center gap-6">
 				<a href="#" className="flex items-center gap-2 font-medium">
 					<div className="bg-primary text-primary-foreground flex size-6 items-center justify-center rounded-md">
 						<IconBrandSocketIo className="size-4" />
 					</div>
 					ApiClient
 				</a>
+				<ThemeSwitcher variant="multiple" />
 			</div>
 			{/*Center Action*/}
 			<div>
 				<SearchPanel />
 			</div>
 			{/*Actions*/}
-			<div className={'flex items-center gap-2'}>
+			<div className={'flex flex-1 items-center justify-end gap-2'}>
 				<WorkspaceSwitcher
 					workspaces={(workspaces || []) as Organization[]}
 					activeOrganization={activeWorkspace}
 				/>
+				<WorkspaceInvite />
 				<UserButton data={currentUserSession!} variant={'header'} />
 			</div>
 		</div>

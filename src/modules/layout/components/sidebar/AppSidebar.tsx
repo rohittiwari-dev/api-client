@@ -1,5 +1,6 @@
 import * as React from 'react';
-import { ChevronRight, File, Folder } from 'lucide-react';
+import { ChevronRight, EllipsisIcon, File, Folder, Plus } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import {
 	Collapsible,
 	CollapsibleContent,
@@ -21,20 +22,6 @@ import {
 
 // This is sample data.
 const data = {
-	changes: [
-		{
-			file: 'README.md',
-			state: 'M',
-		},
-		{
-			file: 'api/hello/route.ts',
-			state: 'U',
-		},
-		{
-			file: 'app/layout.tsx',
-			state: 'M',
-		},
-	],
 	tree: [
 		[
 			'app',
@@ -54,12 +41,6 @@ const data = {
 		],
 		['lib', ['util.ts']],
 		['public', 'favicon.ico', 'vercel.svg'],
-		'.eslintrc.json',
-		'.gitignore',
-		'next.config.js',
-		'tailwind.config.js',
-		'package.json',
-		'README.md',
 	],
 };
 
@@ -71,26 +52,17 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 		>
 			<SidebarContent>
 				<SidebarGroup>
-					<SidebarGroupLabel>Changes</SidebarGroupLabel>
-					<SidebarGroupContent>
-						<SidebarMenu>
-							{data.changes.map((item, index) => (
-								<SidebarMenuItem key={index}>
-									<SidebarMenuButton>
-										<File />
-										{item.file}
-									</SidebarMenuButton>
-									<SidebarMenuBadge>
-										{item.state}
-									</SidebarMenuBadge>
-								</SidebarMenuItem>
-							))}
-						</SidebarMenu>
-					</SidebarGroupContent>
-				</SidebarGroup>
-				<SidebarGroup>
-					<SidebarGroupLabel>Files</SidebarGroupLabel>
-					<SidebarGroupContent>
+					<SidebarGroupLabel className="text-muted-foreground flex w-full items-center justify-between gap-2 !pr-0 text-sm font-medium">
+						<span className="flex-1">Collections</span>
+						<Button
+							size="icon"
+							variant={'ghost'}
+							className="!m-0 !p-1"
+						>
+							<Plus />
+						</Button>
+					</SidebarGroupLabel>
+					<SidebarGroupContent className="mt-2">
 						<SidebarMenu>
 							{data.tree.map((item, index) => (
 								<Tree key={index} item={item} />
@@ -114,7 +86,8 @@ function Tree({ item }: { item: string | any[] }) {
 				className="data-[active=true]:bg-transparent"
 			>
 				<File />
-				{name}
+				<span className="flex-1">{name}</span>
+				<EllipsisIcon className="!size-3" />
 			</SidebarMenuButton>
 		);
 	}
@@ -122,18 +95,19 @@ function Tree({ item }: { item: string | any[] }) {
 	return (
 		<SidebarMenuItem>
 			<Collapsible
-				className="group/collapsible [&[data-state=open]>button>svg:first-child]:rotate-90"
+				className="group/collapsible w-full [&[data-state=open]>button>svg:first-child]:rotate-90"
 				defaultOpen={name === 'components' || name === 'ui'}
 			>
 				<CollapsibleTrigger asChild>
 					<SidebarMenuButton>
 						<ChevronRight className="transition-transform" />
 						<Folder />
-						{name}
+						<span className="flex-1">{name}</span>
+						<EllipsisIcon className="!size-3" />
 					</SidebarMenuButton>
 				</CollapsibleTrigger>
-				<CollapsibleContent>
-					<SidebarMenuSub>
+				<CollapsibleContent className="w-full">
+					<SidebarMenuSub className="w-full pr-4">
 						{items.map((subItem, index) => (
 							<Tree key={index} item={subItem} />
 						))}
