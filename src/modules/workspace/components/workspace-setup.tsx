@@ -3,18 +3,21 @@
 import React from 'react';
 import Image from 'next/image';
 import { redirect } from 'next/navigation';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { IconBrandSocketIo } from '@tabler/icons-react';
 import _ from 'lodash';
 import { Briefcase, CheckCircle, Slash, XCircle } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
+import z from 'zod';
 import AuthImage from '@/assets/authImage.webp';
 import { AddOnInput, InputField } from '@/components/app-ui/inputs';
 import ThemeSwitcher from '@/components/app-ui/theme-switcher';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import authClient from '@/lib/authClient';
+import { CreateWorkspaceSchema } from '@/lib/form-schemas/workspace';
 import { cn } from '@/lib/utils';
 
 const WorkspaceSetup = ({
@@ -30,11 +33,13 @@ const WorkspaceSetup = ({
 		message: string;
 	} | null>(null);
 
-	const form = useForm({
+	const form = useForm<z.infer<typeof CreateWorkspaceSchema>>({
 		defaultValues: {
-			name: '',
-			slug: '',
+			name: undefined,
+			slug: undefined,
 		},
+		resolver: zodResolver(CreateWorkspaceSchema),
+		mode: 'onBlur',
 	});
 
 	const onSubmit = form.handleSubmit(async (data) => {
@@ -114,12 +119,12 @@ const WorkspaceSetup = ({
 					className={cn('flex flex-col gap-4 p-6 md:p-10')}
 				>
 					{type === 'get-started-page' && (
-						<div className="flex w-full justify-between gap-2">
+						<div className="flex justify-between gap-2 w-full">
 							<a
 								href="#"
 								className="flex items-center gap-2 font-medium"
 							>
-								<div className="bg-primary text-primary-foreground flex size-6 items-center justify-center rounded-md">
+								<div className="flex justify-center items-center bg-primary rounded-md size-6 text-primary-foreground">
 									<IconBrandSocketIo className="size-4" />
 								</div>
 								ApiClient
@@ -128,14 +133,14 @@ const WorkspaceSetup = ({
 						</div>
 					)}
 
-					<div className="flex flex-1 items-center justify-center">
+					<div className="flex flex-1 justify-center items-center">
 						<div className="w-full max-w-xs">
 							<form
 								className={cn('flex flex-col gap-6')}
 								onSubmit={onSubmit}
 							>
 								<div className="flex flex-col items-center gap-2 text-center">
-									<h1 className="text-2xl font-bold">
+									<h1 className="font-bold text-2xl">
 										{type === 'get-started-page'
 											? 'Get Started with ApiClient'
 											: 'Create New Workspace'}
@@ -145,8 +150,8 @@ const WorkspaceSetup = ({
 										your teams effectively.
 									</p>
 								</div>
-								<div className="grid gap-6">
-									<div className="grid gap-3">
+								<div className="gap-6 grid">
+									<div className="gap-3 grid">
 										<InputField
 											id="organization-name"
 											label={
@@ -163,7 +168,7 @@ const WorkspaceSetup = ({
 											{...form.register('name')}
 										/>
 									</div>
-									<div className="grid gap-2">
+									<div className="gap-2 grid">
 										<AddOnInput
 											leftIcon={
 												<Slash className="size-3 rotate-[112deg]" />
@@ -174,6 +179,7 @@ const WorkspaceSetup = ({
 													?.message
 											}
 											id="slug"
+											{...form.register('slug')}
 											onChange={(e) => {
 												const value = e.target.value;
 												form.setValue('slug', value);
@@ -191,7 +197,7 @@ const WorkspaceSetup = ({
 										{!!checkSlugMessage && (
 											<p
 												className={cn(
-													'text-muted-foreground flex items-center gap-1 text-xs',
+													'flex items-center gap-1 text-muted-foreground text-xs',
 													checkSlugMessage.status ===
 														'error'
 														? 'text-red-500'
@@ -233,20 +239,20 @@ const WorkspaceSetup = ({
 							damping: 30,
 							duration: 0.5,
 						}}
-						className={cn('relative hidden p-6 lg:block')}
+						className={cn('hidden lg:block relative p-6')}
 					>
 						<div
 							className={cn(
-								'bg-primary relative hidden h-full w-full overflow-hidden rounded-2xl lg:block',
+								'hidden lg:block relative bg-primary rounded-2xl w-full h-full overflow-hidden',
 							)}
 						>
-							<div className="bg-primary/10 blur-in absolute inset-0 z-10 h-full w-full" />
+							<div className="z-10 absolute inset-0 bg-primary/10 blur-in w-full h-full" />
 							<Image
 								width={1000}
 								height={1000}
 								src={AuthImage}
 								alt={'Image'}
-								className="bg-primary/10 absolute h-full w-full object-cover object-center opacity-65 dark:invert"
+								className="absolute bg-primary/10 opacity-65 dark:invert w-full h-full object-center object-cover"
 							/>
 						</div>
 					</motion.div>

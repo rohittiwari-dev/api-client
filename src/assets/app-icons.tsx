@@ -8,7 +8,7 @@ export const IconGoogle = ({ className }: ComponentProps<'svg'>) => {
 			x="0px"
 			y="0px"
 			viewBox="0 0 48 48"
-			className={cn('inline-block h-[100px] w-[100px]', className)}
+			className={cn('inline-block w-[100px] h-[100px]', className)}
 		>
 			<path
 				fill="#fbc02d"
@@ -39,7 +39,7 @@ export const IconWebSocket = ({ className }: ComponentProps<'svg'>) => {
 			preserveAspectRatio="xMidYMid"
 			fill="currentColor"
 			className={cn(
-				'inline-block h-[18px] w-[18px] text-blue-500',
+				'inline-block w-[18px] h-[18px] text-blue-500',
 				className,
 			)}
 		>
@@ -61,7 +61,7 @@ export const IconGraphQL = ({ className }: ComponentProps<'svg'>) => {
 		<svg
 			xmlns="http://www.w3.org/2000/svg"
 			viewBox="0 0 24 24"
-			className={cn('inline-block h-[20px] w-[20px]', className)}
+			className={cn('inline-block w-[20px] h-[20px]', className)}
 		>
 			<path
 				fill="currentColor"
@@ -77,7 +77,10 @@ export const IconSocketIO = ({ className }: ComponentProps<'svg'>) => {
 			fill="currentColor"
 			viewBox="0 0 32 32"
 			xmlns="http://www.w3.org/2000/svg"
-			className={cn('inline-block h-[16px] w-[16px]', className)}
+			className={cn(
+				'inline-block w-[16px] h-[16px] text-green-600',
+				className,
+			)}
 		>
 			<g id="SVGRepo_bgCarrier" strokeWidth="0"></g>
 			<g
@@ -98,7 +101,7 @@ export const IconGRPC = ({ className }: ComponentProps<'svg'>) => {
 		<svg
 			xmlns="http://www.w3.org/2000/svg"
 			viewBox="0 0 512 208"
-			className={cn('inline-block h-[20px] w-[34px]', className)}
+			className={cn('inline-block w-[34px] h-[20px]', className)}
 		>
 			<defs>
 				<linearGradient
