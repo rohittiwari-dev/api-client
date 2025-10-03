@@ -36,8 +36,8 @@ import {
 	SidebarMenuSub,
 	SidebarRail,
 } from '@/components/ui/sidebar';
+import { RequestType } from '@/generated/prisma';
 import useRequestTabsStore from '@/modules/requests/store/tabs.store';
-import { RequestType } from '@/modules/requests/types';
 
 // This is sample data.
 const data = {
@@ -128,15 +128,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 		>
 			<SidebarContent>
 				<SidebarGroup>
-					<SidebarGroupLabel className="flex justify-between items-center gap-2 !pr-0 w-full font-medium text-muted-foreground text-sm">
+					<SidebarGroupLabel className="text-muted-foreground flex w-full items-center justify-between gap-2 !pr-0 text-sm font-medium">
 						<span className="flex-1">Collections</span>
-						<Button
-							size="icon"
-							variant={'ghost'}
-							className="!m-0 !p-1"
-						>
-							<Plus />
-						</Button>
+						<AddNewCollectionOption />
 					</SidebarGroupLabel>
 					<SidebarGroupContent className="mt-2">
 						<SidebarMenu>
@@ -160,7 +154,7 @@ function Tree({ item }: { item: string | any[] }) {
 		return (
 			<SidebarMenuButton
 				isActive={activeTab?.id === file.id}
-				className="data-[active=true]:bg-transparent cursor-pointer select-none"
+				className="cursor-pointer select-none data-[active=true]:bg-transparent"
 			>
 				<File />
 				<span className="flex-1">{file.name}</span>
@@ -172,8 +166,8 @@ function Tree({ item }: { item: string | any[] }) {
 	return (
 		<SidebarMenuItem>
 			<Collapsible
-				className="group/collapsible w-full [&[data-state=open]>button>svg:first-child]:rotate-90 select-none"
-				defaultOpen={file.id === activeTab?.collection_id}
+				className="group/collapsible w-full select-none [&[data-state=open]>button>svg:first-child]:rotate-90"
+				defaultOpen={file.id === activeTab?.collectionId}
 			>
 				<CollapsibleTrigger asChild className="cursor-pointer">
 					<SidebarMenuButton asChild>
@@ -182,14 +176,14 @@ function Tree({ item }: { item: string | any[] }) {
 							<Folder />
 							<span className="flex-1">{file.name}</span>
 							<TreeItemOption
-								type={'collection'}
+								type={'COLLECTION'}
 								optionId={file.id}
 							/>
 						</div>
 					</SidebarMenuButton>
 				</CollapsibleTrigger>
 				<CollapsibleContent className="w-full">
-					<SidebarMenuSub className="pr-4 w-full">
+					<SidebarMenuSub className="w-full pr-4">
 						{items.map((subItem, index) => (
 							<Tree key={index} item={subItem} />
 						))}
@@ -204,7 +198,7 @@ const TreeItemOption = ({
 	type,
 	optionId,
 }: {
-	type?: 'collection' | RequestType;
+	type?: 'COLLECTION' | RequestType;
 	optionId?: string;
 }) => {
 	return (
@@ -238,13 +232,13 @@ const TreeItemOption = ({
 					e.stopPropagation();
 				}}
 			>
-				{type === 'collection' && (
+				{type === 'COLLECTION' && (
 					<>
 						<DropdownMenuItem
 							onClick={(e) => {
 								e.stopPropagation();
 							}}
-							className="group hover:!bg-secondary/60 text-foreground/80 hover:!text-foreground/80 text-xs cursor-pointer"
+							className="group hover:!bg-muted dark:hover:!bg-secondary/60 text-foreground/80 hover:!text-primary cursor-pointer text-xs dark:hover:!text-indigo-400"
 						>
 							<IconWebSocket className="size-3" />
 							Add New Websocket
@@ -253,16 +247,16 @@ const TreeItemOption = ({
 							onClick={(e) => {
 								e.stopPropagation();
 							}}
-							className="group hover:!bg-secondary/60 text-foreground/80 hover:!text-foreground/80 text-xs cursor-pointer"
+							className="group hover:!bg-muted dark:hover:!bg-secondary/60 text-foreground/80 hover:!text-primary cursor-pointer text-xs dark:hover:!text-indigo-400"
 						>
-							<Code2 className="size-3 text-primary" />
+							<Code2 className="text-primary size-3" />
 							Add New Request
 						</DropdownMenuItem>
 						<DropdownMenuItem
 							onClick={(e) => {
 								e.stopPropagation();
 							}}
-							className="group hover:!bg-secondary/60 text-foreground/80 hover:!text-foreground/80 text-xs cursor-pointer"
+							className="group hover:!bg-muted dark:hover:!bg-secondary/60 text-foreground/80 hover:!text-primary cursor-pointer text-xs dark:hover:!text-indigo-400"
 						>
 							<IconSocketIO className="size-3 text-green-600" />
 							Add New SocketIO
@@ -273,7 +267,7 @@ const TreeItemOption = ({
 					onClick={(e) => {
 						e.stopPropagation();
 					}}
-					className="group hover:!bg-secondary/60 text-foreground/80 hover:!text-foreground/80 text-xs cursor-pointer"
+					className="group hover:!bg-muted dark:hover:!bg-secondary/60 text-foreground/80 hover:!text-primary cursor-pointer text-xs dark:hover:!text-indigo-400"
 				>
 					<PencilIcon className="size-3" />
 					Rename
@@ -282,10 +276,80 @@ const TreeItemOption = ({
 					onClick={(e) => {
 						e.stopPropagation();
 					}}
-					className="group hover:!bg-secondary/60 text-foreground/80 hover:!text-red-400 text-xs cursor-pointer"
+					className="group hover:!bg-muted dark:hover:!bg-secondary/60 text-foreground/80 cursor-pointer text-xs hover:!text-red-400"
 				>
 					<Trash className="size-3 !text-inherit group-hover:text-red-400" />{' '}
 					Delete
+				</DropdownMenuItem>
+			</DropdownMenuContent>
+		</DropdownMenu>
+	);
+};
+
+const AddNewCollectionOption = () => {
+	return (
+		<DropdownMenu>
+			<DropdownMenuTrigger
+				asChild
+				onClick={(e) => {
+					e.stopPropagation();
+				}}
+				className="select-none"
+			>
+				<Button
+					onClick={(e) => {
+						e.stopPropagation();
+					}}
+					size={'icon'}
+					variant={'ghost'}
+					className="!m-0 cursor-pointer !p-1"
+				>
+					<Plus className="size-4" />
+				</Button>
+			</DropdownMenuTrigger>
+			<DropdownMenuContent
+				className="flex flex-col"
+				align="start"
+				side="right"
+				onClick={(e) => {
+					e.stopPropagation();
+				}}
+			>
+				<DropdownMenuItem
+					onClick={(e) => {
+						e.stopPropagation();
+					}}
+					className="group hover:!bg-muted dark:hover:!bg-secondary/60 text-foreground/80 hover:!text-primary cursor-pointer text-xs dark:hover:!text-indigo-400"
+				>
+					<Folder className="size-3" />
+					Add New Collection
+				</DropdownMenuItem>
+				<DropdownMenuItem
+					onClick={(e) => {
+						e.stopPropagation();
+					}}
+					className="group hover:!bg-muted dark:hover:!bg-secondary/60 text-foreground/80 hover:!text-primary cursor-pointer text-xs dark:hover:!text-indigo-400"
+				>
+					<IconWebSocket className="size-3" />
+					Add New Websocket
+				</DropdownMenuItem>
+				<DropdownMenuItem
+					onClick={(e) => {
+						e.stopPropagation();
+					}}
+					className="group hover:!bg-muted dark:hover:!bg-secondary/60 text-foreground/80 hover:!text-primary cursor-pointer text-xs dark:hover:!text-indigo-400"
+				>
+					<Code2 className="text-primary size-3" />
+					Add New Request
+				</DropdownMenuItem>
+				<DropdownMenuItem
+					onClick={(e) => {
+						e.stopPropagation();
+					}}
+					className="group hover:!bg-muted dark:hover:!bg-secondary/60 text-foreground/80 hover:!text-primary cursor-pointer text-xs dark:hover:!text-indigo-400"
+				>
+					<IconSocketIO className="size-3 text-green-600" />
+					Add New SocketIO
 				</DropdownMenuItem>
 			</DropdownMenuContent>
 		</DropdownMenu>

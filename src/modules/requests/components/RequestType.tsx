@@ -6,48 +6,37 @@ import {
 	IconWebSocket,
 } from '@/assets/app-icons';
 import { cn } from '@/lib/utils';
-import { RequestType } from '@/modules/requests/types';
+import { RequestType } from '../types/store.types';
 
 export const RequestIcon = ({
 	type,
 	className,
 	...props
-}: { type: RequestType; className?: string } & ComponentProps<'svg'>) => {
+}: {
+	type: RequestType | 'NEW';
+	className?: string;
+} & ComponentProps<'svg'>) => {
 	switch (type) {
-		case 'websocket':
+		case 'WEBSOCKET':
 			return (
 				<IconWebSocket
-					className={cn('!h-[20px] !w-[20px]', className)}
+					className={cn('!w-[20px] !h-[20px]', className)}
 					{...props}
 				/>
 			);
-		case 'socketio':
+		case 'SOCKET_IO':
 			return (
 				<IconSocketIO
-					className={cn('!h-[20px] !w-[20px]', className)}
+					className={cn('!w-[18px] !h-[18px]', className)}
 					{...props}
 				/>
 			);
-		case 'grpc':
-			return (
-				<IconGRPC
-					className={cn('!h-[20px] !w-[20px]', className)}
-					{...props}
-				/>
-			);
-		case 'graphql':
-			return (
-				<IconGraphQL
-					className={cn('!h-[20px] !w-[20px]', className)}
-					{...props}
-				/>
-			);
-		case 'new':
+		case 'NEW':
 			return null;
 		default:
 			return (
 				<IconWebSocket
-					className={cn('!h-[20px] !w-[20px]', className)}
+					className={cn('!w-[20px] !h-[20px]', className)}
 					{...props}
 				/>
 			);

@@ -2,6 +2,7 @@
 
 import React, { useEffect } from 'react';
 import { redirect } from 'next/navigation';
+import { Briefcase, BriefcaseBusinessIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import {
@@ -51,6 +52,7 @@ const WorkspaceSwitcher = ({
 						'bg-input dark:!bg-muted/60 dark:!border-input/40 min-w-40 cursor-pointer border-slate-400/30',
 					)}
 				>
+					<BriefcaseBusinessIcon />
 					<SelectValue />
 				</SelectTrigger>
 				<SelectContent className={'px-2 py-2'}>

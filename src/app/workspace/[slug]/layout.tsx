@@ -8,6 +8,7 @@ import { currentUser } from '@/modules/authentication/server/auth.actions';
 import Header from '@/modules/layout/components/header';
 import { AppSidebar } from '@/modules/layout/components/sidebar/AppSidebar';
 import RightSidebar from '@/modules/layout/components/sidebar/right-sidebar';
+import { getAllCollections } from '@/modules/requests/server/collections';
 
 const WorkspaceLayout = async ({
 	children,
@@ -44,6 +45,10 @@ const WorkspaceLayout = async ({
 			headers: await headers(),
 		});
 	}
+
+	console.log(
+		JSON.stringify(await getAllCollections(activeWorkspace?.id), null, 2),
+	);
 
 	return (
 		<div className="flex flex-col w-full h-[100svh] [--header-height:calc(--spacing(14))]">

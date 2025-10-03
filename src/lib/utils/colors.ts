@@ -1,4 +1,4 @@
-import { RequestMethod } from '@/modules/requests/types';
+import { RequestMethod } from '@/modules/requests/types/core.types';
 
 function shuffleArray<T>(arr: T[]): T[] {
 	return [...arr].sort(() => Math.random() - arr.length / 2);
@@ -289,7 +289,7 @@ export function clamp(value: number, min: number, max: number): number {
 	return isNaN(value) ? min : Math.min(Math.max(value, min), max);
 }
 
-export const requestColorMap: Record<RequestMethod, string> = {
+export const requestTextColorMap: Record<RequestMethod, string> = {
 	GET: 'text-green-500',
 	POST: 'text-blue-500',
 	PUT: 'text-yellow-500',
@@ -297,4 +297,15 @@ export const requestColorMap: Record<RequestMethod, string> = {
 	HEAD: 'text-purple-500',
 	OPTIONS: 'text-gray-500',
 	PATCH: 'text-orange-500',
+};
+
+export const requestBgColorMap: Record<RequestMethod, string> = {
+	GET: 'bg-green-500 hover:bg-green-600 hover:dark:bg-green-800 dark:bg-green-900',
+	POST: 'bg-blue-500 hover:bg-blue-600 hover:dark:bg-blue-800 dark:bg-blue-900',
+	PUT: 'bg-yellow-500 hover:bg-yellow-600 hover:dark:bg-yellow-800 dark:bg-yellow-900',
+	DELETE: 'bg-red-500 hover:bg-red-600 hover:dark:bg-red-800 dark:bg-red-900',
+	HEAD: 'bg-purple-500 hover:bg-purple-600 hover:dark:bg-purple-800 dark:bg-purple-900',
+	OPTIONS:
+		'bg-gray-500 hover:bg-gray-600 hover:dark:bg-gray-800 dark:bg-gray-900',
+	PATCH: 'bg-orange-500 hover:bg-orange-600 hover:dark:bg-orange-800 dark:bg-orange-900',
 };

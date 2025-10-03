@@ -5,7 +5,7 @@ import {
 	RequestType,
 	SocketIORequest,
 	WebSocketRequest,
-} from '../requests/types';
+} from '../requests/types/core.types';
 
 export interface Workspace {
 	id: string;

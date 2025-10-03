@@ -22,21 +22,10 @@ enum MemberRole {
   VIEWER
 }
 
-enum CollectionType {
+enum RequestType {
   API
   WEBSOCKET
   SOCKET_IO
-  GRPC
-  GRAPHQL
-  MIXED
-}
-
-enum RequestType {
-  HTTP
-  WEBSOCKET
-  SOCKET_IO
-  GRPC
-  GRAPHQL
 }
 
 enum HttpMethod {
@@ -55,7 +44,6 @@ enum BodyType {
   FORM_DATA
   X_WWW_FORM_URLENCODED
   BINARY
-  GRAPHQL
 }
 
 enum MessageType {
@@ -199,12 +187,11 @@ model Invitation {
 }
 
 model Collection {
-  id          String         @id @default(cuid())
+  id          String   @id @default(cuid())
   name        String
   description String?
-  type        CollectionType @default(API)
-  createdAt   DateTime       @default(now())
-  updatedAt   DateTime       @updatedAt
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   // Nested collections support
   parentId String?
@@ -229,7 +216,7 @@ model Request {
   description String?
   method      HttpMethod?
   url         String?
-  type        RequestType @default(HTTP)
+  type        RequestType @default(API)
 
   // Request configuration
   headers    Json?
@@ -243,9 +230,6 @@ model Request {
   // WebSocket/Socket.IO specific
   messageType MessageType?
   messages    RequestMessage[]
-
-  // OpenAPI support
-  openApiSpec Json?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

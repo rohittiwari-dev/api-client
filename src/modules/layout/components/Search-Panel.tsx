@@ -42,7 +42,7 @@ const SearchPanel = () => {
 					</div>
 				}
 				inputWrapperClassName="!py-1.5 !min-h-fit dark:!bg-muted bg-input dark:!border-input/40 border-slate-400/30"
-				containerClassName={'min-w-[450px] scale-90'}
+				containerClassName={'w-[50vw] md:w-[30vw] !max-w-full scale-90'}
 			/>
 			<CommandDialog open={open} onOpenChange={setOpen}>
 				<CommandInput placeholder="Type a command or search..." />

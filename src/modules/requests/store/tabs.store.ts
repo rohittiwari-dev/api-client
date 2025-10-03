@@ -1,13 +1,15 @@
 import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
-import { RequestMethod, RequestType } from '../types';
+import { RequestMethod } from '../types/core.types';
+import { RequestType } from '../types/store.types';
 
 export type RequestTabsStoreState = {
 	id: string;
 	title: string;
-	type: RequestType;
+	type: RequestType | 'NEW';
 	method?: RequestMethod;
-	collection_id?: string | null;
+	collectionId?: string | null;
+	isSaved?: boolean;
 };
 type RequestTabsStore = {
 	tabs: RequestTabsStoreState[];
@@ -30,7 +32,8 @@ const useRequestTabsStore = create<RequestTabsStore>()(
 			(set) => ({
 				tabs: [],
 				activeTab: null,
-				collection_id: null,
+				isSaved: false,
+				collectionId: null,
 				addTab: (tab) =>
 					set((state) => {
 						const tabs =
