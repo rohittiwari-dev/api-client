@@ -10,7 +10,7 @@ import {
 	InputGroup,
 	inputVariants,
 	InputWrapper,
-} from '../ui/input';
+} from '../app-ui/customInput';
 import { Label } from '../ui/label';
 
 export const InputField = ({

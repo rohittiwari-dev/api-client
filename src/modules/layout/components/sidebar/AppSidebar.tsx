@@ -7,6 +7,7 @@ import {
 	File,
 	Folder,
 	MoreHorizontal,
+	MoreVertical,
 	PencilIcon,
 	Plus,
 	Trash,
@@ -37,43 +38,45 @@ import {
 	SidebarRail,
 } from '@/components/ui/sidebar';
 import { RequestType } from '@/generated/prisma';
+import { cn, requestTextColorMap } from '@/lib/utils';
+import { RequestIcon } from '@/modules/requests/components/RequestType';
 import useRequestTabsStore from '@/modules/requests/store/tabs.store';
 
 // This is sample data.
 const data = {
 	tree: [
 		[
-			{ name: 'app', type: 'collection', id: 'dsalfjsdoahfo' },
+			{ name: 'app', type: 'COLLECTION', id: 'dsalfjsdoahfo' },
 			[
-				{ name: 'api', type: 'collection', id: 'dsalfjsdoahfo' },
+				{ name: 'api', type: 'COLLECTION', id: 'dsalfjsdoahfo' },
 				[
-					{ name: 'hello', type: 'collection', id: 'dsalfjsdoahfo' },
+					{ name: 'hello', type: 'COLLECTION', id: 'dsalfjsdoahfo' },
 					[
 						{
-							name: 'route.ts',
-							type: 'http',
+							name: 'route',
+							type: 'API',
 							method: 'GET',
 							id: 'dsalfjsdoahfo',
 						},
 					],
 				],
 				{
-					name: 'page.tsx',
-					type: 'http',
+					name: 'page',
+					type: 'API',
 					method: 'POST',
 					id: 'dsalfjsdoahfo',
 				},
 				{
-					name: 'layout.tsx',
-					type: 'http',
+					name: 'layout',
+					type: 'API',
 					method: 'PUT',
 					id: 'dsalfjsdoahfo',
 				},
 				[
-					{ name: 'blog', type: 'collection', id: 'dsalfjsdoahfo' },
+					{ name: 'blog', type: 'COLLECTION', id: 'dsalfjsdoahfo' },
 					[
 						{
-							name: 'page.tsx',
+							name: 'page',
 							type: 'websocket',
 							id: 'dsalfjsdoahfo',
 						},
@@ -82,40 +85,43 @@ const data = {
 			],
 		],
 		[
-			{ name: 'components', type: 'collection', id: 'dsalfjsdoahfo' },
+			{ name: 'components', type: 'COLLECTION', id: 'dsalfjsdoahfo' },
 			[
-				{ name: 'components', type: 'collection', id: 'dsalfjsdoahfo' },
+				{ name: 'components', type: 'COLLECTION', id: 'dsalfjsdoahfo' },
 				{
-					name: 'button.tsx',
-					type: 'http',
+					name: 'button',
+					type: 'API',
 					method: 'GET',
 					id: 'dsalfjsdoahfo',
 				},
 				{
-					name: 'card.tsx',
-					type: 'http',
+					name: 'card',
+					type: 'API',
 					method: 'DELETE',
 					id: 'dsalfjsdoahfo',
 				},
 			],
 			{
-				name: 'layout.tsx',
-				type: 'http',
+				name: 'layout',
+				type: 'API',
 				method: 'PUT',
 				id: 'dsalfjsdoahfo',
 			},
 			{
-				name: 'header.tsx',
-				type: 'http',
+				name: 'header',
+				type: 'API',
 				method: 'PUT',
 				id: 'dsalfjsdoahfo',
 			},
 		],
-		[{ name: 'lib', type: 'collection', id: 'dsalfjsdoahfo' }, ['util']],
 		[
-			{ name: 'public', type: 'collection', id: 'dsalfjsdoahfo' },
-			{ name: 'favicon', type: 'socketio', id: 'dsalfjsdoahfo' },
-			{ name: 'vercel', type: 'websocket', id: 'dsalfjsdoahfo' },
+			{ name: 'lib', type: 'COLLECTION', id: 'dsalfjsdoahfo' },
+			[{ name: 'utils', type: 'WEBSOCKET', id: 'dsalfjsdoahfo' }],
+		],
+		[
+			{ name: 'public', type: 'COLLECTION', id: 'dsalfjsdoahfo' },
+			{ name: 'favicon', type: 'SOCKET_IO', id: 'dsalfjsdoahfo' },
+			{ name: 'vercel', type: 'WEBSOCKET', id: 'dsalfjsdoahfo' },
 		],
 	],
 };
@@ -154,10 +160,36 @@ function Tree({ item }: { item: string | any[] }) {
 		return (
 			<SidebarMenuButton
 				isActive={activeTab?.id === file.id}
-				className="cursor-pointer select-none data-[active=true]:bg-transparent"
+				className="group/item-collapsible !m-0 !h-fit cursor-pointer !p-0 !pl-3 select-none data-[active=true]:bg-transparent"
 			>
-				<File />
-				<span className="flex-1">{file.name}</span>
+				<div className="flex flex-1 flex-col !py-2">
+					<span className="flex items-center gap-1">
+						<span
+							className={cn(
+								'text-muted-foreground mt-1 flex items-center text-center align-middle text-[0.6rem] font-black',
+								(requestTextColorMap as any)[
+									file.method || 'GET'
+								],
+							)}
+						>
+							{file.type !== 'NEW' &&
+								(file.type === 'API' ? (
+									file.method
+								) : (
+									<RequestIcon
+										type={file.type}
+										className="size-4"
+									/>
+								))}
+						</span>
+						{file.name}
+					</span>
+					{file.path && (
+						<span className="text-muted-foreground truncate text-xs">
+							{file.path}
+						</span>
+					)}
+				</div>
 				<TreeItemOption type={file.type} optionId={file.id} />
 			</SidebarMenuButton>
 		);
@@ -166,12 +198,15 @@ function Tree({ item }: { item: string | any[] }) {
 	return (
 		<SidebarMenuItem>
 			<Collapsible
-				className="group/collapsible w-full select-none [&[data-state=open]>button>svg:first-child]:rotate-90"
+				className="w-full select-none [&[data-state=open]>button>svg:first-child]:rotate-90"
 				defaultOpen={file.id === activeTab?.collectionId}
 			>
-				<CollapsibleTrigger asChild className="cursor-pointer">
+				<CollapsibleTrigger
+					asChild
+					className="!m-0 cursor-pointer !p-0"
+				>
 					<SidebarMenuButton asChild>
-						<div>
+						<div className="group/collapsible !pl-2">
 							<ChevronRight className="transition-transform" />
 							<Folder />
 							<span className="flex-1">{file.name}</span>
@@ -208,7 +243,7 @@ const TreeItemOption = ({
 				onClick={(e) => {
 					e.stopPropagation();
 				}}
-				className="select-none"
+				className="!m-0 !p-0 select-none"
 			>
 				<div
 					onClick={(e) => {
@@ -217,11 +252,14 @@ const TreeItemOption = ({
 					className={buttonVariants({
 						variant: 'link',
 						size: 'icon',
-						className:
-							'!m-0 !p-1 opacity-0 group-hover/collapsible:opacity-100',
+						className: cn(
+							'!m-0 !p-1 opacity-0 group-hover/item-collapsible:opacity-100',
+							type === 'COLLECTION' &&
+								'group-hover/collapsible:opacity-100',
+						),
 					})}
 				>
-					<MoreHorizontal className="size-4" />
+					<MoreVertical className="size-4" />
 				</div>
 			</DropdownMenuTrigger>
 			<DropdownMenuContent

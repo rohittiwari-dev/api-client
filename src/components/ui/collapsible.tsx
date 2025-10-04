@@ -21,7 +21,6 @@ function CollapsibleTrigger({
 }
 
 function CollapsibleContent({
-	children,
 	className,
 	...props
 }: React.ComponentProps<typeof CollapsiblePrimitive.CollapsibleContent>) {
@@ -33,9 +32,7 @@ function CollapsibleContent({
 				className,
 			)}
 			{...props}
-		>
-			<div>{children}</div>
-		</CollapsiblePrimitive.CollapsibleContent>
+		/>
 	);
 }
 

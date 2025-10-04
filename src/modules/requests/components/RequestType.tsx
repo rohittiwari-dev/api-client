@@ -1,10 +1,5 @@
 import { ComponentProps } from 'react';
-import {
-	IconGraphQL,
-	IconGRPC,
-	IconSocketIO,
-	IconWebSocket,
-} from '@/assets/app-icons';
+import { IconSocketIO, IconWebSocket } from '@/assets/app-icons';
 import { cn } from '@/lib/utils';
 import { RequestType } from '../types/store.types';
 
@@ -19,26 +14,17 @@ export const RequestIcon = ({
 	switch (type) {
 		case 'WEBSOCKET':
 			return (
-				<IconWebSocket
-					className={cn('!w-[20px] !h-[20px]', className)}
-					{...props}
-				/>
+				<IconWebSocket className={cn('size-4', className)} {...props} />
 			);
 		case 'SOCKET_IO':
 			return (
-				<IconSocketIO
-					className={cn('!w-[18px] !h-[18px]', className)}
-					{...props}
-				/>
+				<IconSocketIO className={cn('size-4', className)} {...props} />
 			);
 		case 'NEW':
 			return null;
 		default:
 			return (
-				<IconWebSocket
-					className={cn('!w-[20px] !h-[20px]', className)}
-					{...props}
-				/>
+				<IconWebSocket className={cn('size-4', className)} {...props} />
 			);
 	}
 };

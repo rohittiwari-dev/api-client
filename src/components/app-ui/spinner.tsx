@@ -1,6 +1,7 @@
 import React from 'react';
 import type { SVGProps } from 'react';
-import { cn } from '@/lib/utils';
+import { cn, getColorFromClass } from '@/lib/utils';
+import { Spinner as RawSpinner } from '../ui/spinner';
 
 type SpinnerSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
 type SpinnerColor =
@@ -28,12 +29,12 @@ const sizeMap = {
 };
 
 const colorMap = {
-	default: 'text-foreground',
-	primary: 'text-primary',
-	secondary: 'text-secondary',
-	success: 'text-green-500',
-	warning: 'text-yellow-500',
-	danger: 'text-red-500',
+	default: '!text-foreground',
+	primary: '!text-primary',
+	secondary: '!text-secondary',
+	success: '!text-green-500',
+	warning: '!text-yellow-500',
+	danger: '!text-red-500',
 };
 
 const Spinner = ({
@@ -47,13 +48,17 @@ const Spinner = ({
 }: SpinnerProps) => (
 	<div
 		className={cn(
-			'inline-flex items-center justify-center will-change-transform',
+			'flex items-center justify-center',
 			!!loadingLabel && 'gap-2',
+			sizeMap[size],
+			'!w-fit',
+			className,
 		)}
-		role="status"
-		aria-live="polite"
 	>
-		<div className="border-muted border-t-primary h-7 w-7 animate-spin rounded-full border-[3px]" />
+		<RawSpinner
+			color={getColorFromClass(colorMap[color]) || 'currentColor'}
+			className={cn(sizeMap[size])}
+		/>
 		{loadingLabel &&
 			(typeof loadingLabel === 'string' ? (
 				<span className={cn('text-base', textClassName)}>

@@ -68,9 +68,10 @@ const TabItem = ({
 				onDragLeave={onDragLeave}
 				onDrop={(e) => onDrop(e, id)}
 				className={cn(
-					'group dark:bg-muted/60 dark:data-[state=active]:bg-background dark:hover:bg-input/40 border-b-border data-[state=active]:!border-b-background data-[state=active]:border-border flex !h-[40px] w-44 max-w-44 cursor-pointer justify-between gap-0 rounded-none rounded-t-lg border border-transparent bg-white/40 transition-all hover:bg-white/85 data-[state=active]:-mb-0.5 data-[state=active]:italic data-[state=active]:shadow-none dark:border-b-0 dark:data-[state=active]:-mb-0.5',
+					'group dark:bg-muted/60 dark:data-[state=active]:bg-background dark:hover:bg-input/40 border-b-border data-[state=active]:!border-b-background data-[state=active]:border-border flex !h-[40px] w-44 max-w-44 cursor-pointer justify-between gap-0 rounded-none rounded-t-lg border border-transparent bg-white/40 text-xs transition-all hover:bg-white/85 data-[state=active]:-mb-0.5 data-[state=active]:shadow-none dark:border-b-0 dark:data-[state=active]:-mb-0.5',
 					isDragging && 'scale-95 opacity-30',
 					showDropIndicator && 'ml-1',
+					!isSaved && 'font-medium italic',
 				)}
 			>
 				<span
@@ -83,7 +84,7 @@ const TabItem = ({
 						(type === 'API' ? (
 							method
 						) : (
-							<RequestIcon type={type} className="!w-[30px]" />
+							<RequestIcon type={type} className="size-4" />
 						))}
 				</span>
 				<span className="flex flex-1 items-center gap-1 truncate overflow-hidden text-start text-ellipsis whitespace-nowrap">

@@ -11,6 +11,7 @@ import {
 	CommandItem,
 	CommandList,
 } from '@/components/ui/command';
+import { Kbd } from '@/components/ui/kbd';
 
 const SearchPanel = () => {
 	const [open, setOpen] = React.useState(false);
@@ -35,10 +36,10 @@ const SearchPanel = () => {
 				leftIcon={<SearchIcon />}
 				rightIcon={
 					<div className="flex items-center justify-center gap-1.5">
-						<kbd className={'bg-secondary rounded p-1 px-2'}>
+						<Kbd className={'bg-secondary rounded p-1 px-2'}>
 							ctrl
-						</kbd>
-						<kbd className={'bg-secondary rounded p-1 px-2'}>k</kbd>
+						</Kbd>
+						<Kbd className={'bg-secondary rounded p-1 px-2'}>k</Kbd>
 					</div>
 				}
 				inputWrapperClassName="!py-1.5 !min-h-fit dark:!bg-muted bg-input dark:!border-input/40 border-slate-400/30"
