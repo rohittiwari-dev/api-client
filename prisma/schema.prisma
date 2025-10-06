@@ -44,6 +44,7 @@ enum BodyType {
   FORM_DATA
   X_WWW_FORM_URLENCODED
   BINARY
+  JSON
 }
 
 enum MessageType {

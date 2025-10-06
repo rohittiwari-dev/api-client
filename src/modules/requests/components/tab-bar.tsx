@@ -10,8 +10,10 @@ import {
 	PopoverTrigger,
 } from '@/components/ui/popover';
 import { TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { BodyType } from '@/generated/prisma';
 import { cn, scrollToSection } from '@/lib/utils';
 import { requestTextColorMap } from '@/lib/utils/colors';
+import useRequestStore from '../store/reques.store';
 import useRequestTabsStore from '../store/tabs.store';
 import { RequestMethod } from '../types/core.types';
 import { RequestType } from '../types/store.types';
@@ -54,7 +56,7 @@ const TabItem = ({
 			id={id + type + method + title}
 		>
 			{showDropIndicator && (
-				<div className="absolute top-0 bottom-0 left-0 z-10 w-0.5 animate-pulse bg-blue-500" />
+				<div className="top-0 bottom-0 left-0 z-10 absolute bg-blue-500 w-0.5 animate-pulse" />
 			)}
 			<TabsTrigger
 				value={id}
@@ -68,7 +70,7 @@ const TabItem = ({
 				onDragLeave={onDragLeave}
 				onDrop={(e) => onDrop(e, id)}
 				className={cn(
-					'group dark:bg-muted/60 dark:data-[state=active]:bg-background dark:hover:bg-input/40 border-b-border data-[state=active]:!border-b-background data-[state=active]:border-border flex !h-[40px] w-44 max-w-44 cursor-pointer justify-between gap-0 rounded-none rounded-t-lg border border-transparent bg-white/40 text-xs transition-all hover:bg-white/85 data-[state=active]:-mb-0.5 data-[state=active]:shadow-none dark:border-b-0 dark:data-[state=active]:-mb-0.5',
+					'group flex justify-between gap-0 bg-white/40 hover:bg-white/85 dark:bg-muted/60 dark:data-[state=active]:bg-background dark:hover:bg-input/40 data-[state=active]:shadow-none data-[state=active]:-mb-0.5 dark:data-[state=active]:-mb-0.5 border border-transparent border-b-border data-[state=active]:!border-b-background data-[state=active]:border-border dark:border-b-0 rounded-none rounded-t-lg w-44 max-w-44 !h-[40px] text-xs transition-all cursor-pointer',
 					isDragging && 'scale-95 opacity-30',
 					showDropIndicator && 'ml-1',
 					!isSaved && 'font-medium italic',
@@ -76,7 +78,7 @@ const TabItem = ({
 			>
 				<span
 					className={cn(
-						'rounded p-2 py-0.5 text-xs',
+						'p-2 py-0.5 rounded text-xs',
 						requestTextColorMap[method || 'GET'],
 					)}
 				>
@@ -87,19 +89,19 @@ const TabItem = ({
 							<RequestIcon type={type} className="size-4" />
 						))}
 				</span>
-				<span className="flex flex-1 items-center gap-1 truncate overflow-hidden text-start text-ellipsis whitespace-nowrap">
+				<span className="flex flex-1 items-center gap-1 overflow-hidden text-start truncate text-ellipsis whitespace-nowrap">
 					{title}
 				</span>
 				{!isSaved && (
 					<span
-						className="mr-1 ml-2 h-[5px] w-[5px] rounded-full bg-indigo-400 opacity-50 select-none"
+						className="bg-indigo-400 opacity-50 mr-1 ml-2 rounded-full w-[5px] h-[5px] select-none"
 						title="Unsaved"
 					/>
 				)}
 
 				<div
 					data-close-button
-					className="bg-muted ml-2 cursor-pointer rounded-full p-0.5 text-sm opacity-0 transition-colors duration-300 group-hover:opacity-100 hover:text-slate-400"
+					className="bg-muted opacity-0 group-hover:opacity-100 ml-2 p-0.5 rounded-full hover:text-slate-400 text-sm transition-colors duration-300 cursor-pointer"
 					onClick={(e) => {
 						e.preventDefault();
 						e.stopPropagation();
@@ -116,7 +118,7 @@ const TabItem = ({
 const TabBar = () => {
 	const { tabs, removeTab, addTab, activeTab, setActiveTabById, setTabs } =
 		useRequestTabsStore();
-
+	const { activeRequest, addRequest } = useRequestStore();
 	const [hiddenTabs, setHiddenTabs] = useState<typeof tabs>([]);
 	const [draggedTabId, setDraggedTabId] = useState<string | null>(null);
 	const [dragOverTabId, setDragOverTabId] = useState<string | null>(null);
@@ -226,7 +228,7 @@ const TabBar = () => {
 
 	return (
 		<TabsList
-			className="!bg-muted !h-fit max-h-[40px] w-full flex-1 justify-start gap-2 overflow-hidden rounded-none p-0 pt-2"
+			className="flex-1 justify-start gap-2 !bg-muted p-0 pt-2 rounded-none w-full !h-fit max-h-[40px] overflow-hidden"
 			ref={tabBarRef}
 		>
 			<div className="flex overflow-hidden">
@@ -238,7 +240,10 @@ const TabBar = () => {
 						type={tab.type}
 						method={tab.method}
 						onCloseClick={() => removeTab(tab.id)}
-						onTabClick={() => setActiveTabById(tab.id)}
+						onTabClick={() => {
+							setActiveTabById(tab.id);
+							setActiveTabById(tab.id || '');
+						}}
 						onDragStart={handleDragStart}
 						onDragEnd={handleDragEnd}
 						onDragOver={handleDragOver}
@@ -253,27 +258,27 @@ const TabBar = () => {
 			</div>
 			{hiddenTabs.length > 0 && (
 				<Popover>
-					<PopoverTrigger asChild className="sticky right-0">
+					<PopoverTrigger asChild className="right-0 sticky">
 						<Button
 							size={'icon'}
 							variant={'ghost'}
-							className="sticky right-0 cursor-pointer"
+							className="right-0 sticky cursor-pointer"
 						>
 							<MoreHorizontal />
 						</Button>
 					</PopoverTrigger>
-					<PopoverContent className="w-auto p-1">
+					<PopoverContent className="p-1 w-auto">
 						<div className="flex flex-col gap-1">
 							{hiddenTabs.map((tab) => (
 								<TabsTrigger
 									value={tab.id}
 									key={tab.id + tab.title}
 									onClick={() => setActiveTabById(tab.id)}
-									className="group dark:bg-muted/60 dark:hover:bg-input/40 border-b-border flex !h-[40px] w-44 max-w-44 cursor-pointer justify-between gap-0 rounded-lg border border-transparent bg-white/40 hover:bg-white/85 dark:border-b-0"
+									className="group flex justify-between gap-0 bg-white/40 hover:bg-white/85 dark:bg-muted/60 dark:hover:bg-input/40 border border-transparent border-b-border dark:border-b-0 rounded-lg w-44 max-w-44 !h-[40px] cursor-pointer"
 								>
 									<span
 										className={cn(
-											'rounded p-2 py-0.5 text-xs',
+											'p-2 py-0.5 rounded text-xs',
 											requestTextColorMap[
 												tab.method || 'GET'
 											],
@@ -288,11 +293,11 @@ const TabBar = () => {
 											/>
 										)}
 									</span>
-									<span className="flex-1 truncate overflow-hidden text-start text-ellipsis whitespace-nowrap">
+									<span className="flex-1 overflow-hidden text-start truncate text-ellipsis whitespace-nowrap">
 										{tab.title}
 									</span>
 									<div
-										className="bg-muted ml-2 cursor-pointer rounded-full p-0.5 text-sm opacity-0 transition-colors duration-300 group-hover:opacity-100 hover:text-slate-400"
+										className="bg-muted opacity-0 group-hover:opacity-100 ml-2 p-0.5 rounded-full hover:text-slate-400 text-sm transition-colors duration-300 cursor-pointer"
 										onClick={(e) => {
 											e.preventDefault();
 											e.stopPropagation();
@@ -310,14 +315,32 @@ const TabBar = () => {
 			<Button
 				size={'icon'}
 				variant={'ghost'}
-				className="sticky right-0 cursor-pointer hover:opacity-80"
-				onClick={() =>
+				className="right-0 sticky hover:opacity-80 cursor-pointer"
+				onClick={() => {
+					const requestId = createId();
 					addTab({
-						id: createId(),
+						id: requestId,
 						title: 'New...',
 						type: 'NEW' as RequestType,
-					})
-				}
+					});
+					addRequest({
+						id: requestId,
+						name: 'New Request',
+						type: 'API' as RequestType,
+						method: 'GET' as RequestMethod,
+						url: '',
+						headers: [],
+						body: '',
+						bodyType: BodyType.NONE,
+						parameters: [],
+						auth: { type: 'NONE', data: {} },
+						collectionId: '',
+						description: '',
+						messageType: 'CONNECTION',
+						createdAt: new Date(),
+						updatedAt: new Date(),
+					});
+				}}
 			>
 				<Plus />
 			</Button>

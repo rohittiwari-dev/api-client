@@ -15,33 +15,24 @@ import {
 import { Organization } from '@/generated/prisma';
 import { cn } from '@/lib/utils';
 import WorkspaceSetup from '@/modules/workspace/components/workspace-setup';
+import useWorkspaceState from '../store';
 
-const WorkspaceSwitcher = ({
-	workspaces,
-	activeOrganization,
-}: {
-	workspaces: Organization[];
-	activeOrganization: Organization;
-}) => {
-	const [selected, setSelected] =
-		React.useState<Organization>(activeOrganization);
+const WorkspaceSwitcher = () => {
+	const { workspaces, activeWorkspace, setActiveWorkspace } =
+		useWorkspaceState();
 	const [workspaceSetupModalOpen, setWorkspaceSetupModalOpen] =
 		React.useState(false);
-
-	useEffect(() => {
-		setSelected(activeOrganization);
-	}, [activeOrganization]);
 
 	return (
 		<>
 			<Select
-				value={selected.id}
+				value={activeWorkspace?.id}
 				onValueChange={async (val) => {
-					const workspace = workspaces.find(
+					const workspace = workspaces?.find(
 						(workspace) => workspace.id === val,
 					);
 					if (workspace) {
-						setSelected(workspace);
+						setActiveWorkspace(workspace);
 						redirect(`/workspace/${workspace.slug}`);
 					}
 				}}
@@ -49,7 +40,7 @@ const WorkspaceSwitcher = ({
 				<SelectTrigger
 					type={'button'}
 					className={cn(
-						'bg-input dark:!bg-muted/60 dark:!border-input/40 min-w-40 cursor-pointer border-slate-400/30',
+						'bg-input dark:!bg-muted/60 border-slate-400/30 dark:!border-input/40 min-w-40 cursor-pointer',
 					)}
 				>
 					<BriefcaseBusinessIcon />

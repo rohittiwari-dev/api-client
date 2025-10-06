@@ -9,6 +9,7 @@ import Header from '@/modules/layout/components/header';
 import { AppSidebar } from '@/modules/layout/components/sidebar/AppSidebar';
 import RightSidebar from '@/modules/layout/components/sidebar/right-sidebar';
 import { getAllCollections } from '@/modules/requests/server/collections';
+import WorkspaceProvider from '@/modules/workspace/store/WorkspaceProvider';
 
 const WorkspaceLayout = async ({
 	children,
@@ -46,27 +47,29 @@ const WorkspaceLayout = async ({
 		});
 	}
 
-	console.log(
-		JSON.stringify(await getAllCollections(activeWorkspace?.id), null, 2),
-	);
-
 	return (
-		<div className="flex flex-col w-full h-[100svh] [--header-height:calc(--spacing(14))]">
-			<SidebarProvider className="flex flex-col w-full h-full">
-				<Header
-					workspaces={(workspaces || []) as Organization[]}
-					activeWorkspace={activeWorkspace}
-					currentUserSession={currentUserSession!}
-				/>
-				<div className="flex flex-1 w-full h-full overflow-hidden">
-					<AppSidebar />
-					<SidebarInset className="h-full overflow-hidden overflow-y-auto">
-						{children}
-					</SidebarInset>
-					<RightSidebar />
-				</div>
-			</SidebarProvider>
-		</div>
+		<WorkspaceProvider
+			activeOrg={activeWorkspace}
+			workspaces={(workspaces || []) as Organization[]}
+		>
+			<div className="flex flex-col w-full h-[100svh] [--header-height:calc(--spacing(14))]">
+				<SidebarProvider className="flex flex-col w-full h-full">
+					<Header currentUserSession={currentUserSession!} />
+					<div className="flex flex-1 w-full h-full overflow-hidden">
+						<AppSidebar
+							collections={
+								(await getAllCollections(activeWorkspace?.id))
+									?.data || []
+							}
+						/>
+						<SidebarInset className="h-full overflow-hidden overflow-y-auto">
+							{children}
+						</SidebarInset>
+						<RightSidebar />
+					</div>
+				</SidebarProvider>
+			</div>
+		</WorkspaceProvider>
 	);
 };
 

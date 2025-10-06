@@ -3,10 +3,10 @@ import Spinner from '@/components/app-ui/spinner';
 
 const Loading = () => {
 	return (
-		<div className="flex min-h-screen w-full items-center justify-center overflow-hidden">
+		<div className="flex justify-center items-center w-full min-h-screen overflow-hidden">
 			<Spinner
 				color="secondary"
-				className="dark:text-violet-700/60"
+				className="dark:text-neutral-200/60"
 				size="lg"
 				stroke="3"
 			/>

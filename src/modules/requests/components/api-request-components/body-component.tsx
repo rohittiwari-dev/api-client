@@ -1,5 +1,5 @@
 import React from 'react';
-import { IconDeviceRemote, IconRocket } from '@tabler/icons-react';
+import { IconDeviceRemote } from '@tabler/icons-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import {
@@ -8,59 +8,85 @@ import {
 	EmptyDescription,
 	EmptyMedia,
 } from '@/components/ui/empty';
-import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { BodyType } from '@/generated/prisma';
+import useRequestStore from '../../store/reques.store';
 import FormDataComponent from './formdata-component';
-import JsonBodyComponent from './json-body-component';
+import JsonAndRawBodyComponent from './json-raw-body-component';
 
 const BodyComponent = () => {
+	const { activeRequest, updateRequest } = useRequestStore();
 	return (
-		<Tabs defaultValue="json" className="">
-			<TabsList className="h-fit rounded">
+		<Tabs
+			defaultValue="none"
+			onValueChange={(val) => {
+				if (val === 'none') {
+					updateRequest(activeRequest?.id || '', {
+						body: null,
+						bodyType: BodyType.NONE,
+					});
+				} else if (val === 'json') {
+					updateRequest(activeRequest?.id || '', {
+						bodyType: BodyType.JSON,
+						body: {},
+					});
+				} else if (val === 'form-data') {
+					updateRequest(activeRequest?.id || '', {
+						bodyType: BodyType.FORM_DATA,
+						body: [],
+					});
+				} else if (val === 'x-www-form-urlencoded') {
+					updateRequest(activeRequest?.id || '', {
+						bodyType: BodyType.X_WWW_FORM_URLENCODED,
+						body: [],
+					});
+				} else if (val === 'raw') {
+					updateRequest(activeRequest?.id || '', {
+						bodyType: BodyType.RAW,
+						body: '',
+					});
+				}
+			}}
+		>
+			<TabsList className="rounded h-fit">
 				<TabsTrigger
-					className="cursor-pointer rounded px-2 py-1 text-[0.6rem]"
+					className="px-2 py-1 rounded text-[0.6rem] cursor-pointer"
 					value="none"
 				>
 					None
 				</TabsTrigger>
 				<TabsTrigger
-					className="cursor-pointer rounded px-2 py-1 text-[0.6rem]"
+					className="px-2 py-1 rounded text-[0.6rem] cursor-pointer"
 					value="json"
 				>
 					Json
 				</TabsTrigger>
 				<TabsTrigger
-					className="cursor-pointer rounded px-2 py-1 text-[0.6rem]"
+					className="px-2 py-1 rounded text-[0.6rem] cursor-pointer"
 					value="form-data"
 				>
 					Form Data
 				</TabsTrigger>
 				<TabsTrigger
-					className="cursor-pointer rounded px-2 py-1 text-[0.6rem]"
+					className="px-2 py-1 rounded text-[0.6rem] cursor-pointer"
 					value="x-www-form-urlencoded"
 				>
 					x-www-form-urlencoded
 				</TabsTrigger>
 				<TabsTrigger
-					className="cursor-pointer rounded px-2 py-1 text-[0.6rem]"
+					className="px-2 py-1 rounded text-[0.6rem] cursor-pointer"
 					value="raw"
 				>
 					Raw
 				</TabsTrigger>
-				<TabsTrigger
-					className="cursor-pointer rounded px-2 py-1 text-[0.6rem]"
-					value="binary"
-				>
-					Binary
-				</TabsTrigger>
 			</TabsList>
 			<TabsContent value="none" className="p-2 !pt-0">
-				<Empty className="flex h-full max-h-[350px] min-h-[200px] w-full flex-1 items-center justify-center">
-					<EmptyContent className="flex h-full w-full items-center justify-center">
+				<Empty className="flex flex-1 justify-center items-center w-full h-full min-h-[200px] max-h-[350px]">
+					<EmptyContent className="flex justify-center items-center w-full h-full">
 						<EmptyMedia>
-							<Card className="bg-muted/30 flex h-24 w-24 items-center justify-center rounded-3xl border-none">
+							<Card className="flex justify-center items-center bg-muted/30 border-none rounded-3xl w-24 h-24">
 								<IconDeviceRemote
-									className="text-primary/70 size-12"
+									className="size-12 text-primary/70"
 									stroke={0.5}
 								/>
 							</Card>
@@ -70,7 +96,15 @@ const BodyComponent = () => {
 				</Empty>
 			</TabsContent>
 			<TabsContent value="json">
-				<JsonBodyComponent />
+				<JsonAndRawBodyComponent
+					type="json"
+					value={activeRequest?.body || ''}
+					onChange={(value) => {
+						updateRequest(activeRequest?.id || '', {
+							body: JSON.parse(value),
+						});
+					}}
+				/>
 			</TabsContent>
 			<TabsContent value="form-data">
 				<FormDataComponent />
@@ -79,10 +113,15 @@ const BodyComponent = () => {
 				<FormDataComponent />
 			</TabsContent>
 			<TabsContent value="raw">
-				<JsonBodyComponent />
-			</TabsContent>
-			<TabsContent value="binary">
-				<Button>Upload</Button>
+				<JsonAndRawBodyComponent
+					type="raw"
+					value={activeRequest?.body || ''}
+					onChange={(value) => {
+						updateRequest(activeRequest?.id || '', {
+							body: value,
+						});
+					}}
+				/>
 			</TabsContent>
 		</Tabs>
 	);

@@ -45,3 +45,5 @@ const useWorkspaceState = create<WorkspaceStoreState & WorkspaceStateActions>(
 		},
 	}),
 );
+
+export default useWorkspaceState;

@@ -1,10 +1,11 @@
+'use client';
+
 import React from 'react';
 import Image from 'next/image';
-import { IconBrandSocketIo } from '@tabler/icons-react';
 import { Session, User } from 'better-auth';
 import ThemeSwitcher from '@/components/app-ui/theme-switcher';
-import { Organization } from '@/generated/prisma';
 import UserButton from '@/modules/authentication/components/user-button';
+import { useAuthStore } from '@/modules/authentication/store';
 import SearchPanel from '@/modules/layout/components/Search-Panel';
 import EnvironmentSwitcher from '@/modules/workspace/components/EnvironmentSwitcher';
 import WorkspaceInvite from '@/modules/workspace/components/workspace-invite';
@@ -12,13 +13,17 @@ import WorkspaceSwitcher from '@/modules/workspace/components/WorkspaceSwitcher'
 
 const Header = ({
 	currentUserSession,
-	activeWorkspace,
-	workspaces,
 }: {
-	workspaces: Organization[];
-	activeWorkspace: Organization;
 	currentUserSession: { user: User | null; session: Session | null };
 }) => {
+	const { setAuthSession } = useAuthStore();
+
+	React.useEffect(() => {
+		if (currentUserSession) {
+			setAuthSession(currentUserSession);
+		}
+	}, [currentUserSession, setAuthSession]);
+
 	return (
 		<div
 			className={
@@ -26,16 +31,16 @@ const Header = ({
 			}
 		>
 			{/*Brand*/}
-			<div className="flex flex-1 flex-wrap items-center gap-6">
+			<div className="flex flex-wrap flex-1 items-center gap-6">
 				<a href="#" className="flex items-center font-medium">
-					<div className="flex items-center justify-center rounded-md">
+					<div className="flex justify-center items-center rounded-md">
 						<Image
 							src="/logo.png"
 							alt="ApiClient"
 							width={100}
 							height={100}
 							priority
-							className="h-[30px] w-[35px]"
+							className="w-[35px] h-[30px]"
 						/>
 					</div>
 					ApiClient
@@ -53,10 +58,7 @@ const Header = ({
 					'flex flex-1 flex-wrap items-center justify-end gap-2'
 				}
 			>
-				<WorkspaceSwitcher
-					workspaces={(workspaces || []) as Organization[]}
-					activeOrganization={activeWorkspace}
-				/>
+				<WorkspaceSwitcher />
 				<WorkspaceInvite />
 				<UserButton data={currentUserSession!} variant={'header'} />
 			</div>
