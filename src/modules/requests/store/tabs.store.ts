@@ -1,13 +1,13 @@
 import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
-import { RequestMethod } from '../types/core.types';
+import { HttpMethod } from '@/generated/prisma';
 import { RequestType } from '../types/store.types';
 
 export type RequestTabsStoreState = {
 	id: string;
 	title: string;
 	type: RequestType | 'NEW';
-	method?: RequestMethod;
+	method?: HttpMethod | null;
 	collectionId?: string | null;
 	isSaved?: boolean;
 };
@@ -36,10 +36,15 @@ const useRequestTabsStore = create<RequestTabsStore>()(
 				collectionId: null,
 				addTab: (tab) =>
 					set((state) => {
+						const existingTabIndex = state.tabs.findIndex(
+							(t) => t.id === tab.id,
+						);
 						const tabs =
-							state.tabs.length >= 10
-								? [tab, ...state.tabs.slice(0, 9)]
-								: [...state.tabs, tab];
+							existingTabIndex !== -1
+								? state.tabs
+								: state.tabs.length >= 10
+									? [tab, ...state.tabs.slice(0, 9)]
+									: [...state.tabs, tab];
 						return { tabs: tabs, activeTab: tab };
 					}),
 				removeTab: (id) =>

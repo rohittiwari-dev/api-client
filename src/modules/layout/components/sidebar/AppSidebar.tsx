@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+import { createId } from '@paralleldrive/cuid2';
 import {
 	ChevronRight,
 	Code2,
@@ -39,20 +40,31 @@ import {
 } from '@/components/ui/sidebar';
 import { RequestType } from '@/generated/prisma';
 import { cn, requestTextColorMap } from '@/lib/utils';
+import DeleteCollection from '@/modules/collections/components/delete-collection';
+import RenameCollection from '@/modules/collections/components/RenameCollection';
+import { useCollections } from '@/modules/collections/hooks/queries';
+import { NestedCollection } from '@/modules/collections/types/sidebar.types';
 import { RequestIcon } from '@/modules/requests/components/RequestType';
+import useRequestStore from '@/modules/requests/store/request.store';
 import useRequestTabsStore from '@/modules/requests/store/tabs.store';
-import { NestedCollection } from '@/modules/requests/types/store.types';
+import { extractRequestFromNestedCollection } from '@/modules/requests/utils';
+import useWorkspaceState from '@/modules/workspace/store';
+import AddNewCollection from '../../../collections/components/AddNewCollection';
 import useSidebarStore from '../../store/sidebar.store';
-import AddNewCollection from './AddNewCollection';
 
 export function AppSidebar({
 	collections,
 	...props
 }: React.ComponentProps<typeof Sidebar> & { collections: NestedCollection[] }) {
 	const { items, setItems } = useSidebarStore();
+	const { activeWorkspace } = useWorkspaceState();
+	const { data: collectionsData } = useCollections(
+		activeWorkspace?.id!,
+		collections,
+	);
 
 	React.useEffect(() => {
-		const tree = collections.map((collection) => {
+		const tree = collectionsData?.map((collection) => {
 			const mapCollection = (col: NestedCollection): any => {
 				const collectionNode = {
 					name: col.name,
@@ -84,9 +96,9 @@ export function AppSidebar({
 
 			return mapCollection(collection);
 		});
-		console.log('TREE', tree);
+
 		setItems(tree);
-	}, [setItems]);
+	}, [setItems, collectionsData]);
 
 	return (
 		<Sidebar
@@ -95,14 +107,18 @@ export function AppSidebar({
 		>
 			<SidebarContent>
 				<SidebarGroup>
-					<SidebarGroupLabel className="flex justify-between items-center gap-2 !pr-0 w-full font-medium text-muted-foreground text-sm">
+					<SidebarGroupLabel className="text-muted-foreground flex w-full items-center justify-between gap-2 !pr-0 text-sm font-medium">
 						<span className="flex-1">Collections</span>
 						<AddNewCollectionOption />
 					</SidebarGroupLabel>
 					<SidebarGroupContent className="mt-2">
 						<SidebarMenu>
-							{items.map((item, index) => (
-								<Tree key={index} item={item} />
+							{items?.map((item, index) => (
+								<Tree
+									key={index}
+									item={item}
+									collectionsData={collectionsData}
+								/>
 							))}
 						</SidebarMenu>
 					</SidebarGroupContent>
@@ -113,21 +129,69 @@ export function AppSidebar({
 	);
 }
 
-function Tree({ item }: { item: string | any[] }) {
-	const { activeTab } = useRequestTabsStore();
+function Tree({
+	item,
+	collectionsData,
+}: {
+	item: string | any[];
+	collectionsData?: NestedCollection[];
+}) {
+	const { activeTab, addTab } = useRequestTabsStore();
+	const { addRequest } = useRequestStore();
 	const [file, ...items] = Array.isArray(item) ? item : [item];
+	const { activeWorkspace } = useWorkspaceState();
+	const { data: collections } = useCollections(
+		activeWorkspace?.id!,
+		collectionsData,
+	);
 
 	if (!items.length && file.type !== 'COLLECTION') {
 		return (
 			<SidebarMenuButton
 				isActive={activeTab?.id === file.id}
-				className="group/item-collapsible data-[active=true]:bg-transparent !m-0 !p-0 !pl-3 !border-none !h-fit cursor-pointer select-none"
+				onClick={() => {
+					const requestFromCollectionList =
+						extractRequestFromNestedCollection(
+							file.id,
+							collections,
+						);
+
+					if (!requestFromCollectionList) {
+						return;
+					}
+
+					addTab({
+						...requestFromCollectionList,
+						isSaved: true,
+						title: requestFromCollectionList.name,
+						type: requestFromCollectionList.type || 'NEW',
+					});
+					addRequest({
+						...requestFromCollectionList,
+						isSaved: true,
+						body: (requestFromCollectionList.body || {
+							raw: '',
+							formData: [],
+							urlEncoded: [],
+							file: null,
+							json: {},
+						}) as any,
+						auth: (requestFromCollectionList.auth || {
+							type: 'NONE',
+						}) as any,
+						headers: (requestFromCollectionList.headers ||
+							[]) as any,
+						parameters: (requestFromCollectionList.parameters ||
+							[]) as any,
+					});
+				}}
+				className="group/item-collapsible !m-0 !h-fit cursor-pointer !border-none !p-0 !pl-3 select-none data-[active=true]:bg-transparent"
 			>
-				<div className="flex flex-col flex-1 !py-2">
+				<div className="flex flex-1 flex-col !py-2">
 					<span className="flex items-center gap-1">
 						<span
 							className={cn(
-								'flex items-center mt-1 font-black text-[0.6rem] text-muted-foreground text-center align-middle',
+								'text-muted-foreground mt-1 flex items-center text-center align-middle text-[0.6rem] font-black',
 								(requestTextColorMap as any)[
 									file.method || 'GET'
 								],
@@ -146,7 +210,7 @@ function Tree({ item }: { item: string | any[] }) {
 						{file.name}
 					</span>
 					{file.path && (
-						<span className="text-muted-foreground text-xs truncate">
+						<span className="text-muted-foreground truncate text-xs">
 							{file.path}
 						</span>
 					)}
@@ -159,12 +223,12 @@ function Tree({ item }: { item: string | any[] }) {
 	return (
 		<SidebarMenuItem>
 			<Collapsible
-				className="w-full [&[data-state=open]>button>svg:first-child]:rotate-90 select-none"
+				className="w-full select-none [&[data-state=open]>button>svg:first-child]:rotate-90"
 				defaultOpen={file.id === activeTab?.collectionId}
 			>
 				<CollapsibleTrigger
 					asChild
-					className="!m-0 !p-0 cursor-pointer"
+					className="!m-0 cursor-pointer !p-0"
 				>
 					<SidebarMenuButton className="group/collapsible !pl-2">
 						<ChevronRight className="transition-transform" />
@@ -177,9 +241,9 @@ function Tree({ item }: { item: string | any[] }) {
 					</SidebarMenuButton>
 				</CollapsibleTrigger>
 				<CollapsibleContent className="w-full">
-					<SidebarMenuSub className="pr-4 w-full">
+					<SidebarMenuSub className="w-full pr-4">
 						{!items.length && (
-							<div className="flex flex-col border border-dashed text-muted-foreground text-xs">
+							<div className="text-muted-foreground flex flex-col border border-dashed text-xs">
 								<p className="p-2 text-center">
 									No Items Found
 								</p>
@@ -212,6 +276,9 @@ const TreeItemOption = ({
 	label?: string;
 	variant?: 'item-drop' | 'item-collapsible';
 }) => {
+	const { addTab } = useRequestTabsStore();
+	const { addRequest } = useRequestStore();
+
 	return (
 		<DropdownMenu>
 			<DropdownMenuTrigger
@@ -229,7 +296,7 @@ const TreeItemOption = ({
 						variant: 'link',
 						size: 'icon',
 						className: cn(
-							'opacity-0 group-hover/item-collapsible:opacity-100 !m-0 !p-1 cursor-pointer',
+							'!m-0 cursor-pointer !p-1 opacity-0 group-hover/item-collapsible:opacity-100',
 							type === 'COLLECTION' &&
 								'group-hover/collapsible:opacity-100',
 							variant === 'item-drop' &&
@@ -251,22 +318,105 @@ const TreeItemOption = ({
 					e.stopPropagation();
 				}}
 			>
+				<DropdownMenuItem
+					onClick={(e) => {
+						e.stopPropagation();
+					}}
+					asChild
+					className="group hover:!bg-muted dark:hover:!bg-secondary/60 text-foreground/80 hover:!text-primary cursor-pointer text-xs dark:hover:!text-indigo-400"
+				>
+					{type === 'COLLECTION' && (
+						<RenameCollection id={optionId!} />
+					)}
+				</DropdownMenuItem>
+				<DropdownMenuItem
+					asChild
+					className="group hover:!bg-muted dark:hover:!bg-secondary/60 text-foreground/80 cursor-pointer text-xs hover:!text-red-400"
+				>
+					{type === 'COLLECTION' && (
+						<DeleteCollection id={optionId!} />
+					)}
+				</DropdownMenuItem>
 				{type === 'COLLECTION' && (
 					<>
 						<DropdownMenuItem
 							onClick={(e) => {
 								e.stopPropagation();
+								const id = createId();
+								addTab({
+									type: 'WEBSOCKET',
+									title: 'New Request',
+									isSaved: false,
+									collectionId: undefined,
+									id,
+								});
+								addRequest({
+									id,
+									type: 'WEBSOCKET',
+									name: 'New Request',
+									url: '',
+									method: null,
+									isSaved: false,
+									collectionId: optionId,
+									body: {
+										raw: '',
+										formData: [],
+										urlEncoded: [],
+										file: null,
+										json: {},
+									},
+									auth: { type: 'NONE' },
+									headers: [],
+									parameters: [],
+									bodyType: 'NONE',
+									description: '',
+									messageType: 'CONNECTION',
+									createdAt: new Date(),
+									updatedAt: new Date(),
+								});
 							}}
-							className="group hover:!bg-muted dark:hover:!bg-secondary/60 text-foreground/80 hover:!text-primary dark:hover:!text-indigo-400 text-xs cursor-pointer"
-							asChild
+							className="group hover:!bg-muted dark:hover:!bg-secondary/60 text-foreground/80 hover:!text-primary cursor-pointer text-xs dark:hover:!text-indigo-400"
 						>
-							<AddNewCollection parentID={optionId} />
+							<Code2 className="text-primary size-3" />
+							Add New Request
 						</DropdownMenuItem>
 						<DropdownMenuItem
 							onClick={(e) => {
 								e.stopPropagation();
+								const id = createId();
+								addTab({
+									type: 'WEBSOCKET',
+									title: 'New Request',
+									isSaved: false,
+									collectionId: undefined,
+									id,
+								});
+								addRequest({
+									id,
+									type: 'WEBSOCKET',
+									name: 'New Request',
+									url: '',
+									method: null,
+									isSaved: false,
+									collectionId: optionId,
+									body: {
+										raw: '',
+										formData: [],
+										urlEncoded: [],
+										file: null,
+										json: {},
+									},
+									auth: { type: 'NONE' },
+									headers: [],
+									parameters: [],
+									bodyType: 'NONE',
+									description: '',
+									messageType: 'CONNECTION',
+									createdAt: new Date(),
+									updatedAt: new Date(),
+								});
 							}}
-							className="group hover:!bg-muted dark:hover:!bg-secondary/60 text-foreground/80 hover:!text-primary dark:hover:!text-indigo-400 text-xs cursor-pointer"
+							className="group hover:!bg-muted dark:hover:!bg-secondary/60 text-foreground/80 hover:!text-primary cursor-pointer text-xs dark:hover:!text-indigo-400"
 						>
 							<IconWebSocket className="size-3" />
 							Add New Websocket
@@ -274,47 +424,64 @@ const TreeItemOption = ({
 						<DropdownMenuItem
 							onClick={(e) => {
 								e.stopPropagation();
+								const id = createId();
+								addTab({
+									type: 'SOCKET_IO',
+									title: 'New Request',
+									isSaved: false,
+									collectionId: undefined,
+									id,
+								});
+								addRequest({
+									id,
+									type: 'SOCKET_IO',
+									name: 'New Request',
+									url: '',
+									method: null,
+									isSaved: false,
+									collectionId: optionId,
+									body: {
+										raw: '',
+										formData: [],
+										urlEncoded: [],
+										file: null,
+										json: {},
+									},
+									auth: { type: 'NONE' },
+									headers: [],
+									parameters: [],
+									bodyType: 'NONE',
+									description: '',
+									messageType: 'CONNECTION',
+									createdAt: new Date(),
+									updatedAt: new Date(),
+								});
 							}}
-							className="group hover:!bg-muted dark:hover:!bg-secondary/60 text-foreground/80 hover:!text-primary dark:hover:!text-indigo-400 text-xs cursor-pointer"
+							className="group hover:!bg-muted dark:hover:!bg-secondary/60 text-foreground/80 hover:!text-primary cursor-pointer text-xs dark:hover:!text-indigo-400"
 						>
-							<Code2 className="size-3 text-primary" />
-							Add New Request
+							<IconSocketIO className="size-3 text-green-600" />
+							Add New SocketIO
 						</DropdownMenuItem>
 						<DropdownMenuItem
 							onClick={(e) => {
 								e.stopPropagation();
 							}}
-							className="group hover:!bg-muted dark:hover:!bg-secondary/60 text-foreground/80 hover:!text-primary dark:hover:!text-indigo-400 text-xs cursor-pointer"
+							className="group hover:!bg-muted dark:hover:!bg-secondary/60 text-foreground/80 hover:!text-primary cursor-pointer text-xs dark:hover:!text-indigo-400"
+							asChild
 						>
-							<IconSocketIO className="size-3 text-green-600" />
-							Add New SocketIO
+							<AddNewCollection parentID={optionId} />
 						</DropdownMenuItem>
 					</>
 				)}
-				<DropdownMenuItem
-					onClick={(e) => {
-						e.stopPropagation();
-					}}
-					className="group hover:!bg-muted dark:hover:!bg-secondary/60 text-foreground/80 hover:!text-primary dark:hover:!text-indigo-400 text-xs cursor-pointer"
-				>
-					<PencilIcon className="size-3" />
-					Rename
-				</DropdownMenuItem>{' '}
-				<DropdownMenuItem
-					onClick={(e) => {
-						e.stopPropagation();
-					}}
-					className="group hover:!bg-muted dark:hover:!bg-secondary/60 text-foreground/80 hover:!text-red-400 text-xs cursor-pointer"
-				>
-					<Trash className="size-3 !text-inherit group-hover:text-red-400" />{' '}
-					Delete
-				</DropdownMenuItem>
 			</DropdownMenuContent>
 		</DropdownMenu>
 	);
 };
 
 const AddNewCollectionOption = () => {
+	const { addTab } = useRequestTabsStore();
+	const { addRequest } = useRequestStore();
+
 	return (
 		<DropdownMenu>
 			<DropdownMenuTrigger
@@ -330,7 +497,7 @@ const AddNewCollectionOption = () => {
 					}}
 					size={'icon'}
 					variant={'ghost'}
-					className="!m-0 !p-1 cursor-pointer"
+					className="!m-0 cursor-pointer !p-1"
 				>
 					<Plus className="size-4" />
 				</Button>
@@ -345,18 +512,82 @@ const AddNewCollectionOption = () => {
 			>
 				<DropdownMenuItem
 					onClick={(e) => {
+						const id = createId();
 						e.stopPropagation();
+						addTab({
+							type: 'API',
+							title: 'New Request',
+							isSaved: false,
+							collectionId: undefined,
+							id,
+						});
+						addRequest({
+							id,
+							type: 'API',
+							name: 'New Request',
+							url: '',
+							method: 'GET',
+							isSaved: false,
+							collectionId: '',
+							body: {
+								raw: '',
+								formData: [],
+								urlEncoded: [],
+								file: null,
+								json: {},
+							},
+							auth: { type: 'NONE' },
+							headers: [],
+							parameters: [],
+							bodyType: 'NONE',
+							description: '',
+							messageType: 'CONNECTION',
+							createdAt: new Date(),
+							updatedAt: new Date(),
+						});
 					}}
-					className="group justify-center items-center hover:!bg-muted dark:hover:!bg-secondary/60 text-foreground/80 hover:!text-primary dark:hover:!text-indigo-400 text-xs cursor-pointer"
-					asChild
+					className="group hover:!bg-muted dark:hover:!bg-secondary/60 text-foreground/80 hover:!text-primary cursor-pointer text-xs dark:hover:!text-indigo-400"
 				>
-					<AddNewCollection />
+					<Code2 className="text-primary size-3" />
+					Add New Request
 				</DropdownMenuItem>
 				<DropdownMenuItem
 					onClick={(e) => {
 						e.stopPropagation();
+						const id = createId();
+						addTab({
+							type: 'WEBSOCKET',
+							title: 'New Request',
+							isSaved: false,
+							collectionId: undefined,
+							id,
+						});
+						addRequest({
+							id,
+							type: 'WEBSOCKET',
+							name: 'New Request',
+							url: '',
+							method: null,
+							isSaved: false,
+							collectionId: '',
+							body: {
+								raw: '',
+								formData: [],
+								urlEncoded: [],
+								file: null,
+								json: {},
+							},
+							auth: { type: 'NONE' },
+							headers: [],
+							parameters: [],
+							bodyType: 'NONE',
+							description: '',
+							messageType: 'CONNECTION',
+							createdAt: new Date(),
+							updatedAt: new Date(),
+						});
 					}}
-					className="group hover:!bg-muted dark:hover:!bg-secondary/60 text-foreground/80 hover:!text-primary dark:hover:!text-indigo-400 text-xs cursor-pointer"
+					className="group hover:!bg-muted dark:hover:!bg-secondary/60 text-foreground/80 hover:!text-primary cursor-pointer text-xs dark:hover:!text-indigo-400"
 				>
 					<IconWebSocket className="size-3" />
 					Add New Websocket
@@ -364,20 +595,52 @@ const AddNewCollectionOption = () => {
 				<DropdownMenuItem
 					onClick={(e) => {
 						e.stopPropagation();
+						const id = createId();
+						addTab({
+							type: 'SOCKET_IO',
+							title: 'New Request',
+							isSaved: false,
+							collectionId: undefined,
+							id,
+						});
+						addRequest({
+							id,
+							type: 'SOCKET_IO',
+							name: 'New Request',
+							url: '',
+							method: null,
+							isSaved: false,
+							collectionId: '',
+							body: {
+								raw: '',
+								formData: [],
+								urlEncoded: [],
+								file: null,
+								json: {},
+							},
+							auth: { type: 'NONE' },
+							headers: [],
+							parameters: [],
+							bodyType: 'NONE',
+							description: '',
+							messageType: 'CONNECTION',
+							createdAt: new Date(),
+							updatedAt: new Date(),
+						});
 					}}
-					className="group hover:!bg-muted dark:hover:!bg-secondary/60 text-foreground/80 hover:!text-primary dark:hover:!text-indigo-400 text-xs cursor-pointer"
+					className="group hover:!bg-muted dark:hover:!bg-secondary/60 text-foreground/80 hover:!text-primary cursor-pointer text-xs dark:hover:!text-indigo-400"
 				>
-					<Code2 className="size-3 text-primary" />
-					Add New Request
+					<IconSocketIO className="size-3 text-green-600" />
+					Add New SocketIO
 				</DropdownMenuItem>
 				<DropdownMenuItem
 					onClick={(e) => {
 						e.stopPropagation();
 					}}
-					className="group hover:!bg-muted dark:hover:!bg-secondary/60 text-foreground/80 hover:!text-primary dark:hover:!text-indigo-400 text-xs cursor-pointer"
+					className="group hover:!bg-muted dark:hover:!bg-secondary/60 text-foreground/80 hover:!text-primary cursor-pointer items-center justify-center text-xs dark:hover:!text-indigo-400"
+					asChild
 				>
-					<IconSocketIO className="size-3 text-green-600" />
-					Add New SocketIO
+					<AddNewCollection />
 				</DropdownMenuItem>
 			</DropdownMenuContent>
 		</DropdownMenu>

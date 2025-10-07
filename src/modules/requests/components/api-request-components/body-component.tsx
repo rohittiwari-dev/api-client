@@ -10,7 +10,7 @@ import {
 } from '@/components/ui/empty';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { BodyType } from '@/generated/prisma';
-import useRequestStore from '../../store/reques.store';
+import useRequestStore from '../../store/request.store';
 import FormDataComponent from './formdata-component';
 import JsonAndRawBodyComponent from './json-raw-body-component';
 
@@ -48,45 +48,45 @@ const BodyComponent = () => {
 				}
 			}}
 		>
-			<TabsList className="rounded h-fit">
+			<TabsList className="h-fit rounded">
 				<TabsTrigger
-					className="px-2 py-1 rounded text-[0.6rem] cursor-pointer"
+					className="cursor-pointer rounded px-2 py-1 text-[0.6rem]"
 					value="none"
 				>
 					None
 				</TabsTrigger>
 				<TabsTrigger
-					className="px-2 py-1 rounded text-[0.6rem] cursor-pointer"
+					className="cursor-pointer rounded px-2 py-1 text-[0.6rem]"
 					value="json"
 				>
 					Json
 				</TabsTrigger>
 				<TabsTrigger
-					className="px-2 py-1 rounded text-[0.6rem] cursor-pointer"
+					className="cursor-pointer rounded px-2 py-1 text-[0.6rem]"
 					value="form-data"
 				>
 					Form Data
 				</TabsTrigger>
 				<TabsTrigger
-					className="px-2 py-1 rounded text-[0.6rem] cursor-pointer"
+					className="cursor-pointer rounded px-2 py-1 text-[0.6rem]"
 					value="x-www-form-urlencoded"
 				>
 					x-www-form-urlencoded
 				</TabsTrigger>
 				<TabsTrigger
-					className="px-2 py-1 rounded text-[0.6rem] cursor-pointer"
+					className="cursor-pointer rounded px-2 py-1 text-[0.6rem]"
 					value="raw"
 				>
 					Raw
 				</TabsTrigger>
 			</TabsList>
 			<TabsContent value="none" className="p-2 !pt-0">
-				<Empty className="flex flex-1 justify-center items-center w-full h-full min-h-[200px] max-h-[350px]">
-					<EmptyContent className="flex justify-center items-center w-full h-full">
+				<Empty className="flex h-full max-h-[350px] min-h-[200px] w-full flex-1 items-center justify-center">
+					<EmptyContent className="flex h-full w-full items-center justify-center">
 						<EmptyMedia>
-							<Card className="flex justify-center items-center bg-muted/30 border-none rounded-3xl w-24 h-24">
+							<Card className="bg-muted/30 flex h-24 w-24 items-center justify-center rounded-3xl border-none">
 								<IconDeviceRemote
-									className="size-12 text-primary/70"
+									className="text-primary/70 size-12"
 									stroke={0.5}
 								/>
 							</Card>

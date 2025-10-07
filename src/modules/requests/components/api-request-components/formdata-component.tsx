@@ -18,12 +18,12 @@ import {
 	TableHeader,
 	TableRow,
 } from '@/components/ui/table';
-import useRequestStore from '../../store/reques.store';
+import useRequestStore from '../../store/request.store';
 
 const FormDataComponent = () => {
 	const { activeRequest, updateRequest } = useRequestStore();
 	return (
-		<div className="relative flex flex-col gap-4 rounded-lg w-full h-fit">
+		<div className="relative flex h-fit w-full flex-col gap-4 rounded-lg">
 			<Button
 				variant={'ghost'}
 				size={'sm'}
@@ -42,13 +42,13 @@ const FormDataComponent = () => {
 						],
 					})
 				}
-				className="right-1 z-50 absolute items-center gap-1 hover:!bg-transparent !text-[0.6rem] hover:!text-foreground/70 cursor-pointer"
+				className="hover:!text-foreground/70 absolute right-1 z-50 cursor-pointer items-center gap-1 !text-[0.6rem] hover:!bg-transparent"
 			>
 				<Plus className="!size-3" /> Add Key
 			</Button>
 			<Table className="!m-0 !p-0">
 				<TableHeader className="select-none">
-					<TableRow className="hover:!bg-transparent !py-0.5 select-none">
+					<TableRow className="!py-0.5 select-none hover:!bg-transparent">
 						<TableHead className="!py-0.5 !text-xs"> </TableHead>
 						<TableHead className="!py-0.5 !text-xs">Key</TableHead>
 						<TableHead className="!py-0.5 !text-xs">
@@ -86,18 +86,18 @@ const FormDataComponent = () => {
 											body,
 										});
 									}}
-									className="rounded-full size-5 cursor-pointer"
+									className="size-5 cursor-pointer rounded-full"
 								/>
 							</TableCell>
 							<TableCell>
 								<Input
 									placeholder="Key"
-									className="py-2 h-fit !text-xs"
+									className="h-fit py-2 !text-xs"
 								/>
 							</TableCell>
 							<TableCell>
 								<Select defaultValue="string">
-									<SelectTrigger className="w-full !text-xs text-left">
+									<SelectTrigger className="w-full text-left !text-xs">
 										<SelectValue placeholder="Select type" />
 									</SelectTrigger>
 									<SelectContent>
@@ -117,13 +117,13 @@ const FormDataComponent = () => {
 							<TableCell>
 								<Input
 									placeholder="Value"
-									className="py-2 h-fit !text-xs"
+									className="h-fit py-2 !text-xs"
 								/>
 							</TableCell>
 							<TableCell>
 								<Input
 									placeholder="Description"
-									className="py-2 h-fit !text-xs"
+									className="h-fit py-2 !text-xs"
 								/>
 							</TableCell>
 						</TableRow>

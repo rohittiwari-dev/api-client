@@ -1,29 +1,27 @@
-// app/actions/collections.ts
 'use server';
 
+import { Collection } from '@/generated/prisma';
 import db from '@/lib/db';
-import { currentUser } from '@/modules/authentication/server/auth.actions';
 import {
 	CollectionWithRelations,
 	NestedCollection,
-} from '../types/store.types';
+} from '../types/sidebar.types';
+import { buildNestedCollections } from '../utils';
 
-export async function getAllCollections(workspaceId: string): Promise<{
+export async function getAllCollections(
+	workspaceId: string,
+	userId: string,
+): Promise<{
 	success: boolean;
 	data?: NestedCollection[];
 	error?: string;
 }> {
 	try {
-		const user = await currentUser();
-		if (!user) {
-			return { success: false, error: 'Unauthorized' };
-		}
-
 		// Verify user has access to the workspace
 		const workspaceAccess = await db.member.findFirst({
 			where: {
 				organizationId: workspaceId,
-				userId: user?.user?.id,
+				userId: userId,
 			},
 		});
 
@@ -90,7 +88,6 @@ export async function getAllCollections(workspaceId: string): Promise<{
 			data: nestedCollections,
 		};
 	} catch (error) {
-		console.error('Error fetching collections:', error);
 		return {
 			success: false,
 			error: 'Failed to fetch collections',
@@ -98,15 +95,70 @@ export async function getAllCollections(workspaceId: string): Promise<{
 	}
 }
 
-// Helper function to build nested structure from flat array
-function buildNestedCollections(
-	collections: CollectionWithRelations[],
-	parentId: string | null = null,
-): NestedCollection[] {
-	return collections
-		.filter((collection) => collection.parentId === parentId)
-		.map((collection) => ({
-			...collection,
-			children: buildNestedCollections(collections, collection.id),
-		}));
-}
+export const createCollectionAction = async (
+	name: string,
+	workspaceId: string,
+	parentID?: string,
+) => {
+	return await db.collection.create({
+		data: {
+			name,
+			workspaceId,
+			...(parentID && { parentId: parentID }),
+			createdAt: new Date(),
+		},
+		include: {
+			workspace: true,
+		},
+	});
+};
+
+export const renameCollectionAction = async (id: string, newName: string) => {
+	return await db.collection.update({
+		where: { id },
+		data: { name: newName },
+	});
+};
+
+export const deleteCollectionAction = async (id: string) => {
+	return await db.collection.delete({
+		where: { id },
+	});
+};
+
+export const getAllCollectionsOnLevelOne = async (
+	workspaceId: string,
+): Promise<Collection[]> => {
+	const collections = await db.collection.findMany({
+		where: {
+			workspaceId,
+		},
+		orderBy: { createdAt: 'desc' },
+		include: {
+			children: true,
+			parent: true,
+		},
+	});
+
+	// Flatten all collections to top level
+	const flattenedCollections = new Map();
+
+	const flatten = (collection: any) => {
+		if (!flattenedCollections.has(collection.id)) {
+			flattenedCollections.set(collection.id, {
+				...collection,
+				children: [],
+				parent: null,
+				parentId: null,
+			});
+		}
+
+		if (collection.children && collection.children.length > 0) {
+			collection.children.forEach((child: any) => flatten(child));
+		}
+	};
+
+	collections.forEach((collection) => flatten(collection));
+
+	return Array.from(flattenedCollections.values());
+};

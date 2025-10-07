@@ -1,10 +1,10 @@
 import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
-import { Request } from '@/generated/prisma';
+import { RequestStateInterface } from '../types/request.types';
 
 export type RequestsStoreState = {
-	requests: (Request & { isSaved: boolean })[];
-	activeRequest: (Request & { isSaved: boolean }) | null;
+	requests: RequestStateInterface[];
+	activeRequest: RequestStateInterface | null;
 	activeRequestLoading: boolean;
 	requestLoading: boolean;
 };
@@ -12,24 +12,23 @@ export type RequestsStoreState = {
 type RequestStoreStateActions = {
 	setActiveRequestLoading: (loading: boolean) => void;
 	setRequestLoading: (loading: boolean) => void;
-	setRequests: (requests: (Request & { isSaved: boolean })[]) => void;
-	setActiveRequest: (
-		request: (Request & { isSaved: boolean }) | null,
-	) => void;
+	setRequests: (requests: RequestStateInterface[]) => void;
+	setActiveRequest: (request: RequestStateInterface | null) => void;
 	setActiveRequestById: (id: string) => void;
 	updateRequest: (
 		id: string,
-		request: Partial<Request & { isSaved: boolean }>,
+		request: Partial<RequestStateInterface>,
 	) => void;
-	addRequest: (request: Request & { isSaved: boolean }) => void;
+	addRequest: (request: RequestStateInterface) => void;
 	removeRequest: (id: string) => void;
 	clearRequests: () => void;
+	getRequestById: (id: string) => RequestStateInterface | null;
 };
 
 const useRequestStore = create<RequestsStoreState & RequestStoreStateActions>()(
 	devtools(
 		persist(
-			(set) => ({
+			(set, get) => ({
 				requests: [],
 				activeRequest: null,
 				activeRequestLoading: false,
@@ -55,10 +54,22 @@ const useRequestStore = create<RequestsStoreState & RequestStoreStateActions>()(
 								: state.activeRequest,
 					})),
 				addRequest: (request) =>
-					set((state) => ({
-						requests: [...state.requests, request],
-						activeRequest: request,
-					})),
+					set((state) => {
+						if (
+							state.requests.some((req) => req.id === request.id)
+						) {
+							return {
+								requests: state.requests,
+								activeRequest: state.requests.find(
+									(req) => req.id === request.id,
+								),
+							};
+						}
+						return {
+							requests: [...state.requests, request],
+							activeRequest: request,
+						};
+					}),
 				removeRequest: (id) =>
 					set((state) => ({
 						requests: state.requests.filter((req) => req.id !== id),
@@ -68,6 +79,11 @@ const useRequestStore = create<RequestsStoreState & RequestStoreStateActions>()(
 								: state.activeRequest,
 					})),
 				clearRequests: () => set({ requests: [], activeRequest: null }),
+				getRequestById: (id) => {
+					const request =
+						get().requests.find((req) => req.id === id) || null;
+					return request;
+				},
 			}),
 			{
 				name: 'request-storage',

@@ -1,9 +1,8 @@
 import React from 'react';
 import { IconRocket, IconSend } from '@tabler/icons-react';
 import { SaveIcon } from 'lucide-react';
-import { AddOnInput } from '@/components/app-ui/inputs';
 import { Button } from '@/components/ui/button';
-import { ButtonGroup, ButtonGroupText } from '@/components/ui/button-group';
+import { ButtonGroup } from '@/components/ui/button-group';
 import { Card } from '@/components/ui/card';
 import {
 	Empty,
@@ -11,13 +10,7 @@ import {
 	EmptyDescription,
 	EmptyMedia,
 } from '@/components/ui/empty';
-import { Input } from '@/components/ui/input';
-import {
-	InputGroup,
-	InputGroupAddon,
-	InputGroupButton,
-	InputGroupInput,
-} from '@/components/ui/input-group';
+import { InputGroup, InputGroupInput } from '@/components/ui/input-group';
 import {
 	ResizableHandle,
 	ResizablePanel,
@@ -31,27 +24,42 @@ import {
 	SelectValue,
 } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { HttpMethod } from '@/generated/prisma';
 import { cn, requestBgColorMap } from '@/lib/utils';
+import useRequestStore from '../store/request.store';
 import useRequestTabsStore from '../store/tabs.store';
 import BodyComponent from './api-request-components/body-component';
 import HeaderComponent from './api-request-components/header-component';
 import ParameterComponent from './api-request-components/parameter-component';
 
 const ApiRequestComponent = () => {
-	const {} = useRequestTabsStore();
+	const { activeTab, replaceTabData } = useRequestTabsStore();
+	const { activeRequest, updateRequest } = useRequestStore();
+
 	return (
 		<div className="mt-4 flex h-full w-full flex-col gap-4 px-4 select-none">
 			<div className="flex w-full items-center gap-4">
 				<ButtonGroup className="flex-1">
 					<Select
-						defaultValue="GET"
-						onValueChange={(value) => console.log(value)}
+						value={activeRequest?.method || 'GET'}
+						onValueChange={(value) => {
+							const updatedRequest = {
+								...activeRequest,
+								method: value as HttpMethod,
+							};
+							if (activeRequest?.id)
+								updateRequest(
+									activeRequest?.id,
+									updatedRequest,
+								);
+						}}
 					>
 						<SelectTrigger
 							className={cn(
 								'cursor-pointer rounded-none rounded-l-md font-semibold text-white',
 								requestBgColorMap[
-									'GET' as keyof typeof requestBgColorMap
+									(activeRequest?.method ||
+										'GET') as keyof typeof requestBgColorMap
 								],
 								'!text-xs',
 								'!w-full !max-w-24',
@@ -87,7 +95,21 @@ const ApiRequestComponent = () => {
 						</SelectContent>
 					</Select>
 					<InputGroup>
-						<InputGroupInput id="url" />
+						<InputGroupInput
+							id="url"
+							value={activeRequest?.url || ''}
+							onChange={(e) => {
+								const updatedRequest = {
+									...activeRequest,
+									url: e.target.value,
+								};
+								if (activeRequest?.id)
+									updateRequest(
+										activeRequest?.id,
+										updatedRequest,
+									);
+							}}
+						/>
 					</InputGroup>
 					<Button className="cursor-pointer rounded-none rounded-r-md">
 						<IconSend className="fill-white" /> Send

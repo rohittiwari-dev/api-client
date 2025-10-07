@@ -5,10 +5,10 @@ import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
 import { Organization } from '@/generated/prisma';
 import auth from '@/lib/auth';
 import { currentUser } from '@/modules/authentication/server/auth.actions';
+import { getAllCollections } from '@/modules/collections/server/collection.action';
 import Header from '@/modules/layout/components/header';
 import { AppSidebar } from '@/modules/layout/components/sidebar/AppSidebar';
 import RightSidebar from '@/modules/layout/components/sidebar/right-sidebar';
-import { getAllCollections } from '@/modules/requests/server/collections';
 import WorkspaceProvider from '@/modules/workspace/store/WorkspaceProvider';
 
 const WorkspaceLayout = async ({
@@ -52,14 +52,18 @@ const WorkspaceLayout = async ({
 			activeOrg={activeWorkspace}
 			workspaces={(workspaces || []) as Organization[]}
 		>
-			<div className="flex flex-col w-full h-[100svh] [--header-height:calc(--spacing(14))]">
-				<SidebarProvider className="flex flex-col w-full h-full">
+			<div className="flex h-[100svh] w-full flex-col [--header-height:calc(--spacing(14))]">
+				<SidebarProvider className="flex h-full w-full flex-col">
 					<Header currentUserSession={currentUserSession!} />
-					<div className="flex flex-1 w-full h-full overflow-hidden">
+					<div className="flex h-full w-full flex-1 overflow-hidden">
 						<AppSidebar
 							collections={
-								(await getAllCollections(activeWorkspace?.id))
-									?.data || []
+								(
+									await getAllCollections(
+										activeWorkspace?.id,
+										currentUserSession?.user?.id || '',
+									)
+								)?.data || []
 							}
 						/>
 						<SidebarInset className="h-full overflow-hidden overflow-y-auto">
