@@ -1,0 +1,268 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// Enums
+enum MemberRole {
+  OWNER
+  ADMIN
+  EDITOR
+  VIEWER
+}
+
+enum RequestType {
+  API
+  WEBSOCKET
+  SOCKET_IO
+}
+
+enum HttpMethod {
+  GET
+  POST
+  PUT
+  PATCH
+  DELETE
+  HEAD
+  OPTIONS
+}
+
+enum BodyType {
+  NONE
+  RAW
+  FORM_DATA
+  X_WWW_FORM_URLENCODED
+  BINARY
+  JSON
+}
+
+enum MessageType {
+  CONNECTION
+  MESSAGE
+  EVENT
+  DISCONNECTION
+}
+
+enum MessageDirection {
+  SEND
+  RECEIVE
+}
+
+enum MessageFormat {
+  JSON
+  TEXT
+  BINARY
+  XML
+}
+
+model User {
+  id               String        @id
+  name             String
+  email            String
+  emailVerified    Boolean       @default(false)
+  image            String?
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @default(now()) @updatedAt
+  twoFactorEnabled Boolean?      @default(false)
+  sessions         Session[]
+  accounts         Account[]
+  twofactors       TwoFactor[]
+  members          Member[]
+  invitations      Invitation[]
+  environments     Environment[]
+
+  @@unique([email])
+  @@index([email])
+  @@map("user")
+}
+
+model Session {
+  id                   String   @id @default(cuid(2))
+  expiresAt            DateTime
+  token                String
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+  ipAddress            String?
+  userAgent            String?
+  userId               String
+  user                 User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  activeOrganizationId String?
+
+  @@unique([token])
+  @@map("session")
+}
+
+model Account {
+  id                    String    @id @default(cuid(2))
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@map("account")
+}
+
+model Verification {
+  id         String   @id @default(cuid(2))
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @default(now()) @updatedAt
+
+  @@map("verification")
+}
+
+model TwoFactor {
+  id          String @id
+  secret      String
+  backupCodes String
+  userId      String
+  user        User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("twoFactor")
+}
+
+model Organization {
+  id          String        @id @default(cuid(2))
+  name        String
+  slug        String?
+  description String?
+  logo        String?
+  createdAt   DateTime
+  metadata    String?
+  members     Member[]
+  invitations Invitation[]
+  Collection  Collection[]
+  Environment Environment[]
+  requests    Request[]
+
+  @@unique([slug])
+  @@index([slug])
+  @@map("organization")
+}
+
+model Member {
+  id             String       @id @default(cuid(2))
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  userId         String
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role           String
+  createdAt      DateTime
+
+  @@map("member")
+}
+
+model Invitation {
+  id             String       @id @default(cuid(2))
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  email          String
+  role           String?
+  status         String
+  expiresAt      DateTime
+  inviterId      String
+  user           User         @relation(fields: [inviterId], references: [id], onDelete: Cascade)
+
+  @@map("invitation")
+}
+
+model Collection {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Nested collections support
+  parentId String?
+  parent   Collection?  @relation("CollectionChildren", fields: [parentId], references: [id])
+  children Collection[] @relation("CollectionChildren")
+
+  workspaceId String
+  workspace   Organization @relation(fields: [workspaceId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  // Relationships
+  requests     Request[]
+  environments Environment[]
+
+  @@index([workspaceId])
+  @@index([parentId])
+  @@map("collections")
+}
+
+model Request {
+  id          String       @id @default(cuid())
+  name        String
+  description String?
+  method      HttpMethod?
+  url         String?
+  type        RequestType? @default(API)
+  sortOrder   Int          @default(0)
+
+  // Request configuration
+  headers    Json?     @default("[]")
+  parameters Json?     @default("[]")
+  body       Json?
+  bodyType   BodyType?
+
+  // Authentication
+  auth Json?
+
+  // WebSocket/Socket.IO specific
+  messageType   MessageType?
+  savedMessages Json?        @default("[]")
+
+  createdAt DateTime? @default(now())
+  updatedAt DateTime? @default(now()) @updatedAt
+
+  collectionId String?
+  collection   Collection? @relation(fields: [collectionId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  workspaceId  String
+  workspace    Organization  @relation(fields: [workspaceId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  // Relationships
+  environments Environment[]
+
+  @@index([collectionId])
+  @@map("requests")
+}
+
+model Environment {
+  id          String  @id @default(cuid())
+  name        String
+  description String?
+  variables   Json?
+  isGlobal    Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Can belong to user, workspace, or collection
+  userId       String?
+  user         User?         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workspaceId  String?
+  workspace    Organization? @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  collectionId String?
+  collection   Collection?   @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+  Request      Request?      @relation(fields: [requestId], references: [id])
+  requestId    String?
+
+  @@index([workspaceId])
+  @@index([userId])
+}
