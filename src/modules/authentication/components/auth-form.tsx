@@ -144,6 +144,27 @@ const AuthForm = ({
 			requestSignUp: type === 'sign-up',
 			callbackURL: '/workspace/get-started',
 			errorCallbackURL: type === 'sign-up' ? `/sign-up` : `/sign-in`,
+			fetchOptions: {
+				onRequest(context) {
+					setLoading((prev) => ({
+						...prev,
+						googleAuthLoading: true,
+					}));
+				},
+				onSuccess(context) {
+					toast.success('Successfully logged in');
+				},
+				onError(context) {
+					console.log(context);
+					toast.error(context.error.message);
+				},
+				onResponse(context) {
+					setLoading((prev) => ({
+						...prev,
+						googleAuthLoading: false,
+					}));
+				},
+			}
 		});
 	};
 
@@ -255,7 +276,7 @@ const AuthForm = ({
 											onClick={handleGoogleLoginAndSignup}
 										>
 											{loading.googleAuthLoading ? (
-												<Loader2 className="mr-2 size-5" />
+												<Loader2 className="mr-2 size-5 animate-spin" />
 											) : (
 												<IconGoogle className="mr-2 size-5" />
 											)}
@@ -395,7 +416,7 @@ const AuthForm = ({
 											className="w-full h-10 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white font-semibold shadow-lg shadow-violet-500/25"
 										>
 											{loading.emailSigninLoading ?
-												<Loader2 className="mr-2 size-5" />
+												<Loader2 className="mr-2 size-5 animate-spin" />
 												: <>
 													{type === 'sign-in' ? 'Sign In' : 'Create Account'}
 													<ArrowRight className="w-4 h-4 ml-2" />
