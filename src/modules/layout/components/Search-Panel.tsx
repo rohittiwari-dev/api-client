@@ -310,6 +310,7 @@ const SearchPanel = () => {
               {filteredRequests.map((request) => (
                 <CommandItem
                   key={request.id}
+                  value={`request-${request.id}`}
                   className="gap-3 py-2.5 cursor-pointer"
                   onSelect={() => handleOpenRequest(request)}
                 >
