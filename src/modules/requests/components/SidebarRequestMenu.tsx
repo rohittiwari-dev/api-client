@@ -26,8 +26,8 @@ import {
   useRenameRequest,
   useDuplicateRequest,
 } from "../hooks/queries";
-import useRequestStore from "../store/request.store";
 import { RequestType } from "../types/store.types";
+import useRequestSyncStoreState from "../hooks/requestSyncStore";
 
 interface SidebarRequestMenuProps {
   requestId: string;
@@ -48,7 +48,8 @@ export function SidebarRequestMenu({
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [showMoveDialog, setShowMoveDialog] = useState(false);
 
-  const { updateRequest, removeRequest, getRequestById } = useRequestStore();
+  const { updateRequest, removeRequest, getRequestById } =
+    useRequestSyncStoreState();
 
   // Check if request is unsaved
   const request = getRequestById(requestId);

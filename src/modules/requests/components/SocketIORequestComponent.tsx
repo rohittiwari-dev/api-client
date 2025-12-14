@@ -24,16 +24,16 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
-import useRequestStore from "../store/request.store";
 import useSocketIOStore from "../store/socketio.store";
 import { useUpsertRequest } from "../hooks/queries";
 import MessageEditor from "./shared/MessageEditor";
 import SavedMessages from "./shared/SavedMessages";
 import ParameterComponent from "./api-request-components/parameter-component";
 import HeaderComponent from "./api-request-components/header-component";
+import useRequestSyncStoreState from "../hooks/requestSyncStore";
 
 const SocketIORequestComponent = () => {
-  const { updateRequest, activeRequest } = useRequestStore();
+  const { updateRequest, activeRequest } = useRequestSyncStoreState();
   const {
     connect,
     disconnect,

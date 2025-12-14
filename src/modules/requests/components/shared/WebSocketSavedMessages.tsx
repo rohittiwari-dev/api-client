@@ -10,7 +10,6 @@ import {
   IconMessage,
   IconPlus,
   IconSearch,
-  IconFilter,
   IconSparkles,
   IconCode,
   IconDeviceFloppy,
@@ -37,29 +36,20 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuCheckboxItem,
-  DropdownMenuTrigger,
-  DropdownMenuSeparator,
-} from "@/components/ui/dropdown-menu";
-import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
-import useRequestStore from "../../store/request.store";
 import { type MessageFormat } from "./WebSocketMessageComposer";
 import { updateRequestAction } from "../../actions";
 import Editor from "react-simple-code-editor";
 import hljs from "highlight.js";
 import { useTheme } from "next-themes";
+import useRequestSyncStoreState from "../../hooks/requestSyncStore";
 
 export interface SavedMessage {
   id: string;
@@ -87,12 +77,10 @@ const WebSocketSavedMessages: React.FC<WebSocketSavedMessagesProps> = ({
   type,
   className,
 }) => {
-  const { updateRequest } = useRequestStore();
+  const { updateRequest, getRequestById } = useRequestSyncStoreState();
 
   // Use selector to subscribe to changes in the specific request
-  const request = useRequestStore((state) =>
-    state.requests.find((r) => r.id === requestId)
-  );
+  const request = getRequestById(requestId);
 
   // Normalize saved messages to new format (backward compatibility)
   const rawSavedMessages: any[] = request?.savedMessages || [];

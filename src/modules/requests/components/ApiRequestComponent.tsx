@@ -25,7 +25,6 @@ import {
   substituteVariablesInObject,
 } from "@/lib/utils/substituteVariables";
 import ApiResponse from "@/modules/response/components/api-response";
-import useRequestStore from "../store/request.store";
 import useResponseStore from "@/modules/response/store/response.store";
 import useCookieStore from "@/modules/cookies/store/cookie.store";
 import useEnvironmentStore from "@/modules/environment/store/environment.store";
@@ -35,6 +34,7 @@ import ParameterComponent from "./api-request-components/parameter-component";
 import AuthComponent from "./api-request-components/auth-component";
 import { useUpsertRequest } from "../hooks/queries";
 import { BodyType, HttpMethod } from "@/generated/prisma/browser";
+import useRequestSyncStoreState from "../hooks/requestSyncStore";
 
 /**
  * Parse Set-Cookie header string into cookie object
@@ -129,7 +129,8 @@ function buildOAuthSignatureBase(
 }
 
 const ApiRequestComponent = () => {
-  const { activeTabId, updateRequest, getRequestById } = useRequestStore();
+  const { activeTabId, updateRequest, getRequestById } =
+    useRequestSyncStoreState();
   const { setResponse, setLoading, setError, setActualRequest } =
     useResponseStore();
   const { getCookiesForDomain, addCookie } = useCookieStore();

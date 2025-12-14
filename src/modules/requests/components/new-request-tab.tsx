@@ -1,10 +1,9 @@
-import React from "react";
 import { createId } from "@paralleldrive/cuid2";
-import { Code2, Zap, ArrowRight, Sparkles } from "lucide-react";
+import { Code2, ArrowRight, Sparkles } from "lucide-react";
 import { IconSocketIO, IconWebSocket } from "@/assets/app-icons";
 import useWorkspaceState from "@/modules/workspace/store";
 import { cn } from "@/lib/utils";
-import useRequestStore from "../store/request.store";
+import useRequestSyncStoreState from "../hooks/requestSyncStore";
 
 const requestTypes = [
   {
@@ -43,7 +42,7 @@ const requestTypes = [
 ];
 
 const NewRequestTabContent = () => {
-  const { openRequest, activeTabId } = useRequestStore();
+  const { openRequest, activeTabId } = useRequestSyncStoreState();
   const { activeWorkspace } = useWorkspaceState();
   const workspaceId = activeWorkspace?.id || "";
 

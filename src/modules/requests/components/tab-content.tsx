@@ -6,10 +6,10 @@ import ApiRequestComponent from "./ApiRequestComponent";
 import NewRequestTabContent from "./new-request-tab";
 import SocketIORequestComponent from "./SocketIORequestComponent";
 import WebsocketRequestComponent from "./WebsocketRequestComponent";
-import useRequestStore from "../store/request.store";
+import useRequestSyncStoreState from "../hooks/requestSyncStore";
 
 const TabContent = ({ id }: { id: string }) => {
-  const { activeRequest } = useRequestStore();
+  const { activeRequest } = useRequestSyncStoreState();
   return (
     <TabsContent
       value={id}

@@ -7,10 +7,10 @@ import TabBar from "@/modules/requests/components/tab-bar";
 import TabContent from "@/modules/requests/components/tab-content";
 import { useWorkspaceSwitcher } from "@/modules/workspace/hooks/use-workspace-switcher";
 import useWorkspaceState from "@/modules/workspace/store";
-import useRequestStore from "@/modules/requests/store/request.store";
+import useRequestSyncStoreState from "@/modules/requests/hooks/requestSyncStore";
 
 const Page = () => {
-  const { getTabs, setActiveTabId, activeTabId } = useRequestStore();
+  const { tabs, setActiveTabId, activeTabId } = useRequestSyncStoreState();
   const { activeWorkspace } = useWorkspaceState();
   const { initializeWorkspaceTracking, currentWorkspaceId } =
     useWorkspaceSwitcher();
@@ -24,7 +24,7 @@ const Page = () => {
 
   return (
     <Tabs
-      value={activeTabId || getTabs(activeWorkspace?.id)[0]?.id}
+      value={activeTabId || tabs[0]?.id}
       onValueChange={(id) => {
         // Sync both tab and request stores
         setActiveTabId(id);
@@ -32,8 +32,8 @@ const Page = () => {
       className="h-full w-full flex flex-col !gap-0"
     >
       <TabBar />
-      <TabContent id={activeTabId || getTabs(activeWorkspace?.id)[0]?.id} />
-      {getTabs(activeWorkspace?.id).length <= 0 && (
+      <TabContent id={activeTabId || tabs[0]?.id} />
+      {tabs.length <= 0 && (
         <div className="flex  flex-1 items-center justify-center select-none">
           <div className="flex items-center gap-2 font-medium opacity-25">
             <Image

@@ -20,10 +20,10 @@ import {
 import { Label } from "@/components/ui/label";
 import { useCollectionsOnTopLevel } from "@/modules/collections/hooks/queries";
 import { useMoveRequest } from "@/modules/requests/hooks/queries";
-import useRequestStore from "@/modules/requests/store/request.store";
 import useSidebarStore from "@/modules/layout/store/sidebar.store";
 import Spinner from "@/components/app-ui/spinner";
 import { FolderOpen, Home } from "lucide-react";
+import useRequestSyncStoreState from "../hooks/requestSyncStore";
 
 interface MoveToCollectionDialogProps {
   open: boolean;
@@ -48,7 +48,7 @@ export function MoveToCollectionDialog({
 
   const { data: collections, isLoading: collectionsLoading } =
     useCollectionsOnTopLevel(workspaceId);
-  const { updateRequest, getRequestById } = useRequestStore();
+  const { updateRequest, getRequestById } = useRequestSyncStoreState();
   const moveItem = useSidebarStore((s) => s.moveItem);
 
   // Check if request is unsaved

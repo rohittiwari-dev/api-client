@@ -2,11 +2,10 @@ import { useCallback } from "react";
 import useWorkspaceStateCache, {
   WorkspaceStateSnapshot,
 } from "../store/workspace-state-cache";
-
-import useRequestStore from "@/modules/requests/store/request.store";
 import useSidebarStore from "@/modules/layout/store/sidebar.store";
 import useEnvironmentStore from "@/modules/environment/store/environment.store";
 import useWorkspaceState from "../store";
+import useRequestSyncStoreState from "@/modules/requests/hooks/requestSyncStore";
 
 /**
  * Hook to manage workspace switching with state preservation
@@ -21,7 +20,7 @@ export function useWorkspaceSwitcher() {
   const { setActiveWorkspace, activeWorkspace } = useWorkspaceState();
 
   // Request store (Unified)
-  const { setRequestsState, getState } = useRequestStore();
+  const { setRequestsState, getState } = useRequestSyncStoreState();
 
   // Sidebar store
   const { items: sidebarItems, setItems: setSidebarItems } = useSidebarStore();

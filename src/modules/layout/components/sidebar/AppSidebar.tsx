@@ -2,24 +2,10 @@
 
 import * as React from "react";
 import { createId } from "@paralleldrive/cuid2";
-import {
-  ChevronRight,
-  ChevronDown,
-  ChevronsDownUp,
-  Code2,
-  Edit2,
-  MoreVertical,
-  Move,
-  Plus,
-} from "lucide-react";
+import { ChevronsDownUp, Code2, Plus } from "lucide-react";
 import { IconFolderFilled } from "@tabler/icons-react";
 import { IconSocketIO, IconWebSocket } from "@/assets/app-icons";
-import { Button, buttonVariants } from "@/components/ui/button";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -34,7 +20,6 @@ import {
   SidebarGroupLabel,
   SidebarRail,
 } from "@/components/ui/sidebar";
-import useRequestStore from "@/modules/requests/store/request.store";
 import useWorkspaceState from "@/modules/workspace/store";
 import AddNewCollection from "../../../collections/components/AddNewCollection";
 import useSidebarStore, {
@@ -42,6 +27,7 @@ import useSidebarStore, {
 } from "../../store/sidebar.store";
 import { useRequestSideBarTree } from "../../hooks/queries";
 import { DraggableSidebarTree } from "./DraggableSidebarTree";
+import useRequestSyncStoreState from "@/modules/requests/hooks/requestSyncStore";
 
 export function AppSidebar({
   sidebarData,
@@ -117,7 +103,7 @@ export function AppSidebar({
 }
 
 const AddNewCollectionOption = ({ workspaceId }: { workspaceId: string }) => {
-  const { addRequest } = useRequestStore();
+  const { addRequest } = useRequestSyncStoreState();
   const [showAddCollectionDialog, setShowAddCollectionDialog] =
     React.useState(false);
 

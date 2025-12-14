@@ -27,7 +27,7 @@ import {
   SidebarCollectionItemInterface,
 } from "../../store/sidebar.store";
 import { RequestType } from "@/generated/prisma/browser";
-import useRequestStore from "@/modules/requests/store/request.store";
+import useRequestSyncStoreState from "@/modules/requests/hooks/requestSyncStore";
 
 type DropPosition = "before" | "after" | "inside" | null;
 
@@ -123,7 +123,7 @@ function RequestTreeItem({
   dropPosition,
   isJustMoved,
 }: RequestTreeItemProps) {
-  const { activeTabId, openRequest, requests } = useRequestStore();
+  const { activeTabId, openRequest, requests } = useRequestSyncStoreState();
   const { getVariablesAsRecord } = useEnvironmentStore();
 
   const currentRequest = {
@@ -305,9 +305,8 @@ function CollectionTreeItem({
   dropPosition,
   collapseKey = 0,
   isJustMoved,
-  justMovedId,
 }: CollectionTreeItemProps) {
-  const { activeTabId } = useRequestStore();
+  const { activeTabId } = useRequestSyncStoreState();
   const [isOpen, setIsOpen] = React.useState(item.id === activeTabId);
   const prevCollapseKeyRef = React.useRef(collapseKey);
 

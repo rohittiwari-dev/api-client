@@ -13,11 +13,11 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
-import useRequestStore from "@/modules/requests/store/request.store";
 import RenameCollection from "./RenameCollection";
 import DeleteCollection from "./delete-collection";
 import AddNewCollection from "./AddNewCollection";
 import { RequestType } from "@/generated/prisma/browser";
+import useRequestSyncStoreState from "@/modules/requests/hooks/requestSyncStore";
 
 interface SidebarCollectionMenuProps {
   type?: "COLLECTION" | RequestType;
@@ -36,7 +36,7 @@ export function SidebarCollectionMenu({
   workspaceId,
   collectionId,
 }: SidebarCollectionMenuProps) {
-  const { addRequest } = useRequestStore();
+  const { addRequest } = useRequestSyncStoreState();
 
   const [showRenameDialog, setShowRenameDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);

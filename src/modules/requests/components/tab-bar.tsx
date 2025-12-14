@@ -20,14 +20,13 @@ import {
 import { TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BodyType, HttpMethod } from "@/generated/prisma/browser";
 import { cn } from "@/lib/utils";
-import useRequestStore from "../store/request.store";
 import { RequestType } from "../types/store.types";
 import { RequestIcon } from "./RequestType";
 import { RenameRequestDialog } from "./RenameRequestDialog";
 import { useRenameRequest } from "../hooks/queries";
-import useWorkspaceState from "@/modules/workspace/store";
 import MethodBadge from "@/components/app-ui/method-badge";
 import { RequestStateInterface } from "../types/request.types";
+import useRequestSyncStoreState from "../hooks/requestSyncStore";
 
 // Method badge component for API requests
 
@@ -68,7 +67,7 @@ const TabItem = ({
   isDragging?: boolean;
   showDropIndicator?: boolean;
 }) => {
-  const { updateRequest } = useRequestStore();
+  const { updateRequest } = useRequestSyncStoreState();
   const [showRenameDialog, setShowRenameDialog] = useState(false);
 
   // Use the rename mutation hook for DB persistence and sidebar refresh
@@ -222,18 +221,19 @@ const TabItem = ({
 };
 
 const TabBar = () => {
-  const { activeWorkspace } = useWorkspaceState();
   const {
-    getTabs,
+    tabs,
     activeTabId,
     setRequestsState,
+    addRequest,
     setActiveTabId,
     closeTab,
     closeOtherTabs,
     closeAllTabs,
-  } = useRequestStore();
-  const currentWorkspaceTabs = getTabs(activeWorkspace?.id || "");
-  const { addRequest, getRequestById } = useRequestStore();
+    getRequestById,
+    activeWorkspace,
+  } = useRequestSyncStoreState();
+  const currentWorkspaceTabs = tabs;
   const [visibleTabs, setVisibleTabs] = useState<RequestStateInterface[]>([]);
   const [hiddenTabs, setHiddenTabs] = useState<RequestStateInterface[]>([]);
   const [draggedTabId, setDraggedTabId] = useState<string | null>(null);
@@ -357,10 +357,9 @@ const TabBar = () => {
     workspaceTabs.splice(targetIndex, 0, draggedTab);
 
     // Rebuild full tabs array: other workspace tabs + reordered current workspace tabs
-    const otherWorkspaceTabs = getTabs(activeWorkspace?.id || "");
 
     setRequestsState({
-      tabIds: [...otherWorkspaceTabs, ...workspaceTabs].map((tab) => tab.id),
+      tabIds: [...tabs, ...workspaceTabs].map((tab) => tab.id),
     });
 
     // Don't change active tab on drop - just reorder
@@ -430,10 +429,8 @@ const TabBar = () => {
                 method={tab.method || undefined}
                 workspaceId={tab.workspaceId}
                 onCloseClick={() => closeTab(tab.id)}
-                onCloseOthers={() =>
-                  closeOtherTabs(tab.id, activeWorkspace?.id || "")
-                }
-                onCloseAll={() => closeAllTabs(activeWorkspace?.id || "")}
+                onCloseOthers={() => closeOtherTabs(tab.id)}
+                onCloseAll={() => closeAllTabs()}
                 onTabClick={() => {
                   setActiveTabId(tab.id);
                 }}

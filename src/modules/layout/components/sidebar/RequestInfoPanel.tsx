@@ -7,7 +7,6 @@ import {
   FileText,
   Hash,
   Code2,
-  Calendar,
   FolderOpen,
   Shield,
   Layers,
@@ -20,9 +19,9 @@ import {
 } from "lucide-react";
 import { cn, requestTextColorMap } from "@/lib/utils";
 import { substituteVariables } from "@/lib/utils/substituteVariables";
-import useRequestStore from "@/modules/requests/store/request.store";
 import useEnvironmentStore from "@/modules/environment/store/environment.store";
 import { toast } from "sonner";
+import useRequestSyncStoreState from "@/modules/requests/hooks/requestSyncStore";
 
 // Animated copy button
 const CopyButton = ({
@@ -84,7 +83,7 @@ const StatCard = ({
 );
 
 const RequestInfoPanel = () => {
-  const { activeRequest } = useRequestStore();
+  const { activeRequest } = useRequestSyncStoreState();
   const { getVariablesAsRecord } = useEnvironmentStore();
 
   if (!activeRequest) {

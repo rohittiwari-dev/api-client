@@ -29,7 +29,6 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
-import useRequestStore from "../../store/request.store";
 import type {
   AuthType,
   TBasicAuth,
@@ -39,6 +38,7 @@ import type {
   TOauth1Auth,
   TOauth2Auth,
 } from "../../types/request.types";
+import useRequestSyncStoreState from "../../hooks/requestSyncStore";
 
 const authTypes: {
   value: AuthType;
@@ -131,7 +131,7 @@ const FieldDescription = ({ children }: { children: React.ReactNode }) => (
 );
 
 const AuthComponent = () => {
-  const { updateRequest, activeRequest } = useRequestStore();
+  const { updateRequest, activeRequest } = useRequestSyncStoreState();
 
   const authType = activeRequest?.auth?.type || "NONE";
   const authData = activeRequest?.auth?.data;

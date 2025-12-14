@@ -22,12 +22,13 @@ import {
 } from "@/components/ui/command";
 import { cn, requestTextColorMap } from "@/lib/utils";
 import { substituteVariables } from "@/lib/utils/substituteVariables";
-import useRequestStore from "@/modules/requests/store/request.store";
 import useEnvironmentStore from "@/modules/environment/store/environment.store";
 import useWorkspaceState from "@/modules/workspace/store";
 import AddNewCollection from "@/modules/collections/components/AddNewCollection";
 import { HttpMethod } from "@/generated/prisma/browser";
 import MethodBadge from "@/components/app-ui/method-badge";
+import useRequestSyncStoreState from "@/modules/requests/hooks/requestSyncStore";
+import { useCollections } from "@/modules/collections/hooks/queries";
 
 const SearchPanel = () => {
   const [open, setOpen] = useState(false);
@@ -35,8 +36,9 @@ const SearchPanel = () => {
   const [collectionModalOpen, setCollectionModalOpen] = useState(false);
 
   const { activeWorkspace } = useWorkspaceState();
-  const { requests, openRequest } = useRequestStore();
+  const { requests, openRequest } = useRequestSyncStoreState();
   const { getVariablesAsRecord } = useEnvironmentStore();
+  const { data: collections = [] } = useCollections(activeWorkspace?.id || "");
 
   // Keyboard shortcut to open
   useEffect(() => {
@@ -59,18 +61,16 @@ const SearchPanel = () => {
     );
 
     if (!query?.trim()) {
-      return workspaceRequests.slice(0, 15);
+      return workspaceRequests;
     }
 
     const lowerQuery = query.toLowerCase()?.trim();
-    return workspaceRequests
-      .filter((r) => {
-        const nameMatch = r.name?.toLowerCase().includes(lowerQuery);
-        const urlMatch = r.url?.toLowerCase().includes(lowerQuery);
-        const descMatch = r.description?.toLowerCase().includes(lowerQuery);
-        return nameMatch || urlMatch || descMatch;
-      })
-      .slice(0, 15);
+    return workspaceRequests.filter((r) => {
+      const nameMatch = r.name?.toLowerCase().includes(lowerQuery);
+      const urlMatch = r.url?.toLowerCase().includes(lowerQuery);
+      const descMatch = r.description?.toLowerCase().includes(lowerQuery);
+      return nameMatch || urlMatch || descMatch;
+    });
   }, [requests, query, activeWorkspace?.id]);
 
   // Create new request handler
@@ -166,6 +166,25 @@ const SearchPanel = () => {
       return url;
     }
   };
+
+  // Get collection name by ID
+  const getCollectionName = useCallback(
+    (collectionId: string | null | undefined) => {
+      if (!collectionId || !collections?.length) return null;
+      const findCollection = (items: typeof collections): string | null => {
+        for (const item of items) {
+          if (item.id === collectionId) return item.name;
+          if (item.children?.length) {
+            const found = findCollection(item.children);
+            if (found) return found;
+          }
+        }
+        return null;
+      };
+      return findCollection(collections);
+    },
+    [collections]
+  );
 
   return (
     <>
@@ -319,6 +338,11 @@ const SearchPanel = () => {
                       </span>
                     )}
                   </div>
+                  {request.collectionId && (
+                    <span className="text-xs text-muted-foreground truncate max-w-[100px]">
+                      {getCollectionName(request.collectionId)}
+                    </span>
+                  )}
                   {request.unsaved && (
                     <span className="size-1.5 rounded-full bg-indigo-500 shrink-0" />
                   )}

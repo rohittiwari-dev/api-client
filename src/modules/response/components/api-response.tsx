@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import { motion } from "motion/react";
 import {
   Loader2,
@@ -16,9 +16,9 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 import useResponseStore from "../store/response.store";
-import useRequestStore from "@/modules/requests/store/request.store";
 import ResponseBodyTabContent from "./response-body-tab-content";
 import { CodeEditor } from "@/components/ui/code-editor";
+import useRequestSyncStoreState from "@/modules/requests/hooks/requestSyncStore";
 
 const tabs = [
   { name: "Body", value: "body", icon: FileCode },
@@ -35,7 +35,7 @@ const ApiResponse = () => {
     width: 0,
   });
 
-  const { activeRequest } = useRequestStore();
+  const { activeRequest } = useRequestSyncStoreState();
   const { getResponse } = useResponseStore();
 
   // Get response for active request

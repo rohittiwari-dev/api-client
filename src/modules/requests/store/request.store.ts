@@ -8,12 +8,11 @@ export type RequestsStoreState = {
   requestLoading: boolean;
   tabIds: string[];
   draftIds: string[];
+  activeRequest: RequestStateInterface | null;
   activeTabId: string | null;
-  activeRequest: RequestStateInterface | null | undefined;
 };
 
 type RequestStoreStateActions = {
-  getTabs: (workspaceId?: string) => RequestStateInterface[];
   setLoading: ({
     activeRequestLoading,
     requestLoading,
@@ -29,10 +28,6 @@ type RequestStoreStateActions = {
   closeTab: (tabId: string) => void;
   setRequestsState: (state: Partial<RequestsStoreState>) => void;
   getActiveRequest: () => RequestStateInterface | null | undefined;
-  clearRequests: (workspaceId?: string) => void;
-  closeAllTabs: (workspaceId?: string) => void;
-  closeOtherTabs: (tabId: string, workspaceId?: string) => void;
-  closeAllDrafts: (workspaceId?: string) => void;
   getState: () => RequestsStoreState;
   openRequest: (request: RequestStateInterface) => void;
   reset: () => void;
@@ -52,8 +47,6 @@ const useRequestStore = create<RequestsStoreState & RequestStoreStateActions>()(
         setRequestsState(incomingState) {
           set((state) => ({ ...state, ...incomingState }));
         },
-        getTabs: () =>
-          get().requests?.filter((r) => get().tabIds.includes(r.id)),
         setLoading: ({
           activeRequestLoading,
           requestLoading,
@@ -69,20 +62,34 @@ const useRequestStore = create<RequestsStoreState & RequestStoreStateActions>()(
           }));
         },
         openRequest: (request) => {
-          set((state) => ({
-            activeTabId: request.id,
-            requests: state.requests.map((r) =>
-              r.id === request.id ? { ...r, ...request } : r
-            ),
-            tabIds: state.tabIds.includes(request.id)
-              ? state.tabIds
-              : [...state.tabIds, request.id],
-            activeRequest: request,
-          }));
+          set((state) => {
+            const requestInfo = state?.requests.find(
+              (r) => r.id === request.id
+            );
+            return {
+              activeTabId: request.id,
+              requests: requestInfo
+                ? state.requests.map((r) =>
+                    r.id === request.id ? { ...r, ...request } : r
+                  )
+                : [...state.requests, request],
+              tabIds: state.tabIds.includes(request.id)
+                ? state.tabIds
+                : [...state.tabIds, request.id],
+              draftIds: state.draftIds.includes(request.id)
+                ? state.draftIds
+                : requestInfo
+                ? [...state.draftIds, request.id]
+                : state.draftIds,
+              activeRequest: requestInfo
+                ? { ...requestInfo, ...request }
+                : request,
+            };
+          });
         },
         getActiveRequest: () => {
-          const { requests, activeTabId } = get();
-          return requests.find((r) => r.id === activeTabId);
+          const { requests, activeTabId, activeRequest } = get();
+          return activeRequest || requests.find((r) => r.id === activeTabId);
         },
         addRequest: (request) =>
           set((state) => {
@@ -125,6 +132,10 @@ const useRequestStore = create<RequestsStoreState & RequestStoreStateActions>()(
               requests: state.requests.map((r) =>
                 r.id === id ? { ...r, ...request } : r
               ),
+              activeRequest:
+                state.activeRequest?.id === id
+                  ? { ...state.activeRequest, ...request }
+                  : state.activeRequest,
             };
           }),
         setActiveTabId: (activeTabId) =>
@@ -156,40 +167,6 @@ const useRequestStore = create<RequestsStoreState & RequestStoreStateActions>()(
             };
           }),
 
-        closeAllTabs: () =>
-          set(() => ({
-            tabIds: [],
-            draftIds: [],
-            activeTabId: null,
-            activeRequest: null,
-          })),
-        closeOtherTabs: (tabId) =>
-          set((state) => ({
-            tabIds: state.tabIds.filter((id) => id === tabId),
-            activeTabId: state.activeTabId === tabId ? null : state.activeTabId,
-            activeRequest:
-              state.activeRequest?.id === tabId ? null : state.activeRequest,
-          })),
-        closeAllDrafts: () =>
-          set(() => ({
-            draftIds: [],
-            activeTabId: get().draftIds.includes(get().activeTabId || "")
-              ? null
-              : get().activeTabId,
-            activeRequest: get().draftIds.includes(get().activeTabId || "")
-              ? null
-              : get().activeRequest,
-          })),
-        clearRequests: () =>
-          set(() => ({
-            requests: [],
-            activeRequest: null,
-            tabIds: [],
-            draftIds: [],
-            activeTabId: null,
-            activeRequestLoading: false,
-            requestLoading: false,
-          })),
         reset: () =>
           set(() => ({
             requests: [],
@@ -198,7 +175,6 @@ const useRequestStore = create<RequestsStoreState & RequestStoreStateActions>()(
             draftIds: [],
             requestLoading: false,
             activeRequestLoading: false,
-            activeRequest: null,
           })),
       }),
       {

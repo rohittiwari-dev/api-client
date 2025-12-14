@@ -6,7 +6,7 @@ import { RequestIcon } from "@/modules/requests/components/RequestType";
 import { SidebarRequestMenu } from "@/modules/requests/components/SidebarRequestMenu";
 import { SidebarItemInterface } from "../../store/sidebar.store";
 import { RequestType } from "@/generated/prisma/browser";
-import useRequestStore from "@/modules/requests/store/request.store";
+import useRequestSyncStoreState from "@/modules/requests/hooks/requestSyncStore";
 
 interface SidebarFileProps {
   item: SidebarItemInterface;
@@ -15,12 +15,14 @@ interface SidebarFileProps {
 }
 
 export function SidebarFile({ item, isActive, isUnsaved }: SidebarFileProps) {
-  const { requests, openRequest } = useRequestStore();
+  const { requests, openRequest } = useRequestSyncStoreState();
 
   const currentRequest = {
     ...item,
     ...(requests.find((req) => req.id === item.id) || {}),
   };
+
+  console.log("currentRequest", currentRequest);
 
   const method = currentRequest?.method || "GET";
 
@@ -57,7 +59,7 @@ export function SidebarFile({ item, isActive, isUnsaved }: SidebarFileProps) {
           description: currentRequest.description || "",
           headers: currentRequest.headers || [],
           id: item.id,
-          unsaved: currentRequest.unsaved || true,
+          unsaved: currentRequest.unsaved ?? true,
           method: currentRequest.method || "GET",
           name: currentRequest.name || "New Request",
           parameters: currentRequest.parameters || [],

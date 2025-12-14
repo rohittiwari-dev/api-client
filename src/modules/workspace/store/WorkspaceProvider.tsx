@@ -3,11 +3,11 @@
 import React, { useEffect } from "react";
 import { Organization, Request } from "@/generated/prisma/browser";
 import useWorkspaceState from ".";
-import useRequestStore from "@/modules/requests/store/request.store";
 import useCookieStore from "@/modules/cookies/store/cookie.store";
 import authClient from "@/lib/authClient";
 import { useFetchAllRequests } from "@/modules/requests/hooks/queries";
 import { RequestStateInterface } from "@/modules/requests/types/request.types";
+import useRequestSyncStoreState from "@/modules/requests/hooks/requestSyncStore";
 
 const WorkspaceProvider = ({
   children,
@@ -22,7 +22,8 @@ const WorkspaceProvider = ({
 }) => {
   const { setWorkspaces, setActiveWorkspace } = useWorkspaceState();
   const { data: requests } = useFetchAllRequests(activeOrg.id, initialRequests);
-  const { setRequestsState } = useRequestStore();
+  const { setRequestsState, requests: currentRequests } =
+    useRequestSyncStoreState();
   const { setCurrentWorkspaceId } = useCookieStore();
 
   useEffect(() => {
@@ -35,8 +36,10 @@ const WorkspaceProvider = ({
     if (requests) {
       setRequestsState({
         requests: requests?.map((request) => ({
+          ...(currentRequests.find((r) => r.id === request.id) || {}),
           ...request,
-          unsaved: false,
+          unsaved:
+            currentRequests.find((r) => r.id === request.id)?.unsaved ?? false,
           body: request.body as RequestStateInterface["body"],
           headers: request.headers as RequestStateInterface["headers"],
           parameters: request.parameters as RequestStateInterface["parameters"],

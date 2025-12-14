@@ -28,7 +28,6 @@ import {
   useReorderRequests,
   useMoveRequest,
 } from "@/modules/collections/hooks/mutations";
-import useRequestStore from "@/modules/requests/store/request.store";
 import { SidebarItem } from "./SidebarItem";
 import { SidebarTreeContext, DropPosition } from "./SidebarTreeContext";
 import useSidebarStore, {
@@ -36,6 +35,7 @@ import useSidebarStore, {
   SidebarCollectionItemInterface,
 } from "../../store/sidebar.store";
 import { cn } from "@/lib/utils";
+import useRequestSyncStoreState from "@/modules/requests/hooks/requestSyncStore";
 
 interface DraggableSidebarTreeProps {
   workspaceId: string;
@@ -53,7 +53,7 @@ export function DraggableSidebarTree({
   const [dropPosition, setDropPosition] = useState<DropPosition>(null);
   const [justMovedId, setJustMovedId] = useState<string | null>(null);
 
-  const { updateRequest } = useRequestStore();
+  const { updateRequest } = useRequestSyncStoreState();
 
   const moveCollectionMutation = useMoveCollection(workspaceId);
   const reorderCollectionsMutation = useReorderCollections(workspaceId);

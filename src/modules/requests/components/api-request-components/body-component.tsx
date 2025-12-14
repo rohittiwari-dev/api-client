@@ -1,11 +1,10 @@
-import React from "react";
 import { FileJson, FileText, FormInput, Braces } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BodyType } from "@/generated/prisma/browser";
 import { cn } from "@/lib/utils";
-import useRequestStore from "../../store/request.store";
 import FormDataComponent from "./formdata-component";
 import JsonAndRawBodyComponent from "./json-raw-body-component";
+import useRequestSyncStoreState from "../../hooks/requestSyncStore";
 
 const bodyTypes = [
   { value: BodyType.NONE, label: "None", icon: null },
@@ -20,7 +19,7 @@ const bodyTypes = [
 ];
 
 const BodyComponent = () => {
-  const { activeRequest, updateRequest } = useRequestStore();
+  const { activeRequest, updateRequest } = useRequestSyncStoreState();
 
   return (
     <Tabs

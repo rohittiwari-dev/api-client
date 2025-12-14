@@ -23,7 +23,6 @@ import {
 } from "@/components/ui/resizable";
 import { cn } from "@/lib/utils";
 import { substituteVariables } from "@/lib/utils/substituteVariables";
-import useRequestStore from "../store/request.store";
 import useWebsocketStore, {
   type MessageFormat,
 } from "../store/websocket.store";
@@ -38,9 +37,10 @@ import WebSocketSavedMessages, {
 } from "./shared/WebSocketSavedMessages";
 import ParameterComponent from "./api-request-components/parameter-component";
 import { updateRequestAction } from "../actions";
+import useRequestSyncStoreState from "../hooks/requestSyncStore";
 
 const WebsocketRequestComponent = () => {
-  const { activeRequest, updateRequest } = useRequestStore();
+  const { activeRequest, updateRequest } = useRequestSyncStoreState();
   const { getVariablesAsRecord } = useEnvironmentStore();
   const {
     connect,

@@ -11,8 +11,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { useDeleteCollection } from "../hooks/queries";
-import useRequestStore from "@/modules/requests/store/request.store";
 import useSidebarStore from "@/modules/layout/store/sidebar.store";
+import useRequestSyncStoreState from "@/modules/requests/hooks/requestSyncStore";
 
 interface DeleteCollectionProps {
   id: string;
@@ -32,7 +32,7 @@ const DeleteCollection = ({
     isError,
   } = useDeleteCollection(id);
 
-  const { requests, updateRequest, draftIds } = useRequestStore();
+  const { requests, updateRequest, draftIds } = useRequestSyncStoreState();
   const removeItemDeep = useSidebarStore((s) => s.removeItemDeep);
 
   React.useEffect(() => {
