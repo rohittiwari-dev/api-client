@@ -1,0 +1,165 @@
+'use client';
+
+import Link from 'next/link';
+import { useAuthStore } from '@/modules/authentication/store';
+import { ArrowRight, Sparkles, Heart, Github, Zap, Shield, Globe } from 'lucide-react';
+import { motion } from 'motion/react';
+
+const MotionLink = motion.create(Link);
+
+export default function CTA() {
+    const { data } = useAuthStore();
+    const isSignedIn = !!data?.session;
+
+    return (
+        <section className="py-24 relative overflow-hidden">
+            {/* Background */}
+            <div className="absolute inset-0">
+                <div className="absolute inset-0 bg-gradient-to-b from-transparent via-violet-950/40 to-transparent" />
+                <motion.div
+                    className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] bg-violet-500/20 rounded-full blur-[120px]"
+                    animate={{
+                        scale: [1, 1.2, 1],
+                        opacity: [0.2, 0.3, 0.2]
+                    }}
+                    transition={{ duration: 8, repeat: Infinity }}
+                />
+            </div>
+
+            <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+                <motion.div
+                    initial={{ opacity: 0, y: 30 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.6 }}
+                    className="max-w-4xl mx-auto"
+                >
+                    {/* Main CTA Card */}
+                    <div className="relative rounded-3xl bg-gradient-to-br from-violet-600/10 via-purple-600/10 to-pink-600/10 border border-white/10 p-8 md:p-12 overflow-hidden">
+                        {/* Animated gradient border */}
+                        <div className="absolute inset-0 rounded-3xl bg-gradient-to-r from-violet-500/20 via-purple-500/20 to-pink-500/20 opacity-0 hover:opacity-100 transition-opacity duration-500" />
+
+                        {/* Decorative elements */}
+                        <motion.div
+                            className="absolute top-0 right-0 w-64 h-64 bg-violet-500/10 rounded-full blur-[80px]"
+                            animate={{ scale: [1, 1.1, 1] }}
+                            transition={{ duration: 5, repeat: Infinity }}
+                        />
+                        <motion.div
+                            className="absolute bottom-0 left-0 w-64 h-64 bg-pink-500/10 rounded-full blur-[80px]"
+                            animate={{ scale: [1, 1.2, 1] }}
+                            transition={{ duration: 6, repeat: Infinity, delay: 1 }}
+                        />
+
+                        <div className="relative z-10 text-center">
+                            {/* Badge */}
+                            <motion.div
+                                initial={{ opacity: 0, scale: 0.8 }}
+                                whileInView={{ opacity: 1, scale: 1 }}
+                                viewport={{ once: true }}
+                                className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-violet-500/10 to-pink-500/10 border border-white/10 mb-6"
+                            >
+                                <motion.div
+                                    animate={{ scale: [1, 1.2, 1] }}
+                                    transition={{ duration: 1, repeat: Infinity }}
+                                >
+                                    <Heart className="w-4 h-4 text-pink-400 fill-pink-400" />
+                                </motion.div>
+                                <span className="text-sm font-medium text-pink-300">Made with love for developers</span>
+                            </motion.div>
+
+                            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-6">
+                                Ready to{' '}
+                                <motion.span
+                                    className="bg-gradient-to-r from-violet-400 via-purple-400 to-pink-400 bg-clip-text text-transparent bg-[length:200%_auto]"
+                                    animate={{ backgroundPosition: ['0%', '100%', '0%'] }}
+                                    transition={{ duration: 5, repeat: Infinity }}
+                                >
+                                    supercharge
+                                </motion.span>
+                                {' '}your API workflow?
+                            </h2>
+
+                            <p className="text-lg text-muted-foreground max-w-xl mx-auto mb-8">
+                                Join developers worldwide who have made ApiClient their daily companion.
+                                It&apos;s free, open source, and always will be.
+                            </p>
+
+                            {/* Feature highlights */}
+                            <motion.div
+                                initial={{ opacity: 0, y: 20 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true }}
+                                transition={{ delay: 0.2 }}
+                                className="flex flex-wrap justify-center gap-6 mb-10"
+                            >
+                                {[
+                                    { icon: Zap, label: 'Lightning Fast', color: 'text-yellow-400', bg: 'bg-yellow-500/20' },
+                                    { icon: Shield, label: 'Secure & Private', color: 'text-blue-400', bg: 'bg-blue-500/20' },
+                                    { icon: Globe, label: 'Self-Hostable', color: 'text-green-400', bg: 'bg-green-500/20' },
+                                ].map((item) => (
+                                    <motion.div
+                                        key={item.label}
+                                        whileHover={{ scale: 1.05, y: -2 }}
+                                        className="flex items-center gap-2 text-sm text-muted-foreground"
+                                    >
+                                        <div className={`w-8 h-8 rounded-lg ${item.bg} flex items-center justify-center`}>
+                                            <item.icon className={`w-4 h-4 ${item.color}`} />
+                                        </div>
+                                        <span>{item.label}</span>
+                                    </motion.div>
+                                ))}
+                            </motion.div>
+
+                            {/* CTA Buttons */}
+                            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                                <MotionLink
+                                    href={isSignedIn ? '/workspace' : '/sign-up'}
+                                    whileHover={{ scale: 1.05 }}
+                                    whileTap={{ scale: 0.98 }}
+                                    className="group relative px-8 py-4 rounded-2xl bg-gradient-to-r from-violet-600 via-purple-600 to-pink-600 text-white font-semibold text-lg overflow-hidden shadow-2xl shadow-violet-500/30"
+                                >
+                                    {/* Shimmer */}
+                                    <motion.div
+                                        className="absolute inset-0 bg-gradient-to-r from-transparent via-white/25 to-transparent"
+                                        animate={{ x: ['-200%', '200%'] }}
+                                        transition={{ duration: 2, repeat: Infinity, repeatDelay: 2 }}
+                                    />
+                                    <span className="relative flex items-center gap-2">
+                                        <Sparkles className="w-5 h-5" />
+                                        {isSignedIn ? 'Open App' : 'Get Started Free'}
+                                        <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                                    </span>
+                                </MotionLink>
+
+                                <motion.a
+                                    href="https://github.com/rohittiwari-dev/api-client"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    whileHover={{ scale: 1.03 }}
+                                    whileTap={{ scale: 0.98 }}
+                                    className="px-8 py-4 rounded-2xl bg-white/5 backdrop-blur-sm border border-white/10 hover:border-violet-500/40 hover:bg-violet-500/10 font-semibold text-lg transition-all flex items-center gap-2"
+                                >
+                                    <Github className="w-5 h-5" />
+                                    Star on GitHub
+                                </motion.a>
+                            </div>
+
+                            {/* Trust text */}
+                            <motion.p
+                                initial={{ opacity: 0 }}
+                                whileInView={{ opacity: 1 }}
+                                viewport={{ once: true }}
+                                transition={{ delay: 0.5 }}
+                                className="mt-8 text-sm text-muted-foreground/60 flex items-center justify-center gap-2"
+                            >
+                                <Heart className="w-3.5 h-3.5 text-pink-400/60 fill-pink-400/60" />
+                                No credit card • MIT Licensed • Self-host anytime
+                            </motion.p>
+                        </div>
+                    </div>
+                </motion.div>
+            </div>
+        </section>
+    );
+}

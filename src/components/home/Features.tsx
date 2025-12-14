@@ -6,135 +6,196 @@ import {
     Code2,
     Shield,
     Sparkles,
+    FolderOpen,
+    Cookie,
+    Variable,
 } from 'lucide-react';
+import { motion } from 'motion/react';
+
+const features = [
+    {
+        icon: Zap,
+        title: 'Lightning Fast',
+        description: 'Execute REST, GraphQL, and WebSocket requests with zero overhead. Built for speed.',
+        gradient: 'from-yellow-500 to-orange-500',
+        bgGradient: 'from-yellow-500/10 to-orange-500/10',
+        delay: 0,
+    },
+    {
+        icon: Shield,
+        title: 'All Auth Types',
+        description: 'Basic, Bearer, OAuth 1.0/2.0, Digest, and API Key authentication built-in.',
+        gradient: 'from-blue-500 to-cyan-500',
+        bgGradient: 'from-blue-500/10 to-cyan-500/10',
+        delay: 0.1,
+    },
+    {
+        icon: Globe,
+        title: 'WebSocket & SSE',
+        description: 'Real-time debugging for WebSocket, Socket.io, and Server-Sent Events.',
+        gradient: 'from-pink-500 to-rose-500',
+        bgGradient: 'from-pink-500/10 to-rose-500/10',
+        delay: 0.2,
+    },
+    {
+        icon: Variable,
+        title: 'Environment Variables',
+        description: 'Manage multiple environments with {{variable}} syntax and auto-complete.',
+        gradient: 'from-green-500 to-emerald-500',
+        bgGradient: 'from-green-500/10 to-emerald-500/10',
+        delay: 0.3,
+    },
+    {
+        icon: FolderOpen,
+        title: 'Collections',
+        description: 'Organize requests into collections and folders. Share and collaborate easily.',
+        gradient: 'from-violet-500 to-purple-500',
+        bgGradient: 'from-violet-500/10 to-purple-500/10',
+        delay: 0.4,
+    },
+    {
+        icon: Cookie,
+        title: 'Cookie Management',
+        description: 'Automatic cookie handling with jar view, attributes, and domain grouping.',
+        gradient: 'from-amber-500 to-yellow-500',
+        bgGradient: 'from-amber-500/10 to-yellow-500/10',
+        delay: 0.5,
+    },
+    {
+        icon: Code2,
+        title: 'Code Generation',
+        description: 'Export requests to 20+ languages and frameworks with one click.',
+        gradient: 'from-indigo-500 to-blue-500',
+        bgGradient: 'from-indigo-500/10 to-blue-500/10',
+        delay: 0.6,
+    },
+    {
+        icon: Sparkles,
+        title: 'Beautiful UI',
+        description: 'A gorgeous, dark-themed interface designed with love for developers.',
+        gradient: 'from-purple-500 to-pink-500',
+        bgGradient: 'from-purple-500/10 to-pink-500/10',
+        delay: 0.7,
+    },
+];
 
 export default function Features() {
     return (
         <section id="features" className="py-24 relative overflow-hidden">
             {/* Background */}
-            <div className="absolute inset-0 bg-gradient-to-b from-transparent via-violet-500/5 to-transparent" />
+            <div className="absolute inset-0">
+                <div className="absolute inset-0 bg-gradient-to-b from-transparent via-violet-950/30 to-transparent" />
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-violet-500/5 rounded-full blur-[150px]" />
+            </div>
 
             <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
                 {/* Section Header */}
-                <div className="text-center max-w-3xl mx-auto mb-16">
+                <motion.div
+                    initial={{ opacity: 0, y: 30 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.6 }}
+                    className="text-center max-w-3xl mx-auto mb-16"
+                >
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        whileInView={{ opacity: 1, scale: 1 }}
+                        viewport={{ once: true }}
+                        className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-violet-500/10 border border-violet-500/20 mb-6"
+                    >
+                        <Sparkles className="w-4 h-4 text-violet-400" />
+                        <span className="text-sm font-medium text-violet-300">Packed with Features</span>
+                    </motion.div>
+
                     <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-6">
                         Everything you need to{' '}
-                        <span className="bg-gradient-to-r from-violet-500 to-indigo-500 bg-clip-text text-transparent">
+                        <span className="bg-gradient-to-r from-violet-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
                             master APIs
                         </span>
                     </h2>
-                    <p className="text-lg text-muted-foreground">
-                        From simple GET requests to complex authentication flows, ApiClient
-                        has all the tools you need to build and test APIs efficiently.
+                    <p className="text-lg text-muted-foreground/80">
+                        From simple GET requests to complex authentication flows, ApiClient has all the tools
+                        you need, crafted with care and attention to detail.
                     </p>
+                </motion.div>
+
+                {/* Features Grid */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
+                    {features.map((feature, index) => (
+                        <motion.div
+                            key={feature.title}
+                            initial={{ opacity: 0, y: 30 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ duration: 0.5, delay: feature.delay }}
+                            whileHover={{ y: -8, scale: 1.02 }}
+                            className={`group relative rounded-2xl bg-gradient-to-br ${feature.bgGradient} border border-white/10 p-6 hover:border-white/20 transition-all duration-300 cursor-default overflow-hidden`}
+                        >
+                            {/* Glow on hover */}
+                            <div className={`absolute inset-0 bg-gradient-to-br ${feature.bgGradient} opacity-0 group-hover:opacity-100 blur-xl transition-opacity duration-300`} />
+
+                            <div className="relative z-10">
+                                <motion.div
+                                    whileHover={{ rotate: [0, -10, 10, 0] }}
+                                    transition={{ duration: 0.5 }}
+                                    className={`w-12 h-12 rounded-xl bg-gradient-to-br ${feature.gradient} p-0.5 mb-4`}
+                                >
+                                    <div className="w-full h-full rounded-xl bg-[#0a0a0a] flex items-center justify-center">
+                                        <feature.icon className={`w-5 h-5 bg-gradient-to-br ${feature.gradient} bg-clip-text text-white`} />
+                                    </div>
+                                </motion.div>
+
+                                <h3 className="text-lg font-bold mb-2 group-hover:text-white transition-colors">
+                                    {feature.title}
+                                </h3>
+                                <p className="text-sm text-muted-foreground group-hover:text-muted-foreground/90 transition-colors leading-relaxed">
+                                    {feature.description}
+                                </p>
+                            </div>
+                        </motion.div>
+                    ))}
                 </div>
 
-                {/* Bento Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto">
-                    {/* Main Feature - Large */}
-                    <div className="md:col-span-2 group relative overflow-hidden rounded-3xl bg-gradient-to-br from-violet-500/10 to-indigo-500/10 border border-white/10 p-8 hover:border-violet-500/50 transition-colors">
-                        <div className="absolute inset-0 bg-grid-white/5 mask-image-bottom opacity-50" />
-                        <div className="relative z-10">
-                            <div className="w-12 h-12 rounded-xl bg-violet-500/20 flex items-center justify-center mb-4 text-violet-400">
-                                <Zap className="w-6 h-6" />
-                            </div>
-                            <h3 className="text-2xl font-bold mb-2">Lightning Fast Requests</h3>
-                            <p className="text-muted-foreground mb-8 max-w-lg">
-                                Execute REST, GraphQL, and WebSocket requests with zero latency overhead.
-                                Optimized for performance and developer experience.
-                            </p>
-                            {/* Visual Decoration */}
-                            <div className="bg-[#1e1e1e] rounded-xl border border-white/10 p-4 shadow-xl transform translate-y-4 group-hover:translate-y-2 transition-transform max-w-md">
-                                <div className="flex items-center gap-3 mb-3 border-b border-white/5 pb-2">
-                                    <span className="text-green-400 font-mono text-xs bg-green-500/10 px-2 py-0.5 rounded">GET</span>
-                                    <span className="text-muted-foreground font-mono text-xs truncate">https://api.example.com/v1/users</span>
-                                    <div className="ml-auto flex gap-1">
-                                        <div className="w-2 h-2 rounded-full bg-red-500/50" />
-                                        <div className="w-2 h-2 rounded-full bg-yellow-500/50" />
-                                        <div className="w-2 h-2 rounded-full bg-green-500/50" />
-                                    </div>
-                                </div>
-                                <div className="space-y-2">
-                                    <div className="h-2 w-full bg-white/5 rounded-full overflow-hidden">
-                                        <div className="h-full w-2/3 bg-violet-500 animate-pulse" />
-                                    </div>
-                                    <div className="h-2 w-3/4 bg-white/5 rounded-full" />
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                {/* Highlight Box */}
+                <motion.div
+                    initial={{ opacity: 0, y: 30 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.6, delay: 0.3 }}
+                    className="mt-16 max-w-4xl mx-auto"
+                >
+                    <div className="relative rounded-3xl bg-gradient-to-r from-violet-600/20 via-purple-600/20 to-indigo-600/20 border border-white/10 p-8 md:p-10 overflow-hidden">
+                        {/* Animated background */}
+                        <motion.div
+                            className="absolute inset-0 bg-gradient-to-r from-violet-600/10 via-purple-600/10 to-indigo-600/10"
+                            animate={{
+                                backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'],
+                            }}
+                            transition={{ duration: 10, repeat: Infinity }}
+                            style={{ backgroundSize: '200% 200%' }}
+                        />
 
-                    {/* Feature 2 - Tall */}
-                    <div className="md:row-span-2 group relative overflow-hidden rounded-3xl bg-[#0f0f11] border border-white/10 p-8 hover:border-pink-500/50 transition-colors">
-                        <div className="absolute top-0 right-0 w-32 h-32 bg-pink-500/10 rounded-bl-full blur-2xl" />
-                        <div className="relative z-10">
-                            <div className="w-12 h-12 rounded-xl bg-pink-500/20 flex items-center justify-center mb-4 text-pink-400">
-                                <Globe className="w-6 h-6" />
+                        <div className="relative z-10 flex flex-col md:flex-row items-center gap-8">
+                            <div className="flex-1 text-center md:text-left">
+                                <h3 className="text-2xl md:text-3xl font-bold mb-3">
+                                    Self-host with{' '}
+                                    <span className="bg-gradient-to-r from-violet-400 to-pink-400 bg-clip-text text-transparent">
+                                        one command
+                                    </span>
+                                </h3>
+                                <p className="text-muted-foreground">
+                                    Deploy your own instance in seconds with Docker. Full control,
+                                    your data stays yours forever.
+                                </p>
                             </div>
-                            <h3 className="text-xl font-bold mb-2">Real-time WebSockets</h3>
-                            <p className="text-muted-foreground mb-6 text-sm">
-                                Debug WebSocket, Socket.io, and SSE connections with ease. View messages in real-time.
-                            </p>
-                            <div className="space-y-3 font-mono text-xs">
-                                <div className="p-3 bg-green-500/5 text-green-400 rounded-lg border border-green-500/20 flex items-center gap-2">
-                                    <span>↓</span> <span>{`{ "type": "connected" }`}</span>
-                                </div>
-                                <div className="p-3 bg-blue-500/5 text-blue-400 rounded-lg border border-blue-500/20 flex items-center gap-2">
-                                    <span>↑</span> <span>{`{ "action": "sub" }`}</span>
-                                </div>
-                                <div className="p-3 bg-green-500/5 text-green-400 rounded-lg border border-green-500/20 flex items-center gap-2">
-                                    <span>↓</span> <span>{`{ "data": "updated" }`}</span>
-                                </div>
+                            <div className="flex-shrink-0">
+                                <code className="block px-6 py-4 rounded-xl bg-[#0a0a0a] border border-white/10 font-mono text-sm text-violet-300 shadow-lg">
+                                    docker compose up -d
+                                </code>
                             </div>
                         </div>
                     </div>
-
-                    {/* Feature 3 - Standard */}
-                    <div className="group relative overflow-hidden rounded-3xl bg-[#0f0f11] border border-white/10 p-6 hover:border-blue-500/50 transition-colors">
-                        <div className="w-10 h-10 rounded-lg bg-blue-500/20 flex items-center justify-center mb-3 text-blue-400">
-                            <Shield className="w-5 h-5" />
-                        </div>
-                        <h3 className="text-lg font-bold mb-2">Auth Helpers</h3>
-                        <p className="text-muted-foreground text-sm">
-                            Built-in support for Bearer, Basic, OAuth 2.0, and API Key authentication methods.
-                        </p>
-                    </div>
-
-                    {/* Feature 4 - Standard */}
-                    <div className="group relative overflow-hidden rounded-3xl bg-[#0f0f11] border border-white/10 p-6 hover:border-orange-500/50 transition-colors">
-                        <div className="w-10 h-10 rounded-lg bg-orange-500/20 flex items-center justify-center mb-3 text-orange-400">
-                            <Code2 className="w-5 h-5" />
-                        </div>
-                        <h3 className="text-lg font-bold mb-2">Code Gen</h3>
-                        <p className="text-muted-foreground text-sm">
-                            Generate code snippets for 20+ languages and libraries instantly.
-                        </p>
-                    </div>
-
-                    {/* Feature 5 - Wide */}
-                    <div className="md:col-span-2 group relative overflow-hidden rounded-3xl bg-gradient-to-r from-[#0f0f11] to-violet-950/20 border border-white/10 p-6 hover:border-indigo-500/50 transition-colors flex flex-col md:flex-row items-center gap-6">
-                        <div className="flex-1">
-                            <div className="w-10 h-10 rounded-lg bg-indigo-500/20 flex items-center justify-center mb-3 text-indigo-400">
-                                <Sparkles className="w-5 h-5" />
-                            </div>
-                            <h3 className="text-xl font-bold mb-2">Team Collections</h3>
-                            <p className="text-muted-foreground text-sm">
-                                Organize requests into collections and share them with your team via export/import.
-                            </p>
-                        </div>
-                        <div className="hidden sm:block w-full md:w-1/3 bg-[#1e1e1e] rounded-lg border border-white/10 p-4 shadow-lg transform rotate-3 group-hover:rotate-0 transition-transform">
-                            <div className="flex items-center gap-2 mb-3 pb-2 border-b border-white/5">
-                                <div className="w-2 h-2 rounded-full bg-yellow-500" />
-                                <span className="text-xs font-medium text-muted-foreground">My Collection</span>
-                            </div>
-                            <div className="space-y-2">
-                                <div className="h-1.5 w-3/4 bg-white/10 rounded-full" />
-                                <div className="h-1.5 w-1/2 bg-white/10 rounded-full" />
-                                <div className="h-1.5 w-5/6 bg-white/10 rounded-full" />
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                </motion.div>
             </div>
         </section>
     );

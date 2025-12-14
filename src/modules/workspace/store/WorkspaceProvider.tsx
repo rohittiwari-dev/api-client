@@ -1,10 +1,11 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import { Organization, RequestType } from "@/generated/prisma/browser";
 import useWorkspaceState from ".";
 import useRequestTabsStore from "@/modules/requests/store/tabs.store";
 import useRequestStore from "@/modules/requests/store/request.store";
+import authClient from "@/lib/authClient";
 
 const WorkspaceProvider = ({
   children,
@@ -45,6 +46,14 @@ const WorkspaceProvider = ({
     if (activeTab && activeTab.workspaceId !== activeOrg.id)
       setActiveTab(newActiveTab);
   });
+
+  useEffect(() => {
+    if (activeOrg)
+      authClient.organization.setActive({
+        organizationId: activeOrg.id,
+        organizationSlug: activeOrg.slug || ""
+      })
+  }, [activeOrg]);
 
   React.useEffect(() => {
     setWorkspaces(workspaces);

@@ -17,6 +17,8 @@ import WorkspaceSetup from "@/modules/workspace/components/workspace-setup";
 import useWorkspaceState from "../store";
 import useResetStore from "@/store/reset";
 import { useWorkspaceSwitcher } from "../hooks/use-workspace-switcher";
+import auth from "@/lib/auth";
+import authClient from "@/lib/authClient";
 
 const WorkspaceSwitcher = () => {
   const { resetCollectionsRequestsAndCookies } = useResetStore();
@@ -32,10 +34,15 @@ const WorkspaceSwitcher = () => {
     }
   }, [activeWorkspace?.id, currentWorkspaceId, initializeWorkspaceTracking]);
 
-  const handleWorkspaceSwitch = (workspaceId: string) => {
+  const handleWorkspaceSwitch = async (workspaceId: string) => {
     const workspace = workspaces?.find((w) => w.id === workspaceId);
     if (workspace) {
+      authClient.organization.setActive({
+        organizationId: workspace.id,
+        organizationSlug: workspace.slug || ""
+      })
       switchWorkspace(workspace);
+      resetCollectionsRequestsAndCookies();
       redirect(`/workspace/${workspace.slug}`);
     }
   };

@@ -2,83 +2,172 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { Github, Twitter, Heart } from 'lucide-react';
+import { Github, Twitter, Heart, Mail, ExternalLink } from 'lucide-react';
+import { motion } from 'motion/react';
+
+const footerLinks = {
+    product: [
+        { label: 'Features', href: '/#features' },
+        { label: 'Documentation', href: '/docs' },
+        { label: 'Self-Hosting', href: '/docs#self-hosting' },
+    ],
+    community: [
+        { label: 'GitHub', href: 'https://github.com/rohittiwari-dev/api-client', external: true },
+        { label: 'Discussions', href: 'https://github.com/rohittiwari-dev/api-client/discussions', external: true },
+        { label: 'Contributing', href: 'https://github.com/rohittiwari-dev/api-client/blob/main/CONTRIBUTING.md', external: true },
+    ],
+    legal: [
+        { label: 'MIT License', href: 'https://github.com/rohittiwari-dev/api-client/blob/main/LICENSE', external: true },
+        { label: 'Security', href: 'https://github.com/rohittiwari-dev/api-client/blob/main/SECURITY.md', external: true },
+    ],
+};
 
 export default function Footer() {
     return (
-        <footer className="relative border-t border-border/50">
+        <footer className="relative border-t border-white/5 bg-gradient-to-b from-transparent to-violet-950/10">
             {/* Gradient border effect */}
             <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-violet-500/50 to-transparent" />
 
-            <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
-                <div className="flex flex-col md:flex-row items-center justify-between gap-8">
-                    {/* Brand */}
-                    <div className="flex items-center gap-6">
-                        <Link href="/" className="flex items-center gap-2">
-                            <div className="relative w-8 h-8">
+            <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-16">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
+                    {/* Brand Column */}
+                    <div className="md:col-span-1">
+                        <Link href="/" className="flex items-center gap-2 group mb-4">
+                            <motion.div
+                                className="relative w-10 h-10"
+                                whileHover={{ rotate: 360 }}
+                                transition={{ duration: 0.5 }}
+                            >
                                 <Image
                                     src="/logo.png"
                                     alt="ApiClient Logo"
                                     fill
                                     className="object-contain"
                                 />
-                            </div>
-                            <span className="text-xl font-bold bg-gradient-to-r from-violet-500 to-indigo-500 bg-clip-text text-transparent">
+                            </motion.div>
+                            <span className="text-xl font-bold bg-gradient-to-r from-violet-400 to-indigo-400 bg-clip-text text-transparent">
                                 ApiClient
                             </span>
                         </Link>
+                        <p className="text-sm text-muted-foreground mb-6 leading-relaxed">
+                            A beautiful, powerful API testing tool built with love for developers everywhere.
+                        </p>
 
-                        {/* Links */}
-                        <nav className="hidden sm:flex items-center gap-6 text-sm text-muted-foreground">
-                            <Link href="/docs" className="hover:text-foreground transition-colors">
-                                Docs
-                            </Link>
-                            <Link href="/#features" className="hover:text-foreground transition-colors">
-                                Features
-                            </Link>
-                        </nav>
+                        {/* Social Links */}
+                        <div className="flex items-center gap-2">
+                            <motion.a
+                                href="https://github.com/rohittiwari-dev/api-client"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                whileHover={{ scale: 1.1, y: -2 }}
+                                className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center hover:bg-violet-500/20 hover:border-violet-500/30 transition-colors"
+                                aria-label="GitHub"
+                            >
+                                <Github className="w-5 h-5" />
+                            </motion.a>
+                            <motion.a
+                                href="https://twitter.com/rohittiwaridev"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                whileHover={{ scale: 1.1, y: -2 }}
+                                className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center hover:bg-blue-500/20 hover:border-blue-500/30 transition-colors"
+                                aria-label="Twitter"
+                            >
+                                <Twitter className="w-5 h-5" />
+                            </motion.a>
+                            <motion.a
+                                href="mailto:hello@apiclient.dev"
+                                whileHover={{ scale: 1.1, y: -2 }}
+                                className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center hover:bg-pink-500/20 hover:border-pink-500/30 transition-colors"
+                                aria-label="Email"
+                            >
+                                <Mail className="w-5 h-5" />
+                            </motion.a>
+                        </div>
                     </div>
 
-                    {/* Social Links */}
-                    <div className="flex items-center gap-3">
-                        <a
-                            href="https://github.com/yourusername/api-client"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="w-10 h-10 rounded-lg glass flex items-center justify-center hover:bg-accent transition-colors"
-                            aria-label="GitHub"
-                        >
-                            <Github className="w-5 h-5" />
-                        </a>
-                        <a
-                            href="https://discord.gg/your-invite"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="w-10 h-10 rounded-lg glass flex items-center justify-center hover:bg-accent transition-colors"
-                            aria-label="Discord"
-                        >
-                            <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
-                                <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z" />
-                            </svg>
-                        </a>
-                        <a
-                            href="https://twitter.com/yourusername"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="w-10 h-10 rounded-lg glass flex items-center justify-center hover:bg-accent transition-colors"
-                            aria-label="Twitter"
-                        >
-                            <Twitter className="w-5 h-5" />
-                        </a>
+                    {/* Links Columns */}
+                    <div>
+                        <h4 className="text-sm font-semibold text-foreground mb-4">Product</h4>
+                        <ul className="space-y-3">
+                            {footerLinks.product.map((link) => (
+                                <li key={link.label}>
+                                    <Link
+                                        href={link.href}
+                                        className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1 group"
+                                    >
+                                        {link.label}
+                                    </Link>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+
+                    <div>
+                        <h4 className="text-sm font-semibold text-foreground mb-4">Community</h4>
+                        <ul className="space-y-3">
+                            {footerLinks.community.map((link) => (
+                                <li key={link.label}>
+                                    <a
+                                        href={link.href}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1 group"
+                                    >
+                                        {link.label}
+                                        <ExternalLink className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
+                                    </a>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+
+                    <div>
+                        <h4 className="text-sm font-semibold text-foreground mb-4">Legal</h4>
+                        <ul className="space-y-3">
+                            {footerLinks.legal.map((link) => (
+                                <li key={link.label}>
+                                    <a
+                                        href={link.href}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1 group"
+                                    >
+                                        {link.label}
+                                        <ExternalLink className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
+                                    </a>
+                                </li>
+                            ))}
+                        </ul>
                     </div>
                 </div>
 
-                {/* Bottom */}
-                <div className="mt-8 pt-6 border-t border-border/50 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-muted-foreground">
-                    <p>© {new Date().getFullYear()} ApiClient. MIT License.</p>
-                    <p className="flex items-center gap-1.5">
-                        Made with <Heart className="w-4 h-4 text-red-500 fill-red-500" /> for developers
+                {/* Bottom Bar */}
+                <div className="mt-12 pt-8 border-t border-white/5 flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <p className="text-sm text-muted-foreground">
+                        © {new Date().getFullYear()} ApiClient. MIT License.
                     </p>
+                    <motion.p
+                        className="text-sm text-muted-foreground flex items-center gap-2"
+                        whileHover={{ scale: 1.05 }}
+                    >
+                        Made with{' '}
+                        <motion.span
+                            animate={{ scale: [1, 1.2, 1] }}
+                            transition={{ duration: 1, repeat: Infinity }}
+                        >
+                            <Heart className="w-4 h-4 text-pink-500 fill-pink-500" />
+                        </motion.span>
+                        {' '}by{' '}
+                        <a
+                            href="https://github.com/rohittiwari-dev"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-violet-400 hover:text-violet-300 transition-colors font-medium"
+                        >
+                            Rohit Tiwari
+                        </a>
+                    </motion.p>
                 </div>
             </div>
         </footer>

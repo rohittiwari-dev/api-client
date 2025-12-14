@@ -95,8 +95,10 @@ export async function proxy(request: NextRequest) {
     return NextResponse.next();
 }
 
-export const matcher = [
-    "/workspace/:path*",
-    "/sign-in",
-    "/sign-up",
-];
+export const config = {
+    matcher: [
+        "/workspace/:path*",
+        "/sign-in",
+        "/sign-up",
+    ],
+};

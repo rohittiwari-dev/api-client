@@ -18,9 +18,12 @@ import authClient from '@/lib/authClient';
 import { cn, getInitialsFromName } from '@/lib/utils';
 import Avatar from '@/modules/authentication/components/avatar';
 import { useAuthStore } from '@/modules/authentication/store';
+import useCookieStore from '@/modules/cookies/store/cookie.store';
 
 const LogoutMenuItem = () => {
 	const [loading, setLoading] = useState(false);
+	const { setAuthSession } = useAuthStore();
+	const { clearCookies } = useCookieStore()
 	return (
 		<DropdownMenuItem
 			onClick={async () => {
@@ -32,6 +35,11 @@ const LogoutMenuItem = () => {
 						},
 						onSuccess: () => {
 							setLoading(false);
+							setAuthSession({
+								session: null,
+								user: null,
+							});
+							clearCookies();
 							redirect('/sign-in');
 						},
 						onError: () => {
@@ -79,7 +87,7 @@ function UserButton({
 					className={cn(
 						'data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground w-full cursor-pointer px-2 select-none',
 						variant === 'header' &&
-							'!bg-secondary hover:bg-accent/90 h-fit w-fit rounded-full p-0.5',
+						'!bg-secondary hover:bg-accent/90 h-fit w-fit rounded-full p-0.5',
 					)}
 				>
 					<Avatar
