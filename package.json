@@ -55,6 +55,7 @@
     "dotenv": "^17.2.3",
     "embla-carousel-react": "^8.6.0",
     "highlight.js": "^11.11.1",
+    "httpsnippet": "^3.0.1",
     "immer": "^11.0.1",
     "input-otp": "^1.4.2",
     "ioredis": "^5.8.2",
