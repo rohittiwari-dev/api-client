@@ -12,6 +12,10 @@ import RightSidebar from "@/modules/layout/components/sidebar/right-sidebar";
 import WorkspaceProvider from "@/modules/workspace/store/WorkspaceProvider";
 import { getRequestSideBarTree } from "@/modules/layout/server/sidebar.actions";
 
+// Force dynamic rendering since we use headers()
+export const dynamic = 'force-dynamic';
+
+
 const WorkspaceLayout = async ({
   children,
   params,
