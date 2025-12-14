@@ -26,7 +26,11 @@ interface RenameCollectionProps {
   onOpenChange: (open: boolean) => void;
 }
 
-const RenameCollection = ({ id, open, onOpenChange }: RenameCollectionProps) => {
+const RenameCollection = ({
+  id,
+  open,
+  onOpenChange,
+}: RenameCollectionProps) => {
   const [newName, setNewName] = React.useState("");
   const updateItemDeep = useSidebarStore((s) => s.updateItemDeep);
   const {
@@ -65,7 +69,10 @@ const RenameCollection = ({ id, open, onOpenChange }: RenameCollectionProps) => 
           <InputGroupAddon>New Name</InputGroupAddon>
         </InputGroup>
         <AlertDialogFooter>
-          <AlertDialogCancel onClick={() => onOpenChange(false)} className="cursor-pointer">
+          <AlertDialogCancel
+            onClick={() => onOpenChange(false)}
+            className="cursor-pointer"
+          >
             Cancel
           </AlertDialogCancel>
           <Button
@@ -73,8 +80,8 @@ const RenameCollection = ({ id, open, onOpenChange }: RenameCollectionProps) => 
             onClick={() => renameCollection()}
             disabled={
               !newName ||
-              newName.trim().length === 0 ||
-              newName.trim() === id ||
+              newName?.trim().length === 0 ||
+              newName?.trim() === id ||
               isPending
             }
           >

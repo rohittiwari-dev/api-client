@@ -20,15 +20,14 @@ import {
 import { TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BodyType, HttpMethod } from "@/generated/prisma/browser";
 import { cn } from "@/lib/utils";
-import { requestTextColorMap } from "@/lib/utils/colors";
 import useRequestStore from "../store/request.store";
-import useRequestTabsStore from "../store/tabs.store";
 import { RequestType } from "../types/store.types";
 import { RequestIcon } from "./RequestType";
 import { RenameRequestDialog } from "./RenameRequestDialog";
 import { useRenameRequest } from "../hooks/queries";
 import useWorkspaceState from "@/modules/workspace/store";
 import MethodBadge from "@/components/app-ui/method-badge";
+import { RequestStateInterface } from "../types/request.types";
 
 // Method badge component for API requests
 
@@ -38,15 +37,15 @@ const TabItem = ({
   type,
   method,
   workspaceId,
-  onCloseClick = () => { },
-  onCloseOthers = () => { },
-  onCloseAll = () => { },
-  onTabClick = () => { },
-  onDragStart = () => { },
-  onDragEnd = () => { },
-  onDragOver = () => { },
-  onDragLeave = () => { },
-  onDrop = () => { },
+  onCloseClick = () => {},
+  onCloseOthers = () => {},
+  onCloseAll = () => {},
+  onTabClick = () => {},
+  onDragStart = () => {},
+  onDragEnd = () => {},
+  onDragOver = () => {},
+  onDragLeave = () => {},
+  onDrop = () => {},
   isDragging = false,
   showDropIndicator = false,
   unsaved = false,
@@ -70,7 +69,6 @@ const TabItem = ({
   showDropIndicator?: boolean;
 }) => {
   const { updateRequest } = useRequestStore();
-  const { replaceTabData } = useRequestTabsStore();
   const [showRenameDialog, setShowRenameDialog] = useState(false);
 
   // Use the rename mutation hook for DB persistence and sidebar refresh
@@ -79,13 +77,11 @@ const TabItem = ({
       // Local store updates are done in handleRename
     },
     onError: (error: unknown) => {
-      console.error('Failed to rename request', error);
+      console.error("Failed to rename request", error);
     },
   });
 
   const handleRename = (newName: string) => {
-    // Update local stores immediately for responsiveness
-    replaceTabData(id, { title: newName });
     updateRequest(id, { name: newName });
 
     // Save to DB and refresh sidebar
@@ -103,8 +99,8 @@ const TabItem = ({
             )}
             id={id + type + method + title}
             style={{
-              transform: isDragging ? 'scale(0.95)' : 'scale(1)',
-              transition: 'all 200ms cubic-bezier(0.25, 0.1, 0.25, 1)'
+              transform: isDragging ? "scale(0.95)" : "scale(1)",
+              transition: "all 200ms cubic-bezier(0.25, 0.1, 0.25, 1)",
             }}
           >
             {showDropIndicator && (
@@ -227,14 +223,19 @@ const TabItem = ({
 
 const TabBar = () => {
   const { activeWorkspace } = useWorkspaceState();
-  const { tabs, removeTab, removeOtherTabs, removeAllTabs, addTab, activeTab, setActiveTabById, setTabs } =
-    useRequestTabsStore();
-  const currentWorkspaceTabs = tabs.filter(
-    (tab) => tab.workspaceId === activeWorkspace?.id
-  );
+  const {
+    getTabs,
+    activeTabId,
+    setRequestsState,
+    setActiveTabId,
+    closeTab,
+    closeOtherTabs,
+    closeAllTabs,
+  } = useRequestStore();
+  const currentWorkspaceTabs = getTabs(activeWorkspace?.id || "");
   const { addRequest, getRequestById } = useRequestStore();
-  const [visibleTabs, setVisibleTabs] = useState<typeof tabs>([]);
-  const [hiddenTabs, setHiddenTabs] = useState<typeof tabs>([]);
+  const [visibleTabs, setVisibleTabs] = useState<RequestStateInterface[]>([]);
+  const [hiddenTabs, setHiddenTabs] = useState<RequestStateInterface[]>([]);
   const [draggedTabId, setDraggedTabId] = useState<string | null>(null);
   const [dragOverTabId, setDragOverTabId] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -265,7 +266,7 @@ const TabBar = () => {
     }
 
     const activeTabIndex = currentWorkspaceTabs.findIndex(
-      (tab) => tab.id === activeTab?.id
+      (tab) => tab.id === activeTabId
     );
 
     let startIndex = visibleStartIndexRef.current;
@@ -299,7 +300,7 @@ const TabBar = () => {
       ...currentWorkspaceTabs.slice(0, startIndex),
       ...currentWorkspaceTabs.slice(endIndex),
     ]);
-  }, [currentWorkspaceTabs, activeTab?.id, isDragging]);
+  }, [currentWorkspaceTabs, activeTabId, isDragging]);
 
   useEffect(() => {
     calculateVisibleTabs();
@@ -342,8 +343,12 @@ const TabBar = () => {
 
     // Find indices in the CURRENT WORKSPACE tabs only
     const workspaceTabs = [...currentWorkspaceTabs];
-    const draggedIndex = workspaceTabs.findIndex((tab) => tab.id === draggedTabId);
-    const targetIndex = workspaceTabs.findIndex((tab) => tab.id === targetTabId);
+    const draggedIndex = workspaceTabs.findIndex(
+      (tab) => tab.id === draggedTabId
+    );
+    const targetIndex = workspaceTabs.findIndex(
+      (tab) => tab.id === targetTabId
+    );
 
     if (draggedIndex === -1 || targetIndex === -1) return;
 
@@ -352,11 +357,11 @@ const TabBar = () => {
     workspaceTabs.splice(targetIndex, 0, draggedTab);
 
     // Rebuild full tabs array: other workspace tabs + reordered current workspace tabs
-    const otherWorkspaceTabs = tabs.filter(
-      (tab) => tab.workspaceId !== activeWorkspace?.id
-    );
+    const otherWorkspaceTabs = getTabs(activeWorkspace?.id || "");
 
-    setTabs([...otherWorkspaceTabs, ...workspaceTabs]);
+    setRequestsState({
+      tabIds: [...otherWorkspaceTabs, ...workspaceTabs].map((tab) => tab.id),
+    });
 
     // Don't change active tab on drop - just reorder
     setDraggedTabId(null);
@@ -366,13 +371,6 @@ const TabBar = () => {
 
   const handleAddNewTab = () => {
     const requestId = createId();
-    addTab({
-      id: requestId,
-      title: "New...",
-      type: "NEW" as RequestType,
-      unsaved: true,
-      workspaceId: activeWorkspace?.id || "",
-    });
     addRequest({
       id: requestId,
       name: "New Request",
@@ -422,20 +420,22 @@ const TabBar = () => {
                 layout: { duration: 0.2, ease: [0.25, 0.1, 0.25, 1] },
                 opacity: { duration: 0.15 },
                 scale: { duration: 0.15 },
-                x: { duration: 0.15 }
+                x: { duration: 0.15 },
               }}
             >
               <TabItem
                 id={tab.id}
-                title={tab.title}
-                type={tab.type}
+                title={tab.name}
+                type={tab.type || "NEW"}
                 method={tab.method || undefined}
                 workspaceId={tab.workspaceId}
-                onCloseClick={() => removeTab(tab.id)}
-                onCloseOthers={() => removeOtherTabs(tab.id, activeWorkspace?.id || "")}
-                onCloseAll={() => removeAllTabs(activeWorkspace?.id || "")}
+                onCloseClick={() => closeTab(tab.id)}
+                onCloseOthers={() =>
+                  closeOtherTabs(tab.id, activeWorkspace?.id || "")
+                }
+                onCloseAll={() => closeAllTabs(activeWorkspace?.id || "")}
                 onTabClick={() => {
-                  setActiveTabById(tab.id);
+                  setActiveTabId(tab.id);
                 }}
                 onDragStart={handleDragStart}
                 onDragEnd={handleDragEnd}
@@ -467,35 +467,41 @@ const TabBar = () => {
               <span className="sr-only">{hiddenTabs.length} more tabs</span>
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="p-1 w-auto max-h-[300px] overflow-y-auto" align="end">
+          <PopoverContent
+            className="p-1 w-auto max-h-[300px] overflow-y-auto"
+            align="end"
+          >
             <div className="flex flex-col gap-1">
               {hiddenTabs.map((tab) => (
                 <div
                   key={tab.id}
                   onClick={() => {
-                    setActiveTabById(tab.id);
+                    setActiveTabId(tab.id);
                     setHiddenTabsOpen(false);
                   }}
                   className={cn(
                     "group flex items-center gap-2 px-2 py-1.5 rounded-md cursor-pointer hover:bg-muted",
-                    activeTab?.id === tab.id && "bg-muted"
+                    activeTabId === tab.id && "bg-muted"
                   )}
                 >
                   <span className="flex items-center">
                     {tab.type === "API" ? (
                       <MethodBadge method={tab.method || undefined} />
                     ) : tab.type !== "NEW" ? (
-                      <RequestIcon type={tab.type} className="size-4" />
+                      <RequestIcon
+                        type={tab.type || "NEW"}
+                        className="size-4"
+                      />
                     ) : null}
                   </span>
                   <span className="flex-1 text-sm truncate max-w-[150px]">
-                    {tab.title}
+                    {tab.name}
                   </span>
                   <button
                     className="opacity-0 group-hover:opacity-100 p-0.5 rounded-full hover:bg-background transition-opacity"
                     onClick={(e) => {
                       e.stopPropagation();
-                      removeTab(tab.id);
+                      closeTab(tab.id);
                     }}
                   >
                     <X className="size-3" />
@@ -522,4 +528,3 @@ const TabBar = () => {
 };
 
 export default TabBar;
-

@@ -11,10 +11,10 @@ import { AppSidebar } from "@/modules/layout/components/sidebar/AppSidebar";
 import RightSidebar from "@/modules/layout/components/sidebar/right-sidebar";
 import WorkspaceProvider from "@/modules/workspace/store/WorkspaceProvider";
 import { getRequestSideBarTree } from "@/modules/layout/server/sidebar.actions";
+import { getAllRequests } from "@/modules/requests/server/request";
 
 // Force dynamic rendering since we use headers()
-export const dynamic = 'force-dynamic';
-
+export const dynamic = "force-dynamic";
 
 const WorkspaceLayout = async ({
   children,
@@ -55,6 +55,7 @@ const WorkspaceLayout = async ({
     <WorkspaceProvider
       activeOrg={activeWorkspace}
       workspaces={(workspaces || []) as Organization[]}
+      requests={(await getAllRequests(activeWorkspace.id)) || []}
     >
       <div className="flex h-svh w-full flex-col [--header-height:calc(--spacing(14))]">
         <SidebarProvider className="flex h-full w-full flex-col">

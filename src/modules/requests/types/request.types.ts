@@ -1,7 +1,5 @@
 import { Request } from "@/generated/prisma/browser";
 
-
-
 export type AuthType =
   | "NONE"
   | "BASIC"
@@ -23,12 +21,12 @@ export type TDigestAuth = {
   realm: string;
   nonce: string;
   algorithm:
-  | "MD5"
-  | "MD5-sess"
-  | "SHA-256"
-  | "SHA-256-sess"
-  | "SHA-512"
-  | "SHA-512-sess";
+    | "MD5"
+    | "MD5-sess"
+    | "SHA-256"
+    | "SHA-256-sess"
+    | "SHA-512"
+    | "SHA-512-sess";
   opaque: string;
   qop: "auth" | "auth-int" | string;
   nc: string;
@@ -41,15 +39,15 @@ export type TOauth1Auth = {
   token: string;
   tokenSecret: string;
   signatureMethod:
-  | "HMAC-SHA1"
-  | "RSA-SHA1"
-  | "PLAINTEXT"
-  | "HMAC-SHA256"
-  | "HMAC-SHA512"
-  | "PLAINTEXT-SHA1"
-  | "RSA-SHA256"
-  | "RSA-SHA512"
-  | "NONE";
+    | "HMAC-SHA1"
+    | "RSA-SHA1"
+    | "PLAINTEXT"
+    | "HMAC-SHA256"
+    | "HMAC-SHA512"
+    | "PLAINTEXT-SHA1"
+    | "RSA-SHA256"
+    | "RSA-SHA512"
+    | "NONE";
   timestamp: string;
   verifier: string;
   nonce: string;
@@ -70,11 +68,11 @@ export type TOauth2Auth = {
   scope: string;
   state: string;
   grantType:
-  | "authorization_code"
-  | "implicit"
-  | "password"
-  | "authorization_code_pkce"
-  | "client_credentials";
+    | "authorization_code"
+    | "implicit"
+    | "password"
+    | "authorization_code_pkce"
+    | "client_credentials";
   clientAuthentication: "header" | "body";
   refreshTokenUrl: string;
   redirectUrl: string;
@@ -86,7 +84,8 @@ export type TApiKeyAuth = {
   addTo: "header" | "query";
 };
 
-export interface RequestStateInterface extends Request {
+export interface RequestStateInterface extends Omit<Request, "type"> {
+  type: Request["type"] | "NEW";
   unsaved: boolean;
   body: {
     raw: string;
@@ -123,30 +122,32 @@ export interface RequestStateInterface extends Request {
   }[];
   auth: {
     type:
-    | "NONE"
-    | "BASIC"
-    | "BEARER"
-    | "API_KEY"
-    | "OAUTH1"
-    | "OAUTH2"
-    | "DIGEST";
+      | "NONE"
+      | "BASIC"
+      | "BEARER"
+      | "API_KEY"
+      | "OAUTH1"
+      | "OAUTH2"
+      | "DIGEST";
     data?:
-    | TBasicAuth
-    | TBearerAuth
-    | TApiKeyAuth
-    | TOauth1Auth
-    | TOauth2Auth
-    | TDigestAuth
-    | null
-    | undefined;
+      | TBasicAuth
+      | TBearerAuth
+      | TApiKeyAuth
+      | TOauth1Auth
+      | TOauth2Auth
+      | TDigestAuth
+      | null
+      | undefined;
   };
   collectionId: string | null;
   workspaceId: string;
-  savedMessages: {
-    id: string;
-    content: string;
-    eventName?: string; // For Socket.IO
-    args?: string; // For Socket.IO
-    ack?: boolean; // For Socket.IO
-  }[] | null;
+  savedMessages:
+    | {
+        id: string;
+        content: string;
+        eventName?: string; // For Socket.IO
+        args?: string; // For Socket.IO
+        ack?: boolean; // For Socket.IO
+      }[]
+    | null;
 }

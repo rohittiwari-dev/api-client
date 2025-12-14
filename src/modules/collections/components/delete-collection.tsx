@@ -1,6 +1,5 @@
 import React from "react";
 import { IconAlertTriangleFilled } from "@tabler/icons-react";
-import { Trash } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogCancel,
@@ -8,13 +7,11 @@ import {
   AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { useDeleteCollection } from "../hooks/queries";
 import useRequestStore from "@/modules/requests/store/request.store";
-import useRequestTabsStore from "@/modules/requests/store/tabs.store";
 import useSidebarStore from "@/modules/layout/store/sidebar.store";
 
 interface DeleteCollectionProps {
@@ -23,7 +20,11 @@ interface DeleteCollectionProps {
   onOpenChange: (open: boolean) => void;
 }
 
-const DeleteCollection = ({ id, open, onOpenChange }: DeleteCollectionProps) => {
+const DeleteCollection = ({
+  id,
+  open,
+  onOpenChange,
+}: DeleteCollectionProps) => {
   const {
     mutate: deleteCollection,
     isPending,
@@ -31,13 +32,11 @@ const DeleteCollection = ({ id, open, onOpenChange }: DeleteCollectionProps) => 
     isError,
   } = useDeleteCollection(id);
 
-  const { requests, updateRequest } = useRequestStore();
-  const { replaceTabData, tabs } = useRequestTabsStore();
+  const { requests, updateRequest, draftIds } = useRequestStore();
   const removeItemDeep = useSidebarStore((s) => s.removeItemDeep);
 
   React.useEffect(() => {
     if (isSuccess) {
-      // Update sidebar immediately
       removeItemDeep(id);
       onOpenChange(false);
     }
@@ -47,11 +46,9 @@ const DeleteCollection = ({ id, open, onOpenChange }: DeleteCollectionProps) => 
   }, [isSuccess, isError, onOpenChange, removeItemDeep, id]);
 
   const handleDelete = () => {
-    // Rescue unsaved requests: Set collectionId to null for unsaved requests in this collection
     requests.forEach((req) => {
-      if (req.collectionId === id && req.unsaved) {
+      if (req.collectionId === id && req.unsaved && draftIds.includes(req.id)) {
         updateRequest(req.id, { collectionId: null });
-        replaceTabData(req.id, { collectionId: null });
       }
     });
 
@@ -80,7 +77,10 @@ const DeleteCollection = ({ id, open, onOpenChange }: DeleteCollectionProps) => 
             {isPending && <Spinner />}
             Delete
           </Button>
-          <AlertDialogCancel onClick={() => onOpenChange(false)} className="cursor-pointer">
+          <AlertDialogCancel
+            onClick={() => onOpenChange(false)}
+            className="cursor-pointer"
+          >
             Cancel
           </AlertDialogCancel>
         </AlertDialogFooter>

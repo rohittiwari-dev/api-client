@@ -32,28 +32,15 @@ import {
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-  SidebarMenuSub,
   SidebarRail,
 } from "@/components/ui/sidebar";
-import { cn, requestTextColorMap } from "@/lib/utils";
-import { substituteVariables } from "@/lib/utils/substituteVariables";
-import { RequestIcon } from "@/modules/requests/components/RequestType";
-import { SidebarRequestMenu } from "@/modules/requests/components/SidebarRequestMenu";
-import { SidebarCollectionMenu } from "@/modules/collections/components/SidebarCollectionMenu";
-import { useTabRequestSync } from "@/modules/requests/hooks/use-tab-request-sync";
 import useRequestStore from "@/modules/requests/store/request.store";
-import useRequestTabsStore from "@/modules/requests/store/tabs.store";
 import useWorkspaceState from "@/modules/workspace/store";
-import useEnvironmentStore from "@/modules/environment/store/environment.store";
 import AddNewCollection from "../../../collections/components/AddNewCollection";
 import useSidebarStore, {
   SidebarItemInterface,
 } from "../../store/sidebar.store";
 import { useRequestSideBarTree } from "../../hooks/queries";
-import { RequestType } from "@/generated/prisma/browser";
 import { DraggableSidebarTree } from "./DraggableSidebarTree";
 
 export function AppSidebar({
@@ -130,7 +117,6 @@ export function AppSidebar({
 }
 
 const AddNewCollectionOption = ({ workspaceId }: { workspaceId: string }) => {
-  const { addTab } = useRequestTabsStore();
   const { addRequest } = useRequestStore();
   const [showAddCollectionDialog, setShowAddCollectionDialog] =
     React.useState(false);
@@ -153,14 +139,6 @@ const AddNewCollectionOption = ({ workspaceId }: { workspaceId: string }) => {
             onClick={(e) => {
               const id = createId();
               e.stopPropagation();
-              addTab({
-                type: "API",
-                title: "New Request",
-                unsaved: true,
-                collectionId: null,
-                workspaceId,
-                id,
-              });
               addRequest({
                 id,
                 type: "API",
@@ -206,14 +184,6 @@ const AddNewCollectionOption = ({ workspaceId }: { workspaceId: string }) => {
             onClick={(e) => {
               const id = createId();
               e.stopPropagation();
-              addTab({
-                type: "WEBSOCKET",
-                title: "New Request",
-                unsaved: true,
-                collectionId: null,
-                workspaceId,
-                id,
-              });
               addRequest({
                 id,
                 type: "WEBSOCKET",
@@ -259,14 +229,6 @@ const AddNewCollectionOption = ({ workspaceId }: { workspaceId: string }) => {
             onClick={(e) => {
               const id = createId();
               e.stopPropagation();
-              addTab({
-                type: "SOCKET_IO",
-                title: "New Request",
-                unsaved: true,
-                collectionId: null,
-                workspaceId,
-                id,
-              });
               addRequest({
                 id,
                 type: "SOCKET_IO",

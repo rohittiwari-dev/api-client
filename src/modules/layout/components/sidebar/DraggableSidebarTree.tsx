@@ -29,7 +29,6 @@ import {
   useMoveRequest,
 } from "@/modules/collections/hooks/mutations";
 import useRequestStore from "@/modules/requests/store/request.store";
-import useRequestTabsStore from "@/modules/requests/store/tabs.store";
 import { SidebarItem } from "./SidebarItem";
 import { SidebarTreeContext, DropPosition } from "./SidebarTreeContext";
 import useSidebarStore, {
@@ -55,7 +54,6 @@ export function DraggableSidebarTree({
   const [justMovedId, setJustMovedId] = useState<string | null>(null);
 
   const { updateRequest } = useRequestStore();
-  const { replaceTabData } = useRequestTabsStore();
 
   const moveCollectionMutation = useMoveCollection(workspaceId);
   const reorderCollectionsMutation = useReorderCollections(workspaceId);
@@ -258,7 +256,6 @@ export function DraggableSidebarTree({
         });
       } else {
         updateRequest(activeItem.id, { collectionId: null });
-        replaceTabData(activeItem.id, { collectionId: null });
         moveRequestMutation.mutate({
           requestId: activeItem.id,
           collectionId: null,
@@ -294,7 +291,6 @@ export function DraggableSidebarTree({
         });
       } else {
         updateRequest(activeItem.id, { collectionId: overItem.id });
-        replaceTabData(activeItem.id, { collectionId: overItem.id });
         moveRequestMutation.mutate({
           requestId: activeItem.id,
           collectionId: overItem.id,
@@ -365,7 +361,6 @@ export function DraggableSidebarTree({
 
         if (activeItem.collectionId !== newCollectionId) {
           updateRequest(activeItem.id, { collectionId: newCollectionId });
-          replaceTabData(activeItem.id, { collectionId: newCollectionId });
           moveRequestMutation.mutate({
             requestId: activeItem.id,
             collectionId: newCollectionId,

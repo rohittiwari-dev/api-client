@@ -1,12 +1,12 @@
-import { create } from 'zustand';
-import { devtools } from 'zustand/middleware';
+import { create } from "zustand";
+import { devtools } from "zustand/middleware";
 
-export type MessageFormat = 'text' | 'json' | 'binary';
+export type MessageFormat = "text" | "json" | "binary";
 
 export type LogMessage = {
   id: string;
   timestamp: number;
-  direction: 'sent' | 'received' | 'error' | 'system';
+  direction: "sent" | "received" | "error" | "system";
   content: string;
   format?: MessageFormat;
 };
@@ -21,12 +21,19 @@ export interface WebSocketConnectionOptions {
 interface WebsocketState {
   connections: Record<string, WebSocket>;
   messages: Record<string, LogMessage[]>;
-  connectionStatus: Record<string, 'connected' | 'disconnected' | 'connecting' | 'error'>;
+  connectionStatus: Record<
+    string,
+    "connected" | "disconnected" | "connecting" | "error"
+  >;
   connectionOptions: Record<string, WebSocketConnectionOptions>;
 
   connect: (requestId: string, options: WebSocketConnectionOptions) => void;
   disconnect: (requestId: string) => void;
-  sendMessage: (requestId: string, message: string, format?: MessageFormat) => void;
+  sendMessage: (
+    requestId: string,
+    message: string,
+    format?: MessageFormat
+  ) => void;
   clearMessages: (requestId: string) => void;
 }
 
@@ -36,18 +43,21 @@ interface WebsocketState {
 function normalizeWebSocketUrl(url: string): string {
   if (!url) return url;
 
-  let normalized = url.trim();
+  let normalized = url?.trim();
 
   // If URL starts with http:// or https://, convert to ws:// or wss://
-  if (normalized.startsWith('https://')) {
-    normalized = 'wss://' + normalized.slice(8);
-  } else if (normalized.startsWith('http://')) {
-    normalized = 'ws://' + normalized.slice(7);
+  if (normalized.startsWith("https://")) {
+    normalized = "wss://" + normalized.slice(8);
+  } else if (normalized.startsWith("http://")) {
+    normalized = "ws://" + normalized.slice(7);
   }
   // If URL doesn't have a protocol, add ws://
-  else if (!normalized.startsWith('ws://') && !normalized.startsWith('wss://')) {
+  else if (
+    !normalized.startsWith("ws://") &&
+    !normalized.startsWith("wss://")
+  ) {
     // Default to ws:// for non-protocol URLs
-    normalized = 'ws://' + normalized;
+    normalized = "ws://" + normalized;
   }
 
   return normalized;
@@ -61,24 +71,36 @@ function buildWebSocketUrl(options: WebSocketConnectionOptions): string {
   let url = normalizeWebSocketUrl(options.url);
 
   // Add parameters to URL
-  const activeParams = options.parameters?.filter(p => p.isActive !== false && p.key);
+  const activeParams = options.parameters?.filter(
+    (p) => p.isActive !== false && p.key
+  );
   if (activeParams && activeParams.length > 0) {
-    const separator = url.includes('?') ? '&' : '?';
+    const separator = url.includes("?") ? "&" : "?";
     const paramString = activeParams
-      .map(p => `${encodeURIComponent(p.key)}=${encodeURIComponent(p.value || '')}`)
-      .join('&');
+      .map(
+        (p) =>
+          `${encodeURIComponent(p.key)}=${encodeURIComponent(p.value || "")}`
+      )
+      .join("&");
     url = `${url}${separator}${paramString}`;
   }
 
   // Note: Browser WebSocket API doesn't support custom headers
   // Headers can be passed as query parameters if server supports it
-  const activeHeaders = options.headers?.filter(h => h.isActive !== false && h.key);
+  const activeHeaders = options.headers?.filter(
+    (h) => h.isActive !== false && h.key
+  );
   if (activeHeaders && activeHeaders.length > 0) {
     // Add headers as query params (server must support this pattern)
-    const separator = url.includes('?') ? '&' : '?';
+    const separator = url.includes("?") ? "&" : "?";
     const headerParams = activeHeaders
-      .map(h => `_header_${encodeURIComponent(h.key)}=${encodeURIComponent(h.value || '')}`)
-      .join('&');
+      .map(
+        (h) =>
+          `_header_${encodeURIComponent(h.key)}=${encodeURIComponent(
+            h.value || ""
+          )}`
+      )
+      .join("&");
     url = `${url}${separator}${headerParams}`;
   }
 
@@ -89,7 +111,7 @@ function buildWebSocketUrl(options: WebSocketConnectionOptions): string {
  * Format message based on type
  */
 function formatMessage(message: string, format: MessageFormat): string {
-  if (format === 'json') {
+  if (format === "json") {
     try {
       // Pretty print JSON if it's valid
       const parsed = JSON.parse(message);
@@ -105,17 +127,20 @@ function formatMessage(message: string, format: MessageFormat): string {
 /**
  * Try to detect and pretty-print JSON in received messages
  */
-function formatReceivedMessage(content: string): { content: string; format: MessageFormat } {
+function formatReceivedMessage(content: string): {
+  content: string;
+  format: MessageFormat;
+} {
   try {
     const parsed = JSON.parse(content);
     return {
       content: JSON.stringify(parsed, null, 2),
-      format: 'json'
+      format: "json",
     };
   } catch {
     return {
       content,
-      format: 'text'
+      format: "text",
     };
   }
 }
@@ -135,8 +160,14 @@ const useWebsocketStore = create<WebsocketState>()(
 
       try {
         set((state) => ({
-          connectionStatus: { ...state.connectionStatus, [requestId]: 'connecting' },
-          connectionOptions: { ...state.connectionOptions, [requestId]: options },
+          connectionStatus: {
+            ...state.connectionStatus,
+            [requestId]: "connecting",
+          },
+          connectionOptions: {
+            ...state.connectionOptions,
+            [requestId]: options,
+          },
         }));
 
         const url = buildWebSocketUrl(options);
@@ -145,7 +176,10 @@ const useWebsocketStore = create<WebsocketState>()(
 
         ws.onopen = () => {
           set((state) => ({
-            connectionStatus: { ...state.connectionStatus, [requestId]: 'connected' },
+            connectionStatus: {
+              ...state.connectionStatus,
+              [requestId]: "connected",
+            },
             messages: {
               ...state.messages,
               [requestId]: [
@@ -153,8 +187,8 @@ const useWebsocketStore = create<WebsocketState>()(
                 {
                   id: crypto.randomUUID(),
                   timestamp: Date.now(),
-                  direction: 'system',
-                  content: 'Connected to ' + url,
+                  direction: "system",
+                  content: "Connected to " + url,
                 },
               ],
             },
@@ -163,7 +197,7 @@ const useWebsocketStore = create<WebsocketState>()(
 
         ws.onmessage = (event) => {
           const { content, format } = formatReceivedMessage(
-            typeof event.data === 'string' ? event.data : 'Binary data received'
+            typeof event.data === "string" ? event.data : "Binary data received"
           );
 
           set((state) => ({
@@ -174,7 +208,7 @@ const useWebsocketStore = create<WebsocketState>()(
                 {
                   id: crypto.randomUUID(),
                   timestamp: Date.now(),
-                  direction: 'received',
+                  direction: "received",
                   content,
                   format,
                 },
@@ -185,7 +219,10 @@ const useWebsocketStore = create<WebsocketState>()(
 
         ws.onerror = (error) => {
           set((state) => ({
-            connectionStatus: { ...state.connectionStatus, [requestId]: 'error' },
+            connectionStatus: {
+              ...state.connectionStatus,
+              [requestId]: "error",
+            },
             messages: {
               ...state.messages,
               [requestId]: [
@@ -193,8 +230,8 @@ const useWebsocketStore = create<WebsocketState>()(
                 {
                   id: crypto.randomUUID(),
                   timestamp: Date.now(),
-                  direction: 'error',
-                  content: 'WebSocket error occurred',
+                  direction: "error",
+                  content: "WebSocket error occurred",
                 },
               ],
             },
@@ -203,7 +240,10 @@ const useWebsocketStore = create<WebsocketState>()(
 
         ws.onclose = (event) => {
           set((state) => ({
-            connectionStatus: { ...state.connectionStatus, [requestId]: 'disconnected' },
+            connectionStatus: {
+              ...state.connectionStatus,
+              [requestId]: "disconnected",
+            },
             messages: {
               ...state.messages,
               [requestId]: [
@@ -211,8 +251,10 @@ const useWebsocketStore = create<WebsocketState>()(
                 {
                   id: crypto.randomUUID(),
                   timestamp: Date.now(),
-                  direction: 'system',
-                  content: `Disconnected (code: ${event.code}${event.reason ? ', reason: ' + event.reason : ''})`,
+                  direction: "system",
+                  content: `Disconnected (code: ${event.code}${
+                    event.reason ? ", reason: " + event.reason : ""
+                  })`,
                 },
               ],
             },
@@ -224,7 +266,7 @@ const useWebsocketStore = create<WebsocketState>()(
         }));
       } catch (error) {
         set((state) => ({
-          connectionStatus: { ...state.connectionStatus, [requestId]: 'error' },
+          connectionStatus: { ...state.connectionStatus, [requestId]: "error" },
           messages: {
             ...state.messages,
             [requestId]: [
@@ -232,8 +274,9 @@ const useWebsocketStore = create<WebsocketState>()(
               {
                 id: crypto.randomUUID(),
                 timestamp: Date.now(),
-                direction: 'error',
-                content: error instanceof Error ? error.message : 'Failed to connect',
+                direction: "error",
+                content:
+                  error instanceof Error ? error.message : "Failed to connect",
               },
             ],
           },
@@ -249,7 +292,7 @@ const useWebsocketStore = create<WebsocketState>()(
       }
     },
 
-    sendMessage: (requestId, message, format = 'text') => {
+    sendMessage: (requestId, message, format = "text") => {
       const { connections } = get();
       const ws = connections[requestId];
 
@@ -258,15 +301,16 @@ const useWebsocketStore = create<WebsocketState>()(
         ws.send(formattedMessage);
 
         // Format for display
-        const displayContent = format === 'json'
-          ? (() => {
-            try {
-              return JSON.stringify(JSON.parse(formattedMessage), null, 2);
-            } catch {
-              return formattedMessage;
-            }
-          })()
-          : formattedMessage;
+        const displayContent =
+          format === "json"
+            ? (() => {
+                try {
+                  return JSON.stringify(JSON.parse(formattedMessage), null, 2);
+                } catch {
+                  return formattedMessage;
+                }
+              })()
+            : formattedMessage;
 
         set((state) => ({
           messages: {
@@ -276,7 +320,7 @@ const useWebsocketStore = create<WebsocketState>()(
               {
                 id: crypto.randomUUID(),
                 timestamp: Date.now(),
-                direction: 'sent',
+                direction: "sent",
                 content: displayContent,
                 format,
               },
@@ -292,8 +336,8 @@ const useWebsocketStore = create<WebsocketState>()(
               {
                 id: crypto.randomUUID(),
                 timestamp: Date.now(),
-                direction: 'error',
-                content: 'Cannot send message: WebSocket is not connected',
+                direction: "error",
+                content: "Cannot send message: WebSocket is not connected",
               },
             ],
           },
@@ -310,4 +354,3 @@ const useWebsocketStore = create<WebsocketState>()(
 );
 
 export default useWebsocketStore;
-

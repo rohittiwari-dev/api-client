@@ -4,10 +4,15 @@ import db from "@/lib/db";
 import { createId } from "@paralleldrive/cuid2";
 
 export const getAllRequests = async (workspace: string) => {
-  return await db.request.findMany({
-    where: { workspaceId: workspace },
-    include: {},
-  });
+  try {
+    const data = await db.request.findMany({
+      where: { workspaceId: workspace },
+      include: {},
+    });
+    return data;
+  } catch (error) {
+    return [];
+  }
 };
 
 export const getRequestById = async (id: string, workspace: string) => {
@@ -63,7 +68,10 @@ export const updateRequest = async (
       updatedAt: new Date(),
       // Handle savedMessages: use Prisma.JsonNull if null, otherwise the value or undefined
       ...(savedMessages !== undefined && {
-        savedMessages: savedMessages === null ? Prisma.JsonNull : savedMessages as Prisma.InputJsonValue,
+        savedMessages:
+          savedMessages === null
+            ? Prisma.JsonNull
+            : (savedMessages as Prisma.InputJsonValue),
       }),
     },
   });
