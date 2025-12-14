@@ -40,6 +40,9 @@ const LogoutMenuItem = () => {
 								user: null,
 							});
 							clearCookies();
+							// clear cookies for auth 
+							document.cookie = 'better-auth.session_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+							document.cookie = '__Secure-better-auth.session_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
 							redirect('/sign-in');
 						},
 						onError: () => {
