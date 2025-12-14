@@ -95,14 +95,6 @@ BETTER_AUTH_SECRET="your-secret-key-here"
 REDIS_URL="redis://localhost:6379"
 
 # ===========================================
-# CLOUDINARY (File Uploads)
-# ===========================================
-# Get from https://cloudinary.com/console
-CLOUDINARY_CLOUD_NAME="your-cloud-name"
-CLOUDINARY_API_KEY="your-api-key"
-CLOUDINARY_API_SECRET="your-api-secret"
-
-# ===========================================
 # OPTIONAL: Google OAuth
 # ===========================================
 GOOGLE_CLIENT_ID=""
@@ -119,8 +111,8 @@ GOOGLE_CLIENT_SECRET=""`}
                                 <button
                                     onClick={() => setActiveTab('docker')}
                                     className={`px-4 py-2 rounded-lg font-medium text-sm transition-all ${activeTab === 'docker'
-                                            ? 'bg-gradient-to-r from-violet-600 to-indigo-600 text-white'
-                                            : 'glass hover:bg-accent'
+                                        ? 'bg-gradient-to-r from-violet-600 to-indigo-600 text-white'
+                                        : 'glass hover:bg-accent'
                                         }`}
                                 >
                                     <Container className="w-4 h-4 inline mr-2" />
@@ -129,8 +121,8 @@ GOOGLE_CLIENT_SECRET=""`}
                                 <button
                                     onClick={() => setActiveTab('manual')}
                                     className={`px-4 py-2 rounded-lg font-medium text-sm transition-all ${activeTab === 'manual'
-                                            ? 'bg-gradient-to-r from-violet-600 to-indigo-600 text-white'
-                                            : 'glass hover:bg-accent'
+                                        ? 'bg-gradient-to-r from-violet-600 to-indigo-600 text-white'
+                                        : 'glass hover:bg-accent'
                                         }`}
                                 >
                                     <Server className="w-4 h-4 inline mr-2" />

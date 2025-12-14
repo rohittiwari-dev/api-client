@@ -49,14 +49,6 @@ BETTER_AUTH_SECRET="generate-a-secure-random-string-here"
 REDIS_URL="redis://localhost:6379"
 
 # ===========================================
-# CLOUDINARY (File Uploads)
-# ===========================================
-# Get these from https://cloudinary.com/console
-CLOUDINARY_CLOUD_NAME="your-cloud-name"
-CLOUDINARY_API_KEY="your-api-key"
-CLOUDINARY_API_SECRET="your-api-secret"
-
-# ===========================================
 # OPTIONAL: Google OAuth
 # ===========================================
 # Leave empty to disable Google login
