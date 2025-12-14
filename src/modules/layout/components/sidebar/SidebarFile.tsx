@@ -19,16 +19,11 @@ interface SidebarFileProps {
 
 export function SidebarFile({ item, isActive, isUnsaved }: SidebarFileProps) {
     const { openRequest, requests } = useTabRequestSync();
-    const { getVariablesAsRecord } = useEnvironmentStore();
 
     const currentRequest = {
         ...item,
         ...(requests.find((req) => req.id === item.id) || {}),
     };
-
-    const rawUrl = currentRequest?.url || (currentRequest as any).path || "";
-    const envVariables = getVariablesAsRecord();
-    const displayUrl = rawUrl ? substituteVariables(rawUrl, envVariables) : "";
 
     const method = currentRequest?.method || "GET";
 
@@ -55,6 +50,8 @@ export function SidebarFile({ item, isActive, isUnsaved }: SidebarFileProps) {
                         id: item.id,
                         collectionId: currentRequest.collectionId || null,
                         workspaceId: currentRequest.workspaceId || "",
+                        unsaved: currentRequest.unsaved || true,
+                        method: currentRequest.method || "GET",
                     },
                     {
                         auth: currentRequest.auth || { type: "NONE" },

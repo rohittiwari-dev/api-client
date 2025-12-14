@@ -40,11 +40,16 @@ const useRequestTabsStore = create<RequestTabsStore>()(
             const existingTabIndex = state.tabs.findIndex(
               (t) => t.id === tab.id
             );
-            // If tab exists, just activate it
             if (existingTabIndex !== -1) {
-              return { activeTab: tab };
+              const tabs = [...state.tabs];
+              const updatedTab = {
+                ...tabs[existingTabIndex],
+                ...tab,
+                id: tabs[existingTabIndex].id,
+              };
+              tabs[existingTabIndex] = updatedTab;
+              return { tabs, activeTab: updatedTab };
             }
-            // Add new tab at the end, don't reorder
             const tabs = [...state.tabs, tab];
             return { tabs, activeTab: tab };
           }),
@@ -53,14 +58,11 @@ const useRequestTabsStore = create<RequestTabsStore>()(
             const tabIndex = state.tabs.findIndex((tab) => tab.id === id);
             const newTabs = state.tabs.filter((tab) => tab.id !== id);
 
-            // If removing the active tab, select adjacent tab
             let newActiveTab = state.activeTab;
             if (state.activeTab?.id === id) {
               if (tabIndex > 0) {
-                // Select previous tab
                 newActiveTab = newTabs[tabIndex - 1] || newTabs[0] || null;
               } else {
-                // Select next tab
                 newActiveTab = newTabs[0] || null;
               }
             }
@@ -69,7 +71,6 @@ const useRequestTabsStore = create<RequestTabsStore>()(
           }),
         removeOtherTabs: (id, workspaceId) =>
           set((state) => {
-            // Keep the specified tab and tabs from other workspaces
             const newTabs = state.tabs.filter(
               (tab) => tab.id === id || tab.workspaceId !== workspaceId
             );
@@ -78,11 +79,9 @@ const useRequestTabsStore = create<RequestTabsStore>()(
           }),
         removeAllTabs: (workspaceId) =>
           set((state) => {
-            // Remove all tabs from the specified workspace
             const newTabs = state.tabs.filter(
               (tab) => tab.workspaceId !== workspaceId
             );
-            // If active tab was from this workspace, clear it
             const activeTab = state.activeTab?.workspaceId === workspaceId
               ? null
               : state.activeTab;
@@ -98,7 +97,6 @@ const useRequestTabsStore = create<RequestTabsStore>()(
           })),
         setTabs: (tabs, preserveActiveTab = true) =>
           set((state) => {
-            // Preserve current active tab if it exists in new tabs
             if (preserveActiveTab && state.activeTab) {
               const activeExists = tabs.find((t) => t.id === state.activeTab?.id);
               if (activeExists) {

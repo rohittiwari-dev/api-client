@@ -129,7 +129,7 @@ const CookieCard = ({
 );
 
 const CookieManager = () => {
-    const { cookies, addCookie, updateCookie, removeCookie, clearCookies, clearExpiredCookies } = useCookieStore();
+    const { getAllCookiesForCurrentWorkspace, addCookie, updateCookie, removeCookie, clearCookies, clearExpiredCookies, currentWorkspaceId } = useCookieStore();
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [editingCookie, setEditingCookie] = useState<Cookie | null>(null);
     const [filterDomain, setFilterDomain] = useState('');
@@ -141,6 +141,9 @@ const CookieManager = () => {
         secure: false,
         httpOnly: false,
     });
+
+    // Get only cookies for current workspace
+    const cookies = getAllCookiesForCurrentWorkspace();
 
     // Clear expired cookies on mount
     React.useEffect(() => {

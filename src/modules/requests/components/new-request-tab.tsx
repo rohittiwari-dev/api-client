@@ -48,7 +48,7 @@ const NewRequestTabContent = () => {
 	const workspaceId = activeWorkspace?.id || '';
 
 	const handleCreateRequest = (type: 'API' | 'WEBSOCKET' | 'SOCKET_IO') => {
-		const newId = createId();
+		const newId = activeTab?.id || createId();
 
 		// Create tab data
 		const tabData = {

@@ -64,7 +64,7 @@ export function AppSidebar({
   sidebarData: SidebarItemInterface[];
   workspaceId: string;
 }) {
-  const { items, setItems } = useSidebarStore();
+  const { setItems } = useSidebarStore();
   const { activeWorkspace } = useWorkspaceState();
   const [collapseKey, setCollapseKey] = React.useState(0);
 
@@ -81,7 +81,7 @@ export function AppSidebar({
   }, [sidebarCachedData, setItems]);
 
   const handleCollapseAll = () => {
-    setCollapseKey(prev => prev + 1);
+    setCollapseKey((prev) => prev + 1);
   };
 
   return (
@@ -97,7 +97,9 @@ export function AppSidebar({
               <div className="flex items-center justify-center size-6 rounded-md bg-primary/10">
                 <IconFolderFilled className="size-3.5 text-primary" />
               </div>
-              <span className="font-semibold text-sm text-foreground">Collections</span>
+              <span className="font-semibold text-sm text-foreground">
+                Collections
+              </span>
             </div>
             <div className="flex items-center gap-1">
               <Button
@@ -115,7 +117,10 @@ export function AppSidebar({
 
           {/* Tree Content */}
           <SidebarGroupContent>
-            <DraggableSidebarTree workspaceId={workspaceId} collapseKey={collapseKey} />
+            <DraggableSidebarTree
+              workspaceId={workspaceId}
+              collapseKey={collapseKey}
+            />
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
@@ -124,17 +129,21 @@ export function AppSidebar({
   );
 }
 
-
 const AddNewCollectionOption = ({ workspaceId }: { workspaceId: string }) => {
   const { addTab } = useRequestTabsStore();
   const { addRequest } = useRequestStore();
-  const [showAddCollectionDialog, setShowAddCollectionDialog] = React.useState(false);
+  const [showAddCollectionDialog, setShowAddCollectionDialog] =
+    React.useState(false);
 
   return (
     <>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="ghost" size="icon" className="h-6 w-6 hover:bg-accent/60">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-6 w-6 hover:bg-accent/60"
+          >
             <Plus className="size-4" />
           </Button>
         </DropdownMenuTrigger>
@@ -145,13 +154,39 @@ const AddNewCollectionOption = ({ workspaceId }: { workspaceId: string }) => {
               const id = createId();
               e.stopPropagation();
               addTab({
-                type: "API", title: "New Request", unsaved: true, collectionId: null, workspaceId, id
+                type: "API",
+                title: "New Request",
+                unsaved: true,
+                collectionId: null,
+                workspaceId,
+                id,
               });
               addRequest({
-                id, type: "API", name: "New Request", url: "", method: "GET", unsaved: true, collectionId: null, workspaceId,
-                body: { raw: "", formData: [], urlEncoded: [], file: null, json: {} }, auth: { type: "NONE" },
-                headers: [], parameters: [], bodyType: "NONE", description: "", messageType: "CONNECTION",
-                createdAt: new Date(), updatedAt: new Date(), savedMessages: [], sortOrder: 0,
+                id,
+                type: "API",
+                name: "New Request",
+                url: "",
+                method: "GET",
+                unsaved: true,
+                collectionId: null,
+                workspaceId,
+                body: {
+                  raw: "",
+                  formData: [],
+                  urlEncoded: [],
+                  file: null,
+                  json: {},
+                },
+                auth: { type: "NONE" },
+                headers: [],
+                parameters: [],
+                bodyType: "NONE",
+                description: "",
+                messageType: "CONNECTION",
+                createdAt: new Date(),
+                updatedAt: new Date(),
+                savedMessages: [],
+                sortOrder: 0,
               });
             }}
           >
@@ -160,7 +195,9 @@ const AddNewCollectionOption = ({ workspaceId }: { workspaceId: string }) => {
             </div>
             <div className="flex flex-col">
               <span className="text-sm font-medium">HTTP Request</span>
-              <span className="text-xs text-muted-foreground">Create new API request</span>
+              <span className="text-xs text-muted-foreground">
+                Create new API request
+              </span>
             </div>
           </DropdownMenuItem>
 
@@ -170,13 +207,39 @@ const AddNewCollectionOption = ({ workspaceId }: { workspaceId: string }) => {
               const id = createId();
               e.stopPropagation();
               addTab({
-                type: "WEBSOCKET", title: "New Websocket", unsaved: true, collectionId: null, workspaceId, id
+                type: "WEBSOCKET",
+                title: "New Request",
+                unsaved: true,
+                collectionId: null,
+                workspaceId,
+                id,
               });
               addRequest({
-                id, type: "WEBSOCKET", name: "New Websocket", url: "", method: null, unsaved: true, collectionId: null, workspaceId,
-                body: { raw: "", formData: [], urlEncoded: [], file: null, json: {} }, auth: { type: "NONE" },
-                headers: [], parameters: [], bodyType: "NONE", description: "", messageType: "CONNECTION",
-                createdAt: new Date(), updatedAt: new Date(), savedMessages: [], sortOrder: 0,
+                id,
+                type: "WEBSOCKET",
+                name: "New Request",
+                url: "",
+                method: null,
+                unsaved: true,
+                collectionId: null,
+                workspaceId,
+                body: {
+                  raw: "",
+                  formData: [],
+                  urlEncoded: [],
+                  file: null,
+                  json: {},
+                },
+                auth: { type: "NONE" },
+                headers: [],
+                parameters: [],
+                bodyType: "NONE",
+                description: "",
+                messageType: "CONNECTION",
+                createdAt: new Date(),
+                updatedAt: new Date(),
+                savedMessages: [],
+                sortOrder: 0,
               });
             }}
           >
@@ -185,7 +248,9 @@ const AddNewCollectionOption = ({ workspaceId }: { workspaceId: string }) => {
             </div>
             <div className="flex flex-col">
               <span className="text-sm font-medium">WebSocket</span>
-              <span className="text-xs text-muted-foreground">Real-time connection</span>
+              <span className="text-xs text-muted-foreground">
+                Real-time connection
+              </span>
             </div>
           </DropdownMenuItem>
 
@@ -195,13 +260,39 @@ const AddNewCollectionOption = ({ workspaceId }: { workspaceId: string }) => {
               const id = createId();
               e.stopPropagation();
               addTab({
-                type: "SOCKET_IO", title: "New SocketIO", unsaved: true, collectionId: null, workspaceId, id
+                type: "SOCKET_IO",
+                title: "New Request",
+                unsaved: true,
+                collectionId: null,
+                workspaceId,
+                id,
               });
               addRequest({
-                id, type: "SOCKET_IO", name: "New SocketIO", url: "", method: null, unsaved: true, collectionId: null, workspaceId,
-                body: { raw: "", formData: [], urlEncoded: [], file: null, json: {} }, auth: { type: "NONE" },
-                headers: [], parameters: [], bodyType: "NONE", description: "", messageType: "CONNECTION",
-                createdAt: new Date(), updatedAt: new Date(), savedMessages: [], sortOrder: 0,
+                id,
+                type: "SOCKET_IO",
+                name: "New Request",
+                url: "",
+                method: null,
+                unsaved: true,
+                collectionId: null,
+                workspaceId,
+                body: {
+                  raw: "",
+                  formData: [],
+                  urlEncoded: [],
+                  file: null,
+                  json: {},
+                },
+                auth: { type: "NONE" },
+                headers: [],
+                parameters: [],
+                bodyType: "NONE",
+                description: "",
+                messageType: "CONNECTION",
+                createdAt: new Date(),
+                updatedAt: new Date(),
+                savedMessages: [],
+                sortOrder: 0,
               });
             }}
           >
@@ -210,7 +301,9 @@ const AddNewCollectionOption = ({ workspaceId }: { workspaceId: string }) => {
             </div>
             <div className="flex flex-col">
               <span className="text-sm font-medium">Socket.IO</span>
-              <span className="text-xs text-muted-foreground">Event-based connection</span>
+              <span className="text-xs text-muted-foreground">
+                Event-based connection
+              </span>
             </div>
           </DropdownMenuItem>
 
@@ -228,7 +321,9 @@ const AddNewCollectionOption = ({ workspaceId }: { workspaceId: string }) => {
             </div>
             <div className="flex flex-col">
               <span className="text-sm font-medium">Collection</span>
-              <span className="text-xs text-muted-foreground">Organize requests</span>
+              <span className="text-xs text-muted-foreground">
+                Organize requests
+              </span>
             </div>
           </DropdownMenuItem>
         </DropdownMenuContent>

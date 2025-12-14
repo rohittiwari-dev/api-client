@@ -9,7 +9,6 @@ import { RequestStateInterface } from '@/modules/requests/types/request.types';
 export function useTabRequestSync() {
     const {
         addTab,
-        setActiveTab,
         setActiveTabById,
         removeTab,
         replaceTabData,
@@ -19,7 +18,6 @@ export function useTabRequestSync() {
 
     const {
         addRequest,
-        setActiveRequest,
         setActiveRequestById,
         removeRequest,
         updateRequest,

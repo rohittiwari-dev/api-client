@@ -5,6 +5,7 @@ import { Organization, RequestType } from "@/generated/prisma/browser";
 import useWorkspaceState from ".";
 import useRequestTabsStore from "@/modules/requests/store/tabs.store";
 import useRequestStore from "@/modules/requests/store/request.store";
+import useCookieStore from "@/modules/cookies/store/cookie.store";
 import authClient from "@/lib/authClient";
 
 const WorkspaceProvider = ({
@@ -19,6 +20,8 @@ const WorkspaceProvider = ({
   const { setWorkspaces, setActiveWorkspace } = useWorkspaceState();
   const { tabs, setActiveTab, activeTab } = useRequestTabsStore();
   const { requests, setActiveRequest, activeRequest } = useRequestStore();
+  const { setCurrentWorkspaceId } = useCookieStore();
+
   const currentWorkspaceTabs = tabs.filter(
     (tab) => tab.workspaceId === activeOrg.id
   );
@@ -48,11 +51,13 @@ const WorkspaceProvider = ({
   });
 
   useEffect(() => {
-    if (activeOrg)
+    if (activeOrg) {
+      setCurrentWorkspaceId(activeOrg.id);
       authClient.organization.setActive({
         organizationId: activeOrg.id,
         organizationSlug: activeOrg.slug || ""
       })
+    }
   }, [activeOrg]);
 
   React.useEffect(() => {
@@ -65,3 +70,4 @@ const WorkspaceProvider = ({
 };
 
 export default WorkspaceProvider;
+
