@@ -5,7 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { LockIcon, Mail, User2, Sparkles, ArrowRight } from 'lucide-react';
+import { LockIcon, Mail, User2, Sparkles, ArrowRight, Loader2 } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
@@ -41,6 +41,10 @@ const AuthForm = ({
 	content_flow = 'left',
 }: Props) => {
 	const [rememberMe, setRememberMe] = useState(false);
+	const [loading, setLoading] = useState({
+		googleAuthLoading: false,
+		emailSigninLoading: false
+	});
 
 	useEffect(() => {
 		if (
@@ -80,11 +84,24 @@ const AuthForm = ({
 					callbackURL: '/workspace/get-started',
 				},
 				{
+					onRequest: () => {
+						setLoading((prev) => ({
+							...prev,
+							emailSigninLoading: true,
+						}));
+					},
 					onSuccess: () => {
 						toast.success('Successfully Signed Up');
 					},
 					onError: (ctx) => {
+						console.log(ctx);
 						toast.error(ctx.error.message);
+					},
+					onResponse: () => {
+						setLoading((prev) => ({
+							...prev,
+							emailSigninLoading: false,
+						}));
 					},
 				},
 			);
@@ -97,11 +114,24 @@ const AuthForm = ({
 					callbackURL: '/workspace/get-started',
 				},
 				{
+					onRequest: () => {
+						setLoading((prev) => ({
+							...prev,
+							emailSigninLoading: true,
+						}));
+					},
 					onSuccess: () => {
 						toast.success('Successfully logged in');
 					},
 					onError: (ctx) => {
+						console.log(ctx);
 						toast.error(ctx.error.message);
+					},
+					onResponse: () => {
+						setLoading((prev) => ({
+							...prev,
+							emailSigninLoading: false,
+						}));
 					},
 				},
 			);
@@ -221,9 +251,14 @@ const AuthForm = ({
 											variant="outline"
 											className="w-full h-10 rounded-xl border-white/10 hover:bg-white/5 hover:border-violet-500/30 transition-all"
 											type="button"
+
 											onClick={handleGoogleLoginAndSignup}
 										>
-											<IconGoogle className="mr-2 size-5" />
+											{loading.googleAuthLoading ? (
+												<Loader2 className="mr-2 size-5" />
+											) : (
+												<IconGoogle className="mr-2 size-5" />
+											)}
 											Continue with Google
 										</Button>
 									</motion.div>
@@ -359,8 +394,13 @@ const AuthForm = ({
 											type="submit"
 											className="w-full h-10 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white font-semibold shadow-lg shadow-violet-500/25"
 										>
-											{type === 'sign-in' ? 'Sign In' : 'Create Account'}
-											<ArrowRight className="w-4 h-4 ml-2" />
+											{loading.emailSigninLoading ?
+												<Loader2 className="mr-2 size-5" />
+												: <>
+													{type === 'sign-in' ? 'Sign In' : 'Create Account'}
+													<ArrowRight className="w-4 h-4 ml-2" />
+												</>}
+
 										</Button>
 									</motion.div>
 								</div>
