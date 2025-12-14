@@ -32,7 +32,7 @@ const Page = () => {
       className="h-full w-full flex flex-col !gap-0"
     >
       <TabBar />
-      {/* <TabContent id={activeTab?.id || tabs[0]?.id} /> */}
+      <TabContent id={activeTab?.id || tabs[0]?.id} />
       {tabs.length <= 0 && (
         <div className="flex  flex-1 items-center justify-center select-none">
           <div className="flex items-center gap-2 font-medium opacity-25">
