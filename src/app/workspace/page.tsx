@@ -1,7 +1,45 @@
-import React from 'react';
+import { redirect } from 'next/navigation';
+import { headers } from 'next/headers';
+import auth from '@/lib/auth';
 
-const WorkspacePage = () => {
-	return <div>Workspace Page</div>;
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+
+const WorkspacePage = async () => {
+	const headersList = await headers();
+
+	// Get session with active organization
+	const session = await auth.api.getSession({
+		headers: headersList
+	});
+
+	if (!session) {
+		redirect('/sign-in');
+	}
+
+	// Check for active organization
+	if (session.session.activeOrganizationId) {
+		const activeOrg = await auth.api.getFullOrganization({
+			query: { organizationId: session.session.activeOrganizationId },
+			headers: headersList
+		});
+
+		if (activeOrg?.slug) {
+			redirect(`/workspace/${activeOrg.slug}`);
+		}
+	}
+
+	// Check if user has any organizations
+	const orgs = await auth.api.listOrganizations({
+		headers: headersList
+	});
+
+	if (orgs && orgs.length > 0) {
+		redirect(`/workspace/${orgs[0].slug}`);
+	}
+
+	// No organizations, redirect to get-started
+	redirect('/workspace/get-started');
 };
 
 export default WorkspacePage;
