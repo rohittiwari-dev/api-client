@@ -170,8 +170,10 @@ const ApiRequestComponent = () => {
           headers[key] = value;
         }
       });
+
       let authConfig: { type: string; data: Record<string, unknown> } | null =
         null;
+
       if (
         activeRequest.auth?.type &&
         activeRequest.auth.type !== "NONE" &&

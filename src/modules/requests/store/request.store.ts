@@ -63,12 +63,16 @@ const useRequestStore = create<RequestsStoreState & RequestStoreStateActions>()(
         },
         openRequest: (request) => {
           set((state) => {
-            const requestInfo = state?.requests.find(
+            const existingRequest = state.requests.find(
               (r) => r.id === request.id
             );
+            const isDraft = request.type === "NEW";
             return {
               activeTabId: request.id,
-              requests: requestInfo
+              activeRequest: existingRequest
+                ? { ...existingRequest, ...request }
+                : request,
+              requests: existingRequest
                 ? state.requests.map((r) =>
                     r.id === request.id ? { ...r, ...request } : r
                   )
@@ -76,14 +80,10 @@ const useRequestStore = create<RequestsStoreState & RequestStoreStateActions>()(
               tabIds: state.tabIds.includes(request.id)
                 ? state.tabIds
                 : [...state.tabIds, request.id],
-              draftIds: state.draftIds.includes(request.id)
-                ? state.draftIds
-                : requestInfo
-                ? [...state.draftIds, request.id]
-                : state.draftIds,
-              activeRequest: requestInfo
-                ? { ...requestInfo, ...request }
-                : request,
+              draftIds:
+                isDraft && !state.draftIds.includes(request.id)
+                  ? [...state.draftIds, request.id]
+                  : state.draftIds,
             };
           });
         },
@@ -152,18 +152,36 @@ const useRequestStore = create<RequestsStoreState & RequestStoreStateActions>()(
         closeTab: (tabId) =>
           set((state) => {
             const isDraft = state.draftIds.includes(tabId);
+            const isActiveTab = state.activeTabId === tabId;
+            const currentIndex = state.tabIds.indexOf(tabId);
+
+            // Calculate next active tab if closing the active tab
+            let nextActiveTabId: string | null = null;
+            let nextActiveRequest: RequestStateInterface | null = null;
+
+            if (isActiveTab && state.tabIds.length > 1) {
+              // Try to select the previous tab, or the next one if closing the first tab
+              const nextIndex = currentIndex > 0 ? currentIndex - 1 : 1;
+              nextActiveTabId = state.tabIds[nextIndex] || null;
+              nextActiveRequest =
+                state.requests.find((r) => r.id === nextActiveTabId) || null;
+            } else if (!isActiveTab) {
+              // Keep current active tab
+              nextActiveTabId = state.activeTabId;
+              nextActiveRequest = state.activeRequest;
+            }
+
             return {
               tabIds: state.tabIds.filter((id) => id !== tabId),
-              requests: isDraft
-                ? state.requests.filter((r) => r.id !== tabId)
-                : state.requests,
               draftIds: isDraft
                 ? state.draftIds.filter((id) => id !== tabId)
                 : state.draftIds,
-              activeTabId:
-                state.activeTabId === tabId ? null : state.activeTabId,
-              activeRequest:
-                state.activeRequest?.id === tabId ? null : state.activeRequest,
+              // Remove draft requests from the requests array
+              requests: isDraft
+                ? state.requests.filter((r) => r.id !== tabId)
+                : state.requests,
+              activeTabId: nextActiveTabId,
+              activeRequest: nextActiveRequest,
             };
           }),
 
