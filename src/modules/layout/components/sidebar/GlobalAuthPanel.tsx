@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   KeyRound,
   Lock,
@@ -11,7 +11,10 @@ import {
   FileKey,
   HelpCircle,
   Globe,
+  Loader2,
+  Save,
 } from "lucide-react";
+import { toast } from "sonner";
 import { Label } from "@/components/ui/label";
 import { EnvironmentVariableInput } from "@/components/ui/environment-variable-input";
 import {
@@ -29,6 +32,11 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
+import useWorkspaceState, { GlobalAuthState } from "@/modules/workspace/store";
+import {
+  updateWorkspaceGlobalAuth,
+  getWorkspaceWithGlobalAuth,
+} from "@/modules/workspace/server/workspace.actions";
 
 type AuthType =
   | "NONE"
@@ -181,20 +189,96 @@ const FieldDescription = ({ children }: { children: React.ReactNode }) => (
 );
 
 const GlobalAuthPanel = () => {
-  // Local state for global auth (UI only for now)
+  const { activeWorkspace, updateWorkspaceGlobalAuth: updateStoreGlobalAuth } =
+    useWorkspaceState();
+  const [isSaving, setIsSaving] = useState(false);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Local state initialized from workspace
   const [authType, setAuthType] = useState<AuthType>("NONE");
   const [authData, setAuthData] = useState<AuthData>(null);
 
-  const handleAuthTypeChange = (type: AuthType) => {
+  // Fetch globalAuth from database when workspace changes
+  useEffect(() => {
+    const fetchGlobalAuth = async () => {
+      if (!activeWorkspace?.id) {
+        setIsLoading(false);
+        return;
+      }
+
+      // First check if store already has globalAuth
+      if (activeWorkspace?.globalAuth) {
+        const globalAuth = activeWorkspace.globalAuth as GlobalAuthState;
+        if (globalAuth) {
+          setAuthType((globalAuth.type as AuthType) || "NONE");
+          setAuthData((globalAuth.data as AuthData) || null);
+        }
+        setIsLoading(false);
+        setHasUnsavedChanges(false);
+        return;
+      }
+
+      // Fetch from database
+      setIsLoading(true);
+      const result = await getWorkspaceWithGlobalAuth(activeWorkspace.id);
+      setIsLoading(false);
+
+      if (result?.globalAuth) {
+        const globalAuth = result.globalAuth as GlobalAuthState;
+        if (globalAuth) {
+          setAuthType((globalAuth.type as AuthType) || "NONE");
+          setAuthData((globalAuth.data as AuthData) || null);
+          // Update store so other components can use it
+          updateStoreGlobalAuth(globalAuth);
+        }
+      } else {
+        setAuthType("NONE");
+        setAuthData(null);
+      }
+      setHasUnsavedChanges(false);
+    };
+
+    fetchGlobalAuth();
+  }, [activeWorkspace?.id]);
+
+  // Save to server
+  const handleSave = useCallback(async () => {
+    if (!activeWorkspace?.id) return;
+
+    setIsSaving(true);
+    const globalAuth: GlobalAuthState =
+      authType === "NONE" ? null : { type: authType, data: authData };
+
+    // Optimistic update to store
+    updateStoreGlobalAuth(globalAuth);
+
+    const result = await updateWorkspaceGlobalAuth(
+      activeWorkspace.id,
+      globalAuth
+    );
+    setIsSaving(false);
+
+    if (result.success) {
+      setHasUnsavedChanges(false);
+      toast.success("Global auth saved");
+    } else {
+      toast.error("Failed to save global auth");
+    }
+  }, [activeWorkspace?.id, authType, authData, updateStoreGlobalAuth]);
+
+  const handleAuthTypeChange = useCallback((type: AuthType) => {
     setAuthType(type);
     if (type === "NONE") {
       setAuthData(null);
     }
-  };
+    setHasUnsavedChanges(true);
+  }, []);
 
-  const handleAuthDataChange = (data: AuthData) => {
+  const handleAuthDataChange = useCallback((data: AuthData) => {
     setAuthData(data);
-  };
+    setHasUnsavedChanges(true);
+  }, []);
 
   const currentAuthType = authTypes.find((t) => t.value === authType);
 
@@ -912,60 +996,102 @@ const GlobalAuthPanel = () => {
         </div>
       </div>
 
-      {/* Auth type selector */}
-      <div className="px-4 py-3 border-b border-border/40">
-        <div className="flex items-center gap-2 mb-2">
-          {currentAuthType?.icon}
-          <span className="text-xs font-medium">{currentAuthType?.label}</span>
-          {currentAuthType?.value !== "NONE" && (
-            <span className="text-[10px] text-muted-foreground">
-              • {currentAuthType?.description}
-            </span>
-          )}
+      {/* Loading state */}
+      {isLoading ? (
+        <div className="flex-1 flex items-center justify-center">
+          <div className="flex flex-col items-center gap-2">
+            <Loader2 className="size-6 animate-spin text-muted-foreground" />
+            <span className="text-xs text-muted-foreground">Loading...</span>
+          </div>
         </div>
-        <Select
-          value={authType}
-          onValueChange={(val) => handleAuthTypeChange(val as AuthType)}
-        >
-          <SelectTrigger className="h-8 text-xs bg-muted/30">
-            <SelectValue placeholder="Select auth type" />
-          </SelectTrigger>
-          <SelectContent>
-            {authTypes.map((type) => (
-              <SelectItem
-                key={type.value}
-                value={type.value}
-                className="text-xs"
+      ) : (
+        <>
+          {/* Auth type selector */}
+          <div className="px-4 py-3 border-b border-border/40">
+            <div className="flex items-center gap-2 mb-2">
+              {currentAuthType?.icon}
+              <span className="text-xs font-medium">
+                {currentAuthType?.label}
+              </span>
+              {currentAuthType?.value !== "NONE" && (
+                <span className="text-[10px] text-muted-foreground">
+                  • {currentAuthType?.description}
+                </span>
+              )}
+            </div>
+            <Select
+              value={authType}
+              onValueChange={(val) => handleAuthTypeChange(val as AuthType)}
+            >
+              <SelectTrigger className="h-8 text-xs bg-muted/30">
+                <SelectValue placeholder="Select auth type" />
+              </SelectTrigger>
+              <SelectContent>
+                {authTypes.map((type) => (
+                  <SelectItem
+                    key={type.value}
+                    value={type.value}
+                    className="text-xs"
+                  >
+                    <div className="flex items-center gap-2">
+                      {type.icon}
+                      <div className="flex flex-col">
+                        <span>{type.label}</span>
+                        <span className="text-[10px] text-muted-foreground">
+                          {type.description}
+                        </span>
+                      </div>
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Auth content */}
+          <div className="flex-1 overflow-auto px-4 py-4">
+            {renderAuthContent()}
+          </div>
+
+          {/* Footer with save button */}
+          <div className="px-4 py-3 border-t border-border/40 bg-muted/20">
+            <div className="flex items-center justify-between gap-3">
+              <p className="text-[10px] text-muted-foreground flex-1">
+                {authType !== "NONE" ? (
+                  <>
+                    <span className="text-amber-500 font-medium">Note:</span>{" "}
+                    Global auth will be applied to requests using "Inherit from
+                    Workspace"
+                  </>
+                ) : (
+                  "No global authentication configured"
+                )}
+              </p>
+              <button
+                onClick={handleSave}
+                disabled={isSaving || !hasUnsavedChanges}
+                className={cn(
+                  "flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-colors",
+                  hasUnsavedChanges
+                    ? "bg-amber-500 text-white hover:bg-amber-600"
+                    : "bg-muted text-muted-foreground cursor-not-allowed"
+                )}
               >
-                <div className="flex items-center gap-2">
-                  {type.icon}
-                  <div className="flex flex-col">
-                    <span>{type.label}</span>
-                    <span className="text-[10px] text-muted-foreground">
-                      {type.description}
-                    </span>
-                  </div>
-                </div>
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-
-      {/* Auth content */}
-      <div className="flex-1 overflow-auto px-4 py-4">
-        {renderAuthContent()}
-      </div>
-
-      {/* Footer note */}
-      {authType !== "NONE" && (
-        <div className="px-4 py-3 border-t border-border/40 bg-muted/20">
-          <p className="text-[10px] text-muted-foreground">
-            <span className="text-amber-500 font-medium">Note:</span> Global
-            auth will be applied to all requests that don't have their own
-            authentication configured.
-          </p>
-        </div>
+                {isSaving ? (
+                  <>
+                    <Loader2 className="size-3 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  <>
+                    <Save className="size-3" />
+                    Save
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </>
       )}
     </div>
   );

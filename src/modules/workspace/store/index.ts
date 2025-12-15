@@ -1,9 +1,18 @@
 import { create } from "zustand";
 import { Organization } from "@/generated/prisma/browser";
 
+export type GlobalAuthState = {
+  type: string;
+  data?: unknown;
+} | null;
+
+export type WorkspaceWithGlobalAuth = Organization & {
+  globalAuth?: GlobalAuthState;
+};
+
 export type WorkspaceStoreState = {
   workspaces?: Organization[];
-  activeWorkspace?: Organization | null;
+  activeWorkspace?: WorkspaceWithGlobalAuth | null;
   isLoading?: boolean;
   error?: Error | null;
   message?: string;
@@ -16,18 +25,21 @@ type WorkspaceStateActions = {
   setLoading: (state: boolean) => void;
   setMessage: (message: string) => void;
   setWorkspaceState: (state: WorkspaceStoreState) => void;
+  updateWorkspaceGlobalAuth: (globalAuth: GlobalAuthState) => void;
   reset: () => void;
 };
 
 const useWorkspaceState = create<WorkspaceStoreState & WorkspaceStateActions>(
-  (set) => ({
+  (set, get) => ({
     activeWorkspace: null,
     error: null,
     isLoading: false,
     message: undefined,
     workspaces: [],
     setActiveWorkspace: (workspace) => {
-      set({ activeWorkspace: workspace });
+      // Cast globalAuth from Prisma JsonValue to our GlobalAuthState type
+      const globalAuth = workspace.globalAuth as GlobalAuthState;
+      set({ activeWorkspace: { ...workspace, globalAuth } as any });
     },
     setError: (error) => {
       set({ error });
@@ -43,6 +55,17 @@ const useWorkspaceState = create<WorkspaceStoreState & WorkspaceStateActions>(
     },
     setWorkspaceState: (state: WorkspaceStoreState) => {
       set(state);
+    },
+    updateWorkspaceGlobalAuth: (globalAuth) => {
+      const currentWorkspace = get().activeWorkspace;
+      if (currentWorkspace) {
+        set({
+          activeWorkspace: {
+            ...currentWorkspace,
+            globalAuth,
+          } as WorkspaceWithGlobalAuth,
+        });
+      }
     },
     reset: () =>
       set({
