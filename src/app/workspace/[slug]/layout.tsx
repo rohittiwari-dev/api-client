@@ -5,7 +5,6 @@ import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { Organization } from "@/generated/prisma/client";
 import auth from "@/lib/auth";
 import { currentUser } from "@/modules/authentication/server/auth.actions";
-import { getAllCollections } from "@/modules/collections/server/collection.action";
 import Header from "@/modules/layout/components/header";
 import { AppSidebar } from "@/modules/layout/components/sidebar/AppSidebar";
 import RightSidebar from "@/modules/layout/components/sidebar/right-sidebar";

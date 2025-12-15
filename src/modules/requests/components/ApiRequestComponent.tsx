@@ -81,55 +81,8 @@ function parseSetCookie(setCookieStr: string, defaultDomain: string) {
   return cookie;
 }
 
-/**
- * Compute HMAC-SHA1 signature (for OAuth 1.0)
- */
-async function hmacSha1(key: string, message: string): Promise<string> {
-  const encoder = new TextEncoder();
-  const keyData = encoder.encode(key);
-  const messageData = encoder.encode(message);
-
-  const cryptoKey = await crypto.subtle.importKey(
-    "raw",
-    keyData,
-    { name: "HMAC", hash: "SHA-1" },
-    false,
-    ["sign"]
-  );
-
-  const signature = await crypto.subtle.sign("HMAC", cryptoKey, messageData);
-  // Convert to base64
-  const signatureArray = new Uint8Array(signature);
-  let binary = "";
-  signatureArray.forEach((byte) => (binary += String.fromCharCode(byte)));
-  return btoa(binary);
-}
-
-/**
- * Generate OAuth 1.0 signature base string
- */
-function buildOAuthSignatureBase(
-  method: string,
-  url: string,
-  params: Record<string, string>
-): string {
-  // Sort params alphabetically and encode
-  const sortedParams = Object.keys(params)
-    .sort()
-    .map(
-      (key) => `${encodeURIComponent(key)}=${encodeURIComponent(params[key])}`
-    )
-    .join("&");
-
-  // Build base string: METHOD&URL&PARAMS (all percent-encoded)
-  const baseUrl = url.split("?")[0];
-  return `${method.toUpperCase()}&${encodeURIComponent(
-    baseUrl
-  )}&${encodeURIComponent(sortedParams)}`;
-}
-
 const ApiRequestComponent = () => {
-  const { activeTabId, updateRequest, getRequestById } =
+  const { activeTabId, updateRequest, activeRequest, activeWorkspace } =
     useRequestSyncStoreState();
   const { setResponse, setLoading, setError, setActualRequest } =
     useResponseStore();
@@ -141,10 +94,9 @@ const ApiRequestComponent = () => {
   );
   const [isSaving, setIsSaving] = React.useState(false);
   const [isSending, setIsSending] = React.useState(false);
-  const activeRequest = getRequestById(activeTabId || "");
 
   // Upsert mutation with query invalidation
-  const upsertMutation = useUpsertRequest(activeRequest?.workspaceId || "", {
+  const upsertMutation = useUpsertRequest(activeWorkspace?.id || "", {
     onSuccess: () => {
       if (activeRequest?.id) {
         updateRequest(activeRequest.id, { unsaved: false });
@@ -179,14 +131,8 @@ const ApiRequestComponent = () => {
     setError(activeRequest.id, "");
 
     try {
-      // Get environment variables for substitution
       const envVariables = getVariablesAsRecord();
-
-      // Substitute variables in URL
       let finalUrl = substituteVariables(activeRequest.url, envVariables);
-
-      // Build URL with query parameters
-      // Build URL with query parameters & Auth params
       try {
         const url = new URL(finalUrl);
         const activeParams =
@@ -199,11 +145,8 @@ const ApiRequestComponent = () => {
         });
 
         finalUrl = url.toString();
-      } catch (e) {
-        // Invalid URL
-      }
+      } catch (e) {}
 
-      // Prepare headers with variable substitution
       const defaultHeaders: Record<string, string> = {
         "User-Agent": "API-Client/1.0",
         Accept: "*/*",
@@ -214,11 +157,8 @@ const ApiRequestComponent = () => {
       try {
         const urlObj = new URL(finalUrl);
         defaultHeaders["Host"] = urlObj.host;
-      } catch (e) {
-        // Invalid URL, ignore host header
-      }
+      } catch (e) {}
 
-      // Add a unique request token similar to Postman-Token
       defaultHeaders["API-Client-Token"] = crypto.randomUUID();
 
       const headers: Record<string, string> = { ...defaultHeaders };
@@ -230,13 +170,12 @@ const ApiRequestComponent = () => {
           headers[key] = value;
         }
       });
-
-      // Prepare auth config with variable substitution for proxy
       let authConfig: { type: string; data: Record<string, unknown> } | null =
         null;
       if (
         activeRequest.auth?.type &&
         activeRequest.auth.type !== "NONE" &&
+        activeRequest.auth.type !== "INHERIT" &&
         activeRequest.auth.data
       ) {
         // Substitute variables in auth data
@@ -255,6 +194,11 @@ const ApiRequestComponent = () => {
           type: activeRequest.auth.type,
           data: authData,
         };
+      } else if (activeRequest.auth?.type === "INHERIT") {
+        authConfig = {
+          type: activeWorkspace?.globalAuth?.type || activeRequest.auth.type,
+          data: activeWorkspace?.globalAuth?.data as Record<string, unknown>,
+        };
       }
 
       // Prepare body based on bodyType
@@ -267,7 +211,6 @@ const ApiRequestComponent = () => {
       switch (bodyType) {
         case BodyType.JSON:
           if (activeRequest.body?.json) {
-            // Substitute variables in JSON body
             const jsonBody = substituteVariablesInObject(
               activeRequest.body.json,
               envVariables
@@ -287,8 +230,6 @@ const ApiRequestComponent = () => {
 
         case BodyType.FORM_DATA:
           if (activeRequest.body?.formData) {
-            // For form-data, we send as JSON to proxy which will handle it
-            // We need to handle file uploads by converting to base64
             const formData: Array<{
               key: string;
               value: string;
@@ -361,7 +302,6 @@ const ApiRequestComponent = () => {
           break;
       }
 
-      // Calculate Content-Length if body exists and header not set
       if (body && !headers["Content-Length"]) {
         try {
           const textEncoder = new TextEncoder();
@@ -370,12 +310,9 @@ const ApiRequestComponent = () => {
           if (activeRequest.bodyType !== BodyType.FORM_DATA) {
             headers["Content-Length"] = length.toString();
           }
-        } catch (e) {
-          // Ignore
-        }
+        } catch (e) {}
       }
 
-      // Get cookies for domain
       let domain = "";
       try {
         domain = new URL(finalUrl).hostname;
@@ -384,7 +321,6 @@ const ApiRequestComponent = () => {
       }
       const requestCookies = getCookiesForDomain(domain);
 
-      // Store the actual request being sent
       const actualRequest = {
         url: finalUrl,
         method: method,
@@ -415,17 +351,14 @@ const ApiRequestComponent = () => {
           body: data.body,
           time: data.time,
           size: data.size,
-          setCookie: data.setCookie, // Store raw setCookie (array or string)
+          setCookie: data.setCookie,
           loading: false,
           error: null,
         });
 
-        // Handle Set-Cookie headers (can be multiple)
-        // Prioritize the raw array from proxy if available to avoid comma splitting issues
         const setCookieData = data.setCookie || data.headers?.["set-cookie"];
 
         if (setCookieData) {
-          // Handle multiple cookies (array or single string)
           const cookieStrings = Array.isArray(setCookieData)
             ? setCookieData
             : [setCookieData];
@@ -482,7 +415,6 @@ const ApiRequestComponent = () => {
 
   const isUnsaved = activeRequest?.unsaved ?? false;
 
-  // Use responses from store directly for proper reactivity
   const { responses } = useResponseStore();
   const currentResponse = activeRequest?.id
     ? responses[activeRequest.id]
@@ -491,9 +423,7 @@ const ApiRequestComponent = () => {
 
   return (
     <div className="flex h-full w-full flex-col backdrop-blur-md">
-      {/* Premium URL Bar */}
-      <div className="flex w-full items-center !border-t-0 gap-3 px-4 py-3 border-b border-primary/15 glass-subtle">
-        {/* Method Selector */}
+      <div className="flex w-full items-center border-t-0! gap-3 px-4 py-3 border-b border-primary/15 glass-subtle">
         <Select
           value={activeRequest?.method || "GET"}
           onValueChange={(value) => {

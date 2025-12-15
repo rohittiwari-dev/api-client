@@ -55,23 +55,41 @@ type TDigestAuth = {
   password: string;
   realm: string;
   nonce: string;
-  algorithm: string;
-  qop: string;
+  algorithm:
+    | "MD5"
+    | "MD5-sess"
+    | "SHA-256"
+    | "SHA-256-sess"
+    | "SHA-512"
+    | "SHA-512-sess";
+  qop: "auth" | "auth-int" | string;
   nc: string;
   cnonce: string;
   opaque: string;
-  disableRetryRequest: boolean;
+  disableRetryRequest?: boolean;
 };
 type TOauth1Auth = {
   consumerKey: string;
   consumerSecret: string;
   token: string;
   tokenSecret: string;
-  signatureMethod: string;
+  signatureMethod:
+    | "HMAC-SHA1"
+    | "RSA-SHA1"
+    | "PLAINTEXT"
+    | "HMAC-SHA256"
+    | "HMAC-SHA512"
+    | "PLAINTEXT-SHA1"
+    | "RSA-SHA256"
+    | "RSA-SHA512"
+    | "NONE";
   timestamp: string;
+  verifier: string;
   nonce: string;
   version: string;
+  callback: string;
   realm: string;
+  requestType: "AUTHORIZATION_HEADER" | "BODY";
   includeBodyHash: boolean;
   addEmptyParamsToSignature: boolean;
 };
@@ -83,8 +101,13 @@ type TOauth2Auth = {
   clientSecret: string;
   scope: string;
   state: string;
-  grantType: string;
-  clientAuthentication: string;
+  grantType:
+    | "authorization_code"
+    | "implicit"
+    | "password"
+    | "authorization_code_pkce"
+    | "client_credentials";
+  clientAuthentication: "header" | "body";
   refreshTokenUrl: string;
   redirectUrl: string;
 };
@@ -93,10 +116,11 @@ type AuthData =
   | TBasicAuth
   | TBearerAuth
   | TApiKeyAuth
-  | TDigestAuth
   | TOauth1Auth
   | TOauth2Auth
-  | null;
+  | TDigestAuth
+  | null
+  | undefined;
 
 const authTypes: {
   value: AuthType;
@@ -189,8 +213,11 @@ const FieldDescription = ({ children }: { children: React.ReactNode }) => (
 );
 
 const GlobalAuthPanel = () => {
-  const { activeWorkspace, updateWorkspaceGlobalAuth: updateStoreGlobalAuth } =
-    useWorkspaceState();
+  const {
+    activeWorkspace,
+    updateWorkspaceGlobalAuth: updateStoreGlobalAuth,
+    setActiveWorkspace,
+  } = useWorkspaceState();
   const [isSaving, setIsSaving] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -224,12 +251,16 @@ const GlobalAuthPanel = () => {
       const result = await getWorkspaceWithGlobalAuth(activeWorkspace.id);
       setIsLoading(false);
 
+      setActiveWorkspace({
+        ...activeWorkspace,
+        ...result,
+      });
+
       if (result?.globalAuth) {
         const globalAuth = result.globalAuth as GlobalAuthState;
         if (globalAuth) {
           setAuthType((globalAuth.type as AuthType) || "NONE");
           setAuthData((globalAuth.data as AuthData) || null);
-          // Update store so other components can use it
           updateStoreGlobalAuth(globalAuth);
         }
       } else {
@@ -242,15 +273,12 @@ const GlobalAuthPanel = () => {
     fetchGlobalAuth();
   }, [activeWorkspace?.id]);
 
-  // Save to server
   const handleSave = useCallback(async () => {
     if (!activeWorkspace?.id) return;
 
     setIsSaving(true);
     const globalAuth: GlobalAuthState =
       authType === "NONE" ? null : { type: authType, data: authData };
-
-    // Optimistic update to store
     updateStoreGlobalAuth(globalAuth);
 
     const result = await updateWorkspaceGlobalAuth(
@@ -512,7 +540,10 @@ const GlobalAuthPanel = () => {
               <Select
                 value={data.algorithm || "MD5"}
                 onValueChange={(val) =>
-                  handleAuthDataChange({ ...data, algorithm: val })
+                  handleAuthDataChange({
+                    ...data,
+                    algorithm: val as TDigestAuth["algorithm"],
+                  })
                 }
               >
                 <SelectTrigger className="h-7 text-xs font-mono bg-muted/30">
@@ -591,9 +622,12 @@ const GlobalAuthPanel = () => {
       tokenSecret: "",
       signatureMethod: "HMAC-SHA1",
       timestamp: "",
+      verifier: "",
       nonce: "",
       version: "1.0",
+      callback: "",
       realm: "",
+      requestType: "AUTHORIZATION_HEADER",
       includeBodyHash: false,
       addEmptyParamsToSignature: false,
     };
@@ -678,7 +712,10 @@ const GlobalAuthPanel = () => {
               <Select
                 value={data.signatureMethod || "HMAC-SHA1"}
                 onValueChange={(val) =>
-                  handleAuthDataChange({ ...data, signatureMethod: val })
+                  handleAuthDataChange({
+                    ...data,
+                    signatureMethod: val as TOauth1Auth["signatureMethod"],
+                  })
                 }
               >
                 <SelectTrigger className="h-7 text-xs font-mono bg-muted/30">
@@ -693,6 +730,8 @@ const GlobalAuthPanel = () => {
                     "RSA-SHA256",
                     "RSA-SHA512",
                     "PLAINTEXT",
+                    "PLAINTEXT-SHA1",
+                    "NONE",
                   ].map((method) => (
                     <SelectItem
                       key={method}
@@ -732,6 +771,72 @@ const GlobalAuthPanel = () => {
                 placeholder="Optional realm"
               />
             </div>
+            <div>
+              <FieldLabel tooltip="Verification code from authorization step">
+                Verifier
+              </FieldLabel>
+              <EnvironmentVariableInput
+                value={data.verifier || ""}
+                onChange={(val) =>
+                  handleAuthDataChange({ ...data, verifier: val })
+                }
+                className="bg-muted/30 h-7 text-xs font-mono px-2"
+                placeholder="Verification code"
+              />
+            </div>
+            <div>
+              <FieldLabel tooltip="Callback URL for OAuth flow">
+                Callback URL
+              </FieldLabel>
+              <EnvironmentVariableInput
+                value={data.callback || ""}
+                onChange={(val) =>
+                  handleAuthDataChange({ ...data, callback: val })
+                }
+                className="bg-muted/30 h-7 text-xs font-mono px-2"
+                placeholder="https://your-app.com/callback"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Request Type */}
+        <div className="border-t border-border/40 pt-3">
+          <FieldLabel tooltip="How to send OAuth parameters">
+            Request Type
+          </FieldLabel>
+          <div className="flex gap-2 mt-1">
+            <button
+              type="button"
+              onClick={() =>
+                handleAuthDataChange({
+                  ...data,
+                  requestType: "AUTHORIZATION_HEADER",
+                })
+              }
+              className={cn(
+                "flex-1 rounded border px-3 py-1.5 text-[10px] transition-colors",
+                data.requestType === "AUTHORIZATION_HEADER"
+                  ? "bg-primary text-primary-foreground border-primary"
+                  : "bg-background hover:bg-muted text-foreground"
+              )}
+            >
+              Authorization Header
+            </button>
+            <button
+              type="button"
+              onClick={() =>
+                handleAuthDataChange({ ...data, requestType: "BODY" })
+              }
+              className={cn(
+                "flex-1 rounded border px-3 py-1.5 text-[10px] transition-colors",
+                data.requestType === "BODY"
+                  ? "bg-primary text-primary-foreground border-primary"
+                  : "bg-background hover:bg-muted text-foreground"
+              )}
+            >
+              Request Body
+            </button>
           </div>
         </div>
 
@@ -829,7 +934,10 @@ const GlobalAuthPanel = () => {
               <Select
                 value={data.grantType || "authorization_code"}
                 onValueChange={(val) =>
-                  handleAuthDataChange({ ...data, grantType: val })
+                  handleAuthDataChange({
+                    ...data,
+                    grantType: val as TOauth2Auth["grantType"],
+                  })
                 }
               >
                 <SelectTrigger className="h-7 text-xs font-mono bg-muted/30">
@@ -941,6 +1049,46 @@ const GlobalAuthPanel = () => {
                 placeholder="Random state string"
               />
             </div>
+          </div>
+        </div>
+
+        {/* Client authentication method */}
+        <div className="border-t border-border/40 pt-3">
+          <FieldLabel tooltip="How to send client credentials when requesting tokens">
+            Client Authentication
+          </FieldLabel>
+          <div className="flex gap-2 mt-1">
+            <button
+              type="button"
+              onClick={() =>
+                handleAuthDataChange({
+                  ...data,
+                  clientAuthentication: "header",
+                })
+              }
+              className={cn(
+                "flex-1 rounded border px-3 py-1.5 text-[10px] transition-colors",
+                data.clientAuthentication === "header"
+                  ? "bg-primary text-primary-foreground border-primary"
+                  : "bg-background hover:bg-muted text-foreground"
+              )}
+            >
+              Send as Basic Auth Header
+            </button>
+            <button
+              type="button"
+              onClick={() =>
+                handleAuthDataChange({ ...data, clientAuthentication: "body" })
+              }
+              className={cn(
+                "flex-1 rounded border px-3 py-1.5 text-[10px] transition-colors",
+                data.clientAuthentication === "body"
+                  ? "bg-primary text-primary-foreground border-primary"
+                  : "bg-background hover:bg-muted text-foreground"
+              )}
+            >
+              Send in Request Body
+            </button>
           </div>
         </div>
       </div>

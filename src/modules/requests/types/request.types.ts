@@ -2,6 +2,7 @@ import { Request } from "@/generated/prisma/browser";
 
 export type AuthType =
   | "NONE"
+  | "INHERIT"
   | "BASIC"
   | "BEARER"
   | "API_KEY"
@@ -123,6 +124,7 @@ export interface RequestStateInterface extends Omit<Request, "type"> {
   auth: {
     type:
       | "NONE"
+      | "INHERIT"
       | "BASIC"
       | "BEARER"
       | "API_KEY"

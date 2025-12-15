@@ -140,7 +140,8 @@ const FieldDescription = ({ children }: { children: React.ReactNode }) => (
 );
 
 const AuthComponent = () => {
-  const { updateRequest, activeRequest } = useRequestSyncStoreState();
+  const { updateRequest, activeRequest, activeWorkspace } =
+    useRequestSyncStoreState();
 
   const authType = (activeRequest?.auth?.type || "INHERIT") as ExtendedAuthType;
   const authData = activeRequest?.auth?.data;
@@ -150,7 +151,12 @@ const AuthComponent = () => {
     updateRequest(activeRequest.id, {
       auth: {
         type: type as AuthType,
-        data: type === "NONE" || type === "INHERIT" ? null : authData,
+        data:
+          type === "NONE"
+            ? null
+            : type === "INHERIT"
+            ? activeWorkspace?.globalAuth?.data
+            : authData,
       },
       unsaved: true,
     });

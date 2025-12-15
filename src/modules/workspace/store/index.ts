@@ -1,9 +1,33 @@
 import { create } from "zustand";
 import { Organization } from "@/generated/prisma/browser";
+import {
+  TApiKeyAuth,
+  TBasicAuth,
+  TBearerAuth,
+  TDigestAuth,
+  TOauth1Auth,
+  TOauth2Auth,
+} from "@/modules/requests/types/request.types";
 
 export type GlobalAuthState = {
-  type: string;
-  data?: unknown;
+  type:
+    | "NONE"
+    | "INHERIT"
+    | "BASIC"
+    | "BEARER"
+    | "API_KEY"
+    | "OAUTH1"
+    | "OAUTH2"
+    | "DIGEST";
+  data?:
+    | TBasicAuth
+    | TBearerAuth
+    | TApiKeyAuth
+    | TOauth1Auth
+    | TOauth2Auth
+    | TDigestAuth
+    | null
+    | undefined;
 } | null;
 
 export type WorkspaceWithGlobalAuth = Organization & {

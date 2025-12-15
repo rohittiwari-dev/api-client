@@ -1,5 +1,6 @@
 "use server";
 
+import { Organization } from "@/generated/prisma/client";
 import db from "@/lib/db";
 
 export const getActiveOrganization = async (
@@ -38,11 +39,10 @@ export const updateWorkspaceGlobalAuth = async (
 
 export const getWorkspaceWithGlobalAuth = async (
   workspaceId: string
-): Promise<{ globalAuth: unknown } | null> => {
+): Promise<Organization | null> => {
   try {
     const workspace = await db.organization.findUnique({
       where: { id: workspaceId },
-      select: { globalAuth: true },
     });
     return workspace;
   } catch (error) {
