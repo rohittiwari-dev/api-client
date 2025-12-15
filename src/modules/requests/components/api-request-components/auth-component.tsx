@@ -10,9 +10,9 @@ import {
   ShieldCheck,
   FileKey,
   HelpCircle,
+  Globe,
 } from "lucide-react";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { EnvironmentVariableInput } from "@/components/ui/environment-variable-input";
 import {
   Select,
@@ -40,12 +40,21 @@ import type {
 } from "../../types/request.types";
 import useRequestSyncStoreState from "../../hooks/requestSyncStore";
 
+// Extended auth type to include INHERIT option
+type ExtendedAuthType = AuthType | "INHERIT";
+
 const authTypes: {
-  value: AuthType;
+  value: ExtendedAuthType;
   label: string;
   icon: React.ReactNode;
   description: string;
 }[] = [
+  {
+    value: "INHERIT",
+    label: "Inherit",
+    icon: <Globe className="size-3.5" />,
+    description: "Use workspace auth",
+  },
   {
     value: "NONE",
     label: "No Auth",
@@ -133,15 +142,15 @@ const FieldDescription = ({ children }: { children: React.ReactNode }) => (
 const AuthComponent = () => {
   const { updateRequest, activeRequest } = useRequestSyncStoreState();
 
-  const authType = activeRequest?.auth?.type || "NONE";
+  const authType = (activeRequest?.auth?.type || "INHERIT") as ExtendedAuthType;
   const authData = activeRequest?.auth?.data;
 
-  const handleAuthTypeChange = (type: AuthType) => {
+  const handleAuthTypeChange = (type: ExtendedAuthType) => {
     if (!activeRequest?.id) return;
     updateRequest(activeRequest.id, {
       auth: {
-        type,
-        data: type === "NONE" ? null : authData,
+        type: type as AuthType,
+        data: type === "NONE" || type === "INHERIT" ? null : authData,
       },
       unsaved: true,
     });
@@ -151,7 +160,7 @@ const AuthComponent = () => {
     if (!activeRequest?.id) return;
     updateRequest(activeRequest.id, {
       auth: {
-        type: authType,
+        type: authType as AuthType,
         data,
       },
       unsaved: true,
@@ -860,89 +869,126 @@ const AuthComponent = () => {
     );
   };
 
-  return (
-    <div className="flex flex-1 min-h-0 flex-col font-sans">
-      <div className="flex-1 min-h-0 overflow-auto p-4 content-start">
-        <div className="space-y-4 max-w-3xl">
-          {/* Auth Type Selector */}
-          <div className="space-y-2">
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-              {authTypes.map((type) => (
-                <button
-                  key={type.value}
-                  type="button"
-                  onClick={() => handleAuthTypeChange(type.value)}
-                  className={cn(
-                    "flex flex-col items-center gap-1.5 rounded-md border p-2 transition-all hover:bg-muted/50",
-                    authType === type.value
-                      ? "border-primary bg-primary/5 ring-1 ring-primary/20"
-                      : "border-border/60"
-                  )}
-                >
-                  <div
-                    className={cn(
-                      "rounded p-1",
-                      authType === type.value
-                        ? "text-primary"
-                        : "text-muted-foreground"
-                    )}
-                  >
-                    {type.icon}
-                  </div>
-                  <span
-                    className={cn(
-                      "text-[10px] font-medium",
-                      authType === type.value
-                        ? "text-primary"
-                        : "text-foreground/80"
-                    )}
-                  >
-                    {type.label}
-                  </span>
-                </button>
-              ))}
+  const renderAuthContent = () => {
+    switch (authType) {
+      case "BASIC":
+        return renderBasicAuth();
+      case "BEARER":
+        return renderBearerAuth();
+      case "API_KEY":
+        return renderApiKeyAuth();
+      case "DIGEST":
+        return renderDigestAuth();
+      case "OAUTH1":
+        return renderOAuth1();
+      case "OAUTH2":
+        return renderOAuth2();
+      case "INHERIT":
+        return (
+          <div className="flex flex-col items-center justify-center py-8 text-center">
+            <div className="size-12 rounded-full bg-amber-500/10 flex items-center justify-center mb-3">
+              <Globe className="size-6 text-amber-500" />
+            </div>
+            <p className="text-sm font-medium text-foreground">
+              Inheriting from Workspace
+            </p>
+            <p className="text-xs text-muted-foreground mt-1 max-w-xs">
+              This request will use the authentication configured in your
+              workspace's global auth settings.
+            </p>
+            <div className="mt-4 px-3 py-2 rounded-lg bg-amber-500/5 border border-amber-500/20">
+              <p className="text-[10px] text-amber-600 dark:text-amber-400">
+                Configure global auth from the right sidebar → Global Auth
+              </p>
             </div>
           </div>
-
-          {/* Auth Configuration */}
-          {authType !== "NONE" && currentAuthType && (
-            <Card className="border-dashed shadow-none border-border/60">
-              <CardHeader className="py-2.5 px-4 bg-muted/20 border-b border-border/40">
-                <div className="flex items-center gap-2">
-                  <span className="text-primary/80">
-                    {currentAuthType.icon}
-                  </span>
-                  <CardTitle className="text-sm font-medium">
-                    {currentAuthType.label}
-                  </CardTitle>
-                  <span className="text-[10px] text-muted-foreground ml-auto">
-                    <span className="text-red-500">*</span> Required fields
-                  </span>
-                </div>
-              </CardHeader>
-              <CardContent className="p-4">
-                {authType === "BASIC" && renderBasicAuth()}
-                {authType === "BEARER" && renderBearerAuth()}
-                {authType === "API_KEY" && renderApiKeyAuth()}
-                {authType === "DIGEST" && renderDigestAuth()}
-                {authType === "OAUTH1" && renderOAuth1()}
-                {authType === "OAUTH2" && renderOAuth2()}
-              </CardContent>
-            </Card>
-          )}
-
-          {authType === "NONE" && (
-            <div className="flex flex-col items-center justify-center py-12 text-muted-foreground gap-2 border border-dashed rounded-lg bg-muted/10">
-              <ShieldOff className="size-8 opacity-20" />
-              <span className="text-xs opacity-60">
-                No authentication selected
-              </span>
-              <span className="text-[10px] opacity-40">
-                Select an auth type above to configure
-              </span>
+        );
+      case "NONE":
+      default:
+        return (
+          <div className="flex flex-col items-center justify-center py-8 text-center">
+            <div className="size-12 rounded-full bg-muted/50 flex items-center justify-center mb-3">
+              <ShieldOff className="size-6 text-muted-foreground" />
             </div>
-          )}
+            <p className="text-sm text-muted-foreground">
+              No authentication configured
+            </p>
+            <p className="text-xs text-muted-foreground/70 mt-1">
+              This request will be sent without any auth headers
+            </p>
+          </div>
+        );
+    }
+  };
+
+  return (
+    <div className="flex flex-1 min-h-0 flex-col font-sans">
+      <div className="flex-1 min-h-0 overflow-auto content-start">
+        {/* Auth Type Selector - Dropdown style like GlobalAuthPanel */}
+        <div className="px-4 py-3 border-b border-border/40">
+          <div className="flex items-center gap-2 mb-2">
+            {currentAuthType?.icon}
+            <span className="text-xs font-medium">
+              {currentAuthType?.label}
+            </span>
+            {currentAuthType &&
+              currentAuthType.value !== "NONE" &&
+              currentAuthType.value !== "INHERIT" && (
+                <span className="text-[10px] text-muted-foreground">
+                  • {currentAuthType.description}
+                </span>
+              )}
+          </div>
+          <Select
+            value={authType}
+            onValueChange={(val) =>
+              handleAuthTypeChange(val as ExtendedAuthType)
+            }
+          >
+            <SelectTrigger className="h-8 text-xs bg-muted/30">
+              <SelectValue placeholder="Select auth type" />
+            </SelectTrigger>
+            <SelectContent>
+              {authTypes.map((type) => (
+                <SelectItem
+                  key={type.value}
+                  value={type.value}
+                  className="text-xs"
+                >
+                  <div className="flex items-center gap-2">
+                    <span
+                      className={cn(
+                        type.value === "INHERIT" && "text-amber-500"
+                      )}
+                    >
+                      {type.icon}
+                    </span>
+                    <div className="flex flex-col">
+                      <span>{type.label}</span>
+                      <span className="text-[10px] text-muted-foreground">
+                        {type.description}
+                      </span>
+                    </div>
+                  </div>
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
+
+        {/* Auth Content */}
+        <div className="px-4 py-4">{renderAuthContent()}</div>
+
+        {/* Footer note for non-inherit types */}
+        {authType !== "NONE" && authType !== "INHERIT" && (
+          <div className="px-4 py-3 border-t border-border/40 bg-muted/20">
+            <p className="text-[10px] text-muted-foreground">
+              <span className="text-primary font-medium">Note:</span> This
+              authentication will override any workspace-level global auth
+              settings.
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );
