@@ -244,9 +244,8 @@ const CodeSnippetPanel = () => {
   const [error, setError] = useState<string | null>(null);
 
   // Hooks
-  const { activeTabId, getRequestById } = useRequestSyncStoreState();
+  const { activeRequest } = useRequestSyncStoreState();
   const { getVariablesAsRecord } = useEnvironmentStore();
-  const activeRequest = getRequestById(activeTabId || "");
 
   // Update active client when group changes if current client not in new group
   useEffect(() => {
@@ -352,7 +351,9 @@ const CodeSnippetPanel = () => {
         }
 
         // Body
-        let postData: any = undefined;
+        let postData: any = {
+          mimeType: "application/json",
+        };
         if (
           activeRequest.bodyType === BodyType.JSON &&
           activeRequest.body?.json
@@ -580,7 +581,7 @@ const CodeSnippetPanel = () => {
                 </div>
                 <div className="text-center">
                   <p className="text-sm font-medium text-foreground/80">
-                    No Request Selected
+                    Valid Endpoint Required
                   </p>
                   <p className="text-xs text-muted-foreground mt-1">
                     Enter a URL in your request to generate code
