@@ -52,6 +52,7 @@ export type OrganizationCountAggregateOutputType = {
   logo: number
   createdAt: number
   metadata: number
+  globalAuth: number
   _all: number
 }
 
@@ -84,6 +85,7 @@ export type OrganizationCountAggregateInputType = {
   logo?: true
   createdAt?: true
   metadata?: true
+  globalAuth?: true
   _all?: true
 }
 
@@ -167,6 +169,7 @@ export type OrganizationGroupByOutputType = {
   logo: string | null
   createdAt: Date
   metadata: string | null
+  globalAuth: runtime.JsonValue | null
   _count: OrganizationCountAggregateOutputType | null
   _min: OrganizationMinAggregateOutputType | null
   _max: OrganizationMaxAggregateOutputType | null
@@ -198,6 +201,7 @@ export type OrganizationWhereInput = {
   logo?: Prisma.StringNullableFilter<"Organization"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Organization"> | Date | string
   metadata?: Prisma.StringNullableFilter<"Organization"> | string | null
+  globalAuth?: Prisma.JsonNullableFilter<"Organization">
   members?: Prisma.MemberListRelationFilter
   invitations?: Prisma.InvitationListRelationFilter
   Collection?: Prisma.CollectionListRelationFilter
@@ -213,6 +217,7 @@ export type OrganizationOrderByWithRelationInput = {
   logo?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   metadata?: Prisma.SortOrderInput | Prisma.SortOrder
+  globalAuth?: Prisma.SortOrderInput | Prisma.SortOrder
   members?: Prisma.MemberOrderByRelationAggregateInput
   invitations?: Prisma.InvitationOrderByRelationAggregateInput
   Collection?: Prisma.CollectionOrderByRelationAggregateInput
@@ -231,6 +236,7 @@ export type OrganizationWhereUniqueInput = Prisma.AtLeast<{
   logo?: Prisma.StringNullableFilter<"Organization"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Organization"> | Date | string
   metadata?: Prisma.StringNullableFilter<"Organization"> | string | null
+  globalAuth?: Prisma.JsonNullableFilter<"Organization">
   members?: Prisma.MemberListRelationFilter
   invitations?: Prisma.InvitationListRelationFilter
   Collection?: Prisma.CollectionListRelationFilter
@@ -246,6 +252,7 @@ export type OrganizationOrderByWithAggregationInput = {
   logo?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   metadata?: Prisma.SortOrderInput | Prisma.SortOrder
+  globalAuth?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.OrganizationCountOrderByAggregateInput
   _max?: Prisma.OrganizationMaxOrderByAggregateInput
   _min?: Prisma.OrganizationMinOrderByAggregateInput
@@ -262,6 +269,7 @@ export type OrganizationScalarWhereWithAggregatesInput = {
   logo?: Prisma.StringNullableWithAggregatesFilter<"Organization"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Organization"> | Date | string
   metadata?: Prisma.StringNullableWithAggregatesFilter<"Organization"> | string | null
+  globalAuth?: Prisma.JsonNullableWithAggregatesFilter<"Organization">
 }
 
 export type OrganizationCreateInput = {
@@ -272,6 +280,7 @@ export type OrganizationCreateInput = {
   logo?: string | null
   createdAt: Date | string
   metadata?: string | null
+  globalAuth?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   members?: Prisma.MemberCreateNestedManyWithoutOrganizationInput
   invitations?: Prisma.InvitationCreateNestedManyWithoutOrganizationInput
   Collection?: Prisma.CollectionCreateNestedManyWithoutWorkspaceInput
@@ -287,6 +296,7 @@ export type OrganizationUncheckedCreateInput = {
   logo?: string | null
   createdAt: Date | string
   metadata?: string | null
+  globalAuth?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   members?: Prisma.MemberUncheckedCreateNestedManyWithoutOrganizationInput
   invitations?: Prisma.InvitationUncheckedCreateNestedManyWithoutOrganizationInput
   Collection?: Prisma.CollectionUncheckedCreateNestedManyWithoutWorkspaceInput
@@ -302,6 +312,7 @@ export type OrganizationUpdateInput = {
   logo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   metadata?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  globalAuth?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   members?: Prisma.MemberUpdateManyWithoutOrganizationNestedInput
   invitations?: Prisma.InvitationUpdateManyWithoutOrganizationNestedInput
   Collection?: Prisma.CollectionUpdateManyWithoutWorkspaceNestedInput
@@ -317,6 +328,7 @@ export type OrganizationUncheckedUpdateInput = {
   logo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   metadata?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  globalAuth?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   members?: Prisma.MemberUncheckedUpdateManyWithoutOrganizationNestedInput
   invitations?: Prisma.InvitationUncheckedUpdateManyWithoutOrganizationNestedInput
   Collection?: Prisma.CollectionUncheckedUpdateManyWithoutWorkspaceNestedInput
@@ -332,6 +344,7 @@ export type OrganizationCreateManyInput = {
   logo?: string | null
   createdAt: Date | string
   metadata?: string | null
+  globalAuth?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
 
 export type OrganizationUpdateManyMutationInput = {
@@ -342,6 +355,7 @@ export type OrganizationUpdateManyMutationInput = {
   logo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   metadata?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  globalAuth?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
 
 export type OrganizationUncheckedUpdateManyInput = {
@@ -352,6 +366,7 @@ export type OrganizationUncheckedUpdateManyInput = {
   logo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   metadata?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  globalAuth?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
 
 export type OrganizationCountOrderByAggregateInput = {
@@ -362,6 +377,7 @@ export type OrganizationCountOrderByAggregateInput = {
   logo?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   metadata?: Prisma.SortOrder
+  globalAuth?: Prisma.SortOrder
 }
 
 export type OrganizationMaxOrderByAggregateInput = {
@@ -474,6 +490,7 @@ export type OrganizationCreateWithoutMembersInput = {
   logo?: string | null
   createdAt: Date | string
   metadata?: string | null
+  globalAuth?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   invitations?: Prisma.InvitationCreateNestedManyWithoutOrganizationInput
   Collection?: Prisma.CollectionCreateNestedManyWithoutWorkspaceInput
   Environment?: Prisma.EnvironmentCreateNestedManyWithoutWorkspaceInput
@@ -488,6 +505,7 @@ export type OrganizationUncheckedCreateWithoutMembersInput = {
   logo?: string | null
   createdAt: Date | string
   metadata?: string | null
+  globalAuth?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   invitations?: Prisma.InvitationUncheckedCreateNestedManyWithoutOrganizationInput
   Collection?: Prisma.CollectionUncheckedCreateNestedManyWithoutWorkspaceInput
   Environment?: Prisma.EnvironmentUncheckedCreateNestedManyWithoutWorkspaceInput
@@ -518,6 +536,7 @@ export type OrganizationUpdateWithoutMembersInput = {
   logo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   metadata?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  globalAuth?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   invitations?: Prisma.InvitationUpdateManyWithoutOrganizationNestedInput
   Collection?: Prisma.CollectionUpdateManyWithoutWorkspaceNestedInput
   Environment?: Prisma.EnvironmentUpdateManyWithoutWorkspaceNestedInput
@@ -532,6 +551,7 @@ export type OrganizationUncheckedUpdateWithoutMembersInput = {
   logo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   metadata?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  globalAuth?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   invitations?: Prisma.InvitationUncheckedUpdateManyWithoutOrganizationNestedInput
   Collection?: Prisma.CollectionUncheckedUpdateManyWithoutWorkspaceNestedInput
   Environment?: Prisma.EnvironmentUncheckedUpdateManyWithoutWorkspaceNestedInput
@@ -546,6 +566,7 @@ export type OrganizationCreateWithoutInvitationsInput = {
   logo?: string | null
   createdAt: Date | string
   metadata?: string | null
+  globalAuth?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   members?: Prisma.MemberCreateNestedManyWithoutOrganizationInput
   Collection?: Prisma.CollectionCreateNestedManyWithoutWorkspaceInput
   Environment?: Prisma.EnvironmentCreateNestedManyWithoutWorkspaceInput
@@ -560,6 +581,7 @@ export type OrganizationUncheckedCreateWithoutInvitationsInput = {
   logo?: string | null
   createdAt: Date | string
   metadata?: string | null
+  globalAuth?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   members?: Prisma.MemberUncheckedCreateNestedManyWithoutOrganizationInput
   Collection?: Prisma.CollectionUncheckedCreateNestedManyWithoutWorkspaceInput
   Environment?: Prisma.EnvironmentUncheckedCreateNestedManyWithoutWorkspaceInput
@@ -590,6 +612,7 @@ export type OrganizationUpdateWithoutInvitationsInput = {
   logo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   metadata?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  globalAuth?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   members?: Prisma.MemberUpdateManyWithoutOrganizationNestedInput
   Collection?: Prisma.CollectionUpdateManyWithoutWorkspaceNestedInput
   Environment?: Prisma.EnvironmentUpdateManyWithoutWorkspaceNestedInput
@@ -604,6 +627,7 @@ export type OrganizationUncheckedUpdateWithoutInvitationsInput = {
   logo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   metadata?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  globalAuth?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   members?: Prisma.MemberUncheckedUpdateManyWithoutOrganizationNestedInput
   Collection?: Prisma.CollectionUncheckedUpdateManyWithoutWorkspaceNestedInput
   Environment?: Prisma.EnvironmentUncheckedUpdateManyWithoutWorkspaceNestedInput
@@ -618,6 +642,7 @@ export type OrganizationCreateWithoutCollectionInput = {
   logo?: string | null
   createdAt: Date | string
   metadata?: string | null
+  globalAuth?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   members?: Prisma.MemberCreateNestedManyWithoutOrganizationInput
   invitations?: Prisma.InvitationCreateNestedManyWithoutOrganizationInput
   Environment?: Prisma.EnvironmentCreateNestedManyWithoutWorkspaceInput
@@ -632,6 +657,7 @@ export type OrganizationUncheckedCreateWithoutCollectionInput = {
   logo?: string | null
   createdAt: Date | string
   metadata?: string | null
+  globalAuth?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   members?: Prisma.MemberUncheckedCreateNestedManyWithoutOrganizationInput
   invitations?: Prisma.InvitationUncheckedCreateNestedManyWithoutOrganizationInput
   Environment?: Prisma.EnvironmentUncheckedCreateNestedManyWithoutWorkspaceInput
@@ -662,6 +688,7 @@ export type OrganizationUpdateWithoutCollectionInput = {
   logo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   metadata?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  globalAuth?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   members?: Prisma.MemberUpdateManyWithoutOrganizationNestedInput
   invitations?: Prisma.InvitationUpdateManyWithoutOrganizationNestedInput
   Environment?: Prisma.EnvironmentUpdateManyWithoutWorkspaceNestedInput
@@ -676,6 +703,7 @@ export type OrganizationUncheckedUpdateWithoutCollectionInput = {
   logo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   metadata?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  globalAuth?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   members?: Prisma.MemberUncheckedUpdateManyWithoutOrganizationNestedInput
   invitations?: Prisma.InvitationUncheckedUpdateManyWithoutOrganizationNestedInput
   Environment?: Prisma.EnvironmentUncheckedUpdateManyWithoutWorkspaceNestedInput
@@ -690,6 +718,7 @@ export type OrganizationCreateWithoutRequestsInput = {
   logo?: string | null
   createdAt: Date | string
   metadata?: string | null
+  globalAuth?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   members?: Prisma.MemberCreateNestedManyWithoutOrganizationInput
   invitations?: Prisma.InvitationCreateNestedManyWithoutOrganizationInput
   Collection?: Prisma.CollectionCreateNestedManyWithoutWorkspaceInput
@@ -704,6 +733,7 @@ export type OrganizationUncheckedCreateWithoutRequestsInput = {
   logo?: string | null
   createdAt: Date | string
   metadata?: string | null
+  globalAuth?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   members?: Prisma.MemberUncheckedCreateNestedManyWithoutOrganizationInput
   invitations?: Prisma.InvitationUncheckedCreateNestedManyWithoutOrganizationInput
   Collection?: Prisma.CollectionUncheckedCreateNestedManyWithoutWorkspaceInput
@@ -734,6 +764,7 @@ export type OrganizationUpdateWithoutRequestsInput = {
   logo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   metadata?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  globalAuth?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   members?: Prisma.MemberUpdateManyWithoutOrganizationNestedInput
   invitations?: Prisma.InvitationUpdateManyWithoutOrganizationNestedInput
   Collection?: Prisma.CollectionUpdateManyWithoutWorkspaceNestedInput
@@ -748,6 +779,7 @@ export type OrganizationUncheckedUpdateWithoutRequestsInput = {
   logo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   metadata?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  globalAuth?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   members?: Prisma.MemberUncheckedUpdateManyWithoutOrganizationNestedInput
   invitations?: Prisma.InvitationUncheckedUpdateManyWithoutOrganizationNestedInput
   Collection?: Prisma.CollectionUncheckedUpdateManyWithoutWorkspaceNestedInput
@@ -762,6 +794,7 @@ export type OrganizationCreateWithoutEnvironmentInput = {
   logo?: string | null
   createdAt: Date | string
   metadata?: string | null
+  globalAuth?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   members?: Prisma.MemberCreateNestedManyWithoutOrganizationInput
   invitations?: Prisma.InvitationCreateNestedManyWithoutOrganizationInput
   Collection?: Prisma.CollectionCreateNestedManyWithoutWorkspaceInput
@@ -776,6 +809,7 @@ export type OrganizationUncheckedCreateWithoutEnvironmentInput = {
   logo?: string | null
   createdAt: Date | string
   metadata?: string | null
+  globalAuth?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   members?: Prisma.MemberUncheckedCreateNestedManyWithoutOrganizationInput
   invitations?: Prisma.InvitationUncheckedCreateNestedManyWithoutOrganizationInput
   Collection?: Prisma.CollectionUncheckedCreateNestedManyWithoutWorkspaceInput
@@ -806,6 +840,7 @@ export type OrganizationUpdateWithoutEnvironmentInput = {
   logo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   metadata?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  globalAuth?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   members?: Prisma.MemberUpdateManyWithoutOrganizationNestedInput
   invitations?: Prisma.InvitationUpdateManyWithoutOrganizationNestedInput
   Collection?: Prisma.CollectionUpdateManyWithoutWorkspaceNestedInput
@@ -820,6 +855,7 @@ export type OrganizationUncheckedUpdateWithoutEnvironmentInput = {
   logo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   metadata?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  globalAuth?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   members?: Prisma.MemberUncheckedUpdateManyWithoutOrganizationNestedInput
   invitations?: Prisma.InvitationUncheckedUpdateManyWithoutOrganizationNestedInput
   Collection?: Prisma.CollectionUncheckedUpdateManyWithoutWorkspaceNestedInput
@@ -901,6 +937,7 @@ export type OrganizationSelect<ExtArgs extends runtime.Types.Extensions.Internal
   logo?: boolean
   createdAt?: boolean
   metadata?: boolean
+  globalAuth?: boolean
   members?: boolean | Prisma.Organization$membersArgs<ExtArgs>
   invitations?: boolean | Prisma.Organization$invitationsArgs<ExtArgs>
   Collection?: boolean | Prisma.Organization$CollectionArgs<ExtArgs>
@@ -917,6 +954,7 @@ export type OrganizationSelectCreateManyAndReturn<ExtArgs extends runtime.Types.
   logo?: boolean
   createdAt?: boolean
   metadata?: boolean
+  globalAuth?: boolean
 }, ExtArgs["result"]["organization"]>
 
 export type OrganizationSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -927,6 +965,7 @@ export type OrganizationSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.
   logo?: boolean
   createdAt?: boolean
   metadata?: boolean
+  globalAuth?: boolean
 }, ExtArgs["result"]["organization"]>
 
 export type OrganizationSelectScalar = {
@@ -937,9 +976,10 @@ export type OrganizationSelectScalar = {
   logo?: boolean
   createdAt?: boolean
   metadata?: boolean
+  globalAuth?: boolean
 }
 
-export type OrganizationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "slug" | "description" | "logo" | "createdAt" | "metadata", ExtArgs["result"]["organization"]>
+export type OrganizationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "slug" | "description" | "logo" | "createdAt" | "metadata" | "globalAuth", ExtArgs["result"]["organization"]>
 export type OrganizationInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   members?: boolean | Prisma.Organization$membersArgs<ExtArgs>
   invitations?: boolean | Prisma.Organization$invitationsArgs<ExtArgs>
@@ -968,6 +1008,7 @@ export type $OrganizationPayload<ExtArgs extends runtime.Types.Extensions.Intern
     logo: string | null
     createdAt: Date
     metadata: string | null
+    globalAuth: runtime.JsonValue | null
   }, ExtArgs["result"]["organization"]>
   composites: {}
 }
@@ -1403,6 +1444,7 @@ export interface OrganizationFieldRefs {
   readonly logo: Prisma.FieldRef<"Organization", 'String'>
   readonly createdAt: Prisma.FieldRef<"Organization", 'DateTime'>
   readonly metadata: Prisma.FieldRef<"Organization", 'String'>
+  readonly globalAuth: Prisma.FieldRef<"Organization", 'Json'>
 }
     
 

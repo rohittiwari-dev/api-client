@@ -149,6 +149,7 @@ model Organization {
   Collection  Collection[]
   Environment Environment[]
   requests    Request[]
+  globalAuth  Json?
 
   @@unique([slug])
   @@index([slug])

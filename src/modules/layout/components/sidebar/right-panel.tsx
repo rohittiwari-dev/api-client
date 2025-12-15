@@ -18,6 +18,7 @@ import EnvironmentSwitcher from "@/modules/workspace/components/EnvironmentSwitc
 import CookieManager from "@/modules/cookies/components/CookieManager";
 import RequestInfoPanel from "./RequestInfoPanel";
 import CodeSnippetPanel from "./CodeSnippetPanel";
+import GlobalAuthPanel from "./GlobalAuthPanel";
 
 const RightPanel = () => {
   const { activePanel, closePanel } = useRightPanelStore();
@@ -83,6 +84,21 @@ const RightPanel = () => {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Global Auth Sheet (Side Drawer) */}
+      <Sheet
+        open={activePanel === "auth"}
+        onOpenChange={(open) => !open && closePanel()}
+      >
+        <SheetContent side="right" className="w-[420px] p-0 flex flex-col">
+          <SheetHeader className="px-4 py-3 border-b bg-muted/30 shrink-0">
+            <SheetTitle className="text-sm">Global Authentication</SheetTitle>
+          </SheetHeader>
+          <div className="flex-1 overflow-hidden">
+            <GlobalAuthPanel />
+          </div>
+        </SheetContent>
+      </Sheet>
     </>
   );
 };

@@ -157,7 +157,8 @@ export const OrganizationScalarFieldEnum = {
   description: 'description',
   logo: 'logo',
   createdAt: 'createdAt',
-  metadata: 'metadata'
+  metadata: 'metadata',
+  globalAuth: 'globalAuth'
 } as const
 
 export type OrganizationScalarFieldEnum = (typeof OrganizationScalarFieldEnum)[keyof typeof OrganizationScalarFieldEnum]
