@@ -8,6 +8,7 @@ import authClient from "@/lib/authClient";
 import { useFetchAllRequests } from "@/modules/requests/hooks/queries";
 import { RequestStateInterface } from "@/modules/requests/types/request.types";
 import useRequestSyncStoreState from "@/modules/requests/hooks/requestSyncStore";
+import { useWorkspaceSwitcher } from "../hooks/use-workspace-switcher";
 
 const WorkspaceProvider = ({
   children,
@@ -25,6 +26,8 @@ const WorkspaceProvider = ({
   const { setRequestsState, requests: currentRequests } =
     useRequestSyncStoreState();
   const { setCurrentWorkspaceId } = useCookieStore();
+  const { applyPendingRestore, pendingRestoreWorkspaceId } =
+    useWorkspaceSwitcher();
 
   useEffect(() => {
     if (activeOrg) {
@@ -34,8 +37,9 @@ const WorkspaceProvider = ({
 
   useEffect(() => {
     if (requests) {
-      setRequestsState({
-        requests: requests?.map((request) => ({
+      // Convert DB requests to RequestStateInterface format
+      const formattedRequests: RequestStateInterface[] = requests.map(
+        (request) => ({
           ...(currentRequests.find((r) => r.id === request.id) || {}),
           ...request,
           unsaved:
@@ -46,10 +50,22 @@ const WorkspaceProvider = ({
           auth: request.auth as RequestStateInterface["auth"],
           savedMessages:
             request.savedMessages as RequestStateInterface["savedMessages"],
-        })),
-      });
+        })
+      );
+
+      // Check if there's a pending restore for this workspace
+      if (pendingRestoreWorkspaceId === activeOrg.id) {
+        // Apply cached state merged with fresh DB data
+        // This preserves tabs, drafts, and unsaved changes from before switching
+        applyPendingRestore(activeOrg.id, formattedRequests);
+      } else {
+        // Normal flow - just set requests from DB
+        setRequestsState({
+          requests: formattedRequests,
+        });
+      }
     }
-  }, [requests]);
+  }, [requests, activeOrg.id, pendingRestoreWorkspaceId]);
 
   React.useEffect(() => {
     setWorkspaces(workspaces);

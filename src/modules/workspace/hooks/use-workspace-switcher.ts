@@ -1,11 +1,11 @@
 import { useCallback } from "react";
-import useWorkspaceStateCache, {
-  WorkspaceStateSnapshot,
-} from "../store/workspace-state-cache";
+import useWorkspaceStateCache from "../store/workspace-state-cache";
 import useSidebarStore from "@/modules/layout/store/sidebar.store";
 import useEnvironmentStore from "@/modules/environment/store/environment.store";
 import useWorkspaceState from "../store";
 import useRequestSyncStoreState from "@/modules/requests/hooks/requestSyncStore";
+import { RequestStateInterface } from "@/modules/requests/types/request.types";
+import { Organization } from "@/generated/prisma/browser";
 
 /**
  * Hook to manage workspace switching with state preservation
@@ -16,11 +16,17 @@ export function useWorkspaceSwitcher() {
     getSnapshot,
     setCurrentWorkspaceId,
     currentWorkspaceId,
+    createSnapshotFromState,
+    mergeWithDatabaseRequests,
+    setPendingRestore,
+    clearPendingRestore,
+    getPendingRestore,
+    pendingRestoreWorkspaceId,
   } = useWorkspaceStateCache();
   const { setActiveWorkspace, activeWorkspace } = useWorkspaceState();
 
   // Request store (Unified)
-  const { setRequestsState, getState } = useRequestSyncStoreState();
+  const { setRequestsState, getState, requests } = useRequestSyncStoreState();
 
   // Sidebar store
   const { items: sidebarItems, setItems: setSidebarItems } = useSidebarStore();
@@ -34,13 +40,13 @@ export function useWorkspaceSwitcher() {
   const saveCurrentWorkspaceState = useCallback(() => {
     if (!currentWorkspaceId) return;
 
-    const snapshot: WorkspaceStateSnapshot = {
-      workspaceId: currentWorkspaceId,
-      requestState: getState(),
-      sidebarItems: sidebarItems,
-      activeEnvironmentId: activeEnvironmentId,
-      savedAt: Date.now(),
-    };
+    const requestState = getState();
+    const snapshot = createSnapshotFromState(
+      currentWorkspaceId,
+      requestState,
+      sidebarItems,
+      activeEnvironmentId
+    );
 
     saveSnapshot(snapshot);
   }, [
@@ -49,24 +55,39 @@ export function useWorkspaceSwitcher() {
     sidebarItems,
     activeEnvironmentId,
     saveSnapshot,
+    createSnapshotFromState,
   ]);
 
   /**
    * Restore a workspace's state from cache
+   * This should be called AFTER DB requests are loaded
    */
   const restoreWorkspaceState = useCallback(
-    (workspaceId: string) => {
+    (workspaceId: string, dbRequests?: RequestStateInterface[]) => {
       const snapshot = getSnapshot(workspaceId);
 
       if (snapshot) {
-        // Restore tabs
-        setRequestsState(snapshot.requestState);
         // Restore sidebar
         setSidebarItems(snapshot.sidebarItems);
 
         // Restore environment
         if (snapshot.activeEnvironmentId) {
           setActiveEnvironment(snapshot.activeEnvironmentId);
+        }
+
+        // If we have DB requests, merge with cached state
+        if (dbRequests && dbRequests.length > 0) {
+          const mergedState = mergeWithDatabaseRequests(snapshot, dbRequests);
+          setRequestsState(mergedState);
+        } else {
+          // No DB requests yet, restore just the tab/draft structure
+          // The actual requests will be merged when DB data arrives
+          setRequestsState({
+            tabIds: snapshot.tabIds,
+            draftIds: snapshot.draftIds,
+            activeTabId: snapshot.activeTabId,
+            requests: snapshot.draftRequests, // Only restore drafts for now
+          });
         }
       } else {
         // No cached state - clear stores for fresh workspace
@@ -77,18 +98,42 @@ export function useWorkspaceSwitcher() {
           draftIds: [],
           requestLoading: false,
           activeRequestLoading: false,
+          activeRequest: null,
         });
         // Sidebar will be populated by the page query
       }
     },
-    [getSnapshot, setRequestsState, setSidebarItems, setActiveEnvironment]
+    [
+      getSnapshot,
+      setRequestsState,
+      setSidebarItems,
+      setActiveEnvironment,
+      mergeWithDatabaseRequests,
+    ]
   );
 
   /**
-   * Switch to a new workspace, saving current state and restoring target state
+   * Apply cached state to existing DB requests
+   * Call this from WorkspaceProvider after DB requests are loaded
+   */
+  const applyCachedStateToRequests = useCallback(
+    (workspaceId: string, dbRequests: RequestStateInterface[]) => {
+      const snapshot = getSnapshot(workspaceId);
+
+      if (snapshot) {
+        const mergedState = mergeWithDatabaseRequests(snapshot, dbRequests);
+        setRequestsState(mergedState);
+      }
+    },
+    [getSnapshot, mergeWithDatabaseRequests, setRequestsState]
+  );
+
+  /**
+   * Switch to a new workspace, saving current state and marking for restore
+   * Note: Actual restore happens via applyPendingRestore AFTER reset/navigation
    */
   const switchWorkspace = useCallback(
-    (targetWorkspace: typeof activeWorkspace) => {
+    (targetWorkspace: Organization | null | undefined) => {
       if (!targetWorkspace) return;
 
       // Save current workspace state before switching
@@ -100,14 +145,15 @@ export function useWorkspaceSwitcher() {
       // Set the new active workspace
       setActiveWorkspace(targetWorkspace);
 
-      // Restore target workspace state
-      restoreWorkspaceState(targetWorkspace.id);
+      // Mark for pending restore - don't restore now as resetCollectionsRequestsAndCookies
+      // will clear it. The actual restore will happen when applyPendingRestore is called.
+      setPendingRestore(targetWorkspace.id);
     },
     [
       saveCurrentWorkspaceState,
       setCurrentWorkspaceId,
       setActiveWorkspace,
-      restoreWorkspaceState,
+      setPendingRestore,
     ]
   );
 
@@ -121,11 +167,62 @@ export function useWorkspaceSwitcher() {
     [setCurrentWorkspaceId]
   );
 
+  /**
+   * Apply pending restore for a workspace
+   * Call this from WorkspaceProvider AFTER DB requests are loaded to merge cached state
+   */
+  const applyPendingRestore = useCallback(
+    (workspaceId: string, dbRequests: RequestStateInterface[]) => {
+      const pendingId = getPendingRestore();
+
+      // Only apply if this is the pending workspace
+      if (pendingId !== workspaceId && pendingId !== null) {
+        return false;
+      }
+
+      const snapshot = getSnapshot(workspaceId);
+
+      if (snapshot) {
+        // Restore sidebar
+        setSidebarItems(snapshot.sidebarItems);
+
+        // Restore environment
+        if (snapshot.activeEnvironmentId) {
+          setActiveEnvironment(snapshot.activeEnvironmentId);
+        }
+
+        // Merge cached state with DB requests
+        const mergedState = mergeWithDatabaseRequests(snapshot, dbRequests);
+        setRequestsState(mergedState);
+
+        // Clear the pending flag
+        clearPendingRestore();
+        return true;
+      }
+
+      // No cached state - just clear the pending flag
+      clearPendingRestore();
+      return false;
+    },
+    [
+      getPendingRestore,
+      getSnapshot,
+      setSidebarItems,
+      setActiveEnvironment,
+      mergeWithDatabaseRequests,
+      setRequestsState,
+      clearPendingRestore,
+    ]
+  );
+
   return {
     switchWorkspace,
     saveCurrentWorkspaceState,
     restoreWorkspaceState,
+    applyCachedStateToRequests,
+    applyPendingRestore,
     initializeWorkspaceTracking,
     currentWorkspaceId,
+    pendingRestoreWorkspaceId,
   };
 }
