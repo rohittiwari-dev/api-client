@@ -10,14 +10,13 @@ import { RequestsStoreState } from "@/modules/requests/store/request.store";
  */
 export interface WorkspaceStateSnapshot {
   workspaceId: string;
-  // Only store what we need to restore UI state, not the full DB data
+  // UI State
   tabIds: string[];
   draftIds: string[];
   activeTabId: string | null;
-  // Draft requests that don't exist in DB (local only)
-  draftRequests: RequestStateInterface[];
-  // Unsaved changes for DB requests (id -> partial request with changes)
-  unsavedChanges: Record<string, Partial<RequestStateInterface>>;
+  activeRequest: RequestStateInterface | null;
+  // Full request state (captures everything including unsaved changes & drafts)
+  requests: RequestStateInterface[];
   // Sidebar state
   sidebarItems: SidebarItemInterface[];
   // Active environment
@@ -30,6 +29,8 @@ interface WorkspaceStateCacheState {
   currentWorkspaceId: string | null;
   // Workspace ID that needs cache restoration after navigation
   pendingRestoreWorkspaceId: string | null;
+  // Workspace ID that has had restore applied (to prevent re-applying)
+  appliedRestoreWorkspaceId: string | null;
 }
 
 interface WorkspaceStateCacheActions {
@@ -50,6 +51,18 @@ interface WorkspaceStateCacheActions {
    * Get pending restore workspace ID
    */
   getPendingRestore: () => string | null;
+  /**
+   * Mark restore as applied for a workspace
+   */
+  setAppliedRestore: (workspaceId: string) => void;
+  /**
+   * Check if restore was already applied for a workspace
+   */
+  hasAppliedRestore: (workspaceId: string) => boolean;
+  /**
+   * Clear applied restore when switching away
+   */
+  clearAppliedRestore: () => void;
   /**
    * Create a snapshot from the current request store state
    */
@@ -78,6 +91,7 @@ const useWorkspaceStateCache = create<
         snapshots: {},
         currentWorkspaceId: null,
         pendingRestoreWorkspaceId: null,
+        appliedRestoreWorkspaceId: null,
 
         saveSnapshot: (snapshot) =>
           set((state) => ({
@@ -101,17 +115,29 @@ const useWorkspaceStateCache = create<
           set({ currentWorkspaceId: workspaceId }),
 
         setPendingRestore: (workspaceId) =>
-          set({ pendingRestoreWorkspaceId: workspaceId }),
+          set({
+            pendingRestoreWorkspaceId: workspaceId,
+            appliedRestoreWorkspaceId: null,
+          }),
 
         clearPendingRestore: () => set({ pendingRestoreWorkspaceId: null }),
 
         getPendingRestore: () => get().pendingRestoreWorkspaceId,
+
+        setAppliedRestore: (workspaceId) =>
+          set({ appliedRestoreWorkspaceId: workspaceId }),
+
+        hasAppliedRestore: (workspaceId) =>
+          get().appliedRestoreWorkspaceId === workspaceId,
+
+        clearAppliedRestore: () => set({ appliedRestoreWorkspaceId: null }),
 
         reset: () =>
           set({
             snapshots: {},
             currentWorkspaceId: null,
             pendingRestoreWorkspaceId: null,
+            appliedRestoreWorkspaceId: null,
           }),
 
         createSnapshotFromState: (
@@ -120,32 +146,16 @@ const useWorkspaceStateCache = create<
           sidebarItems,
           activeEnvironmentId
         ) => {
-          const { requests, tabIds, draftIds, activeTabId } = requestState;
-
-          // Separate draft requests (local only, type: NEW) from DB requests
-          const draftRequests = requests.filter(
-            (r) => draftIds.includes(r.id) && r.type === "NEW"
-          );
-
-          // Collect unsaved changes for DB requests (not drafts)
-          const unsavedChanges: Record<
-            string,
-            Partial<RequestStateInterface>
-          > = {};
-          requests.forEach((r) => {
-            if (r.unsaved && !draftIds.includes(r.id)) {
-              // Store the full request state for unsaved DB requests
-              unsavedChanges[r.id] = { ...r };
-            }
-          });
+          const { requests, tabIds, draftIds, activeTabId, activeRequest } =
+            requestState;
 
           return {
             workspaceId,
             tabIds,
             draftIds,
             activeTabId,
-            draftRequests,
-            unsavedChanges,
+            activeRequest,
+            requests, // Save the full request state
             sidebarItems,
             activeEnvironmentId,
             savedAt: Date.now(),
@@ -153,31 +163,48 @@ const useWorkspaceStateCache = create<
         },
 
         mergeWithDatabaseRequests: (snapshot, dbRequests) => {
-          // Start with DB requests
-          const mergedRequests: RequestStateInterface[] = dbRequests.map(
-            (dbReq) => {
-              // Check if there are unsaved changes for this request
-              const unsavedChanges = snapshot.unsavedChanges[dbReq.id];
-              if (unsavedChanges) {
-                return {
-                  ...dbReq,
-                  ...unsavedChanges,
-                  unsaved: true,
-                };
-              }
-              return { ...dbReq, unsaved: false };
-            }
-          );
+          // 1. Start with fresh DB requests as the base
+          // Map to quick lookup for DB existence
+          const dbRequestMap = new Map(dbRequests.map((r) => [r.id, r]));
 
-          // Add draft requests that don't exist in DB
-          snapshot.draftRequests.forEach((draftReq) => {
-            if (!mergedRequests.find((r) => r.id === draftReq.id)) {
-              mergedRequests.push(draftReq);
+          // 2. Process cached requests to apply overlays
+          const fusedRequests: RequestStateInterface[] = [];
+          const processedIds = new Set<string>();
+
+          // Iterate through cached requests to preserve order/unsaved work
+          // Handle legacy snapshots where requests might be undefined
+          const cachedRequests = snapshot.requests || [];
+          cachedRequests.forEach((cachedReq) => {
+            const dbReq = dbRequestMap.get(cachedReq.id);
+
+            if (dbReq) {
+              // CASE A: Request exists in DB
+              if (cachedReq.unsaved) {
+                // If local has unsaved changes, PRESERVE local version
+                fusedRequests.push(cachedReq);
+              } else {
+                // If local is clean, use fresh DB version (to get external updates)
+                fusedRequests.push(dbReq);
+              }
+            } else {
+              // CASE B: Request NOT in DB (It's a local draft)
+              // Preserve it
+              fusedRequests.push(cachedReq);
+            }
+            processedIds.add(cachedReq.id);
+          });
+
+          // 3. Add any NEW DB requests that weren't in cache
+          // (e.g. created by another user or in another session)
+          dbRequests.forEach((dbReq) => {
+            if (!processedIds.has(dbReq.id)) {
+              fusedRequests.push(dbReq);
             }
           });
 
-          // Filter tabIds to only include valid requests (in merged list)
-          const validRequestIds = new Set(mergedRequests.map((r) => r.id));
+          // 4. Validate UI State
+          // Ensure tabIds only point to existing requests
+          const validRequestIds = new Set(fusedRequests.map((r) => r.id));
           const validTabIds = snapshot.tabIds.filter((id) =>
             validRequestIds.has(id)
           );
@@ -185,18 +212,18 @@ const useWorkspaceStateCache = create<
             validRequestIds.has(id)
           );
 
-          // Determine active tab - use cached if valid, otherwise first tab or null
+          // Validate active tab
           let activeTabId = snapshot.activeTabId;
           if (activeTabId && !validRequestIds.has(activeTabId)) {
             activeTabId = validTabIds[0] || null;
           }
 
           const activeRequest = activeTabId
-            ? mergedRequests.find((r) => r.id === activeTabId) || null
+            ? fusedRequests.find((r) => r.id === activeTabId) || null
             : null;
 
           return {
-            requests: mergedRequests,
+            requests: fusedRequests,
             tabIds: validTabIds,
             draftIds: validDraftIds,
             activeTabId,

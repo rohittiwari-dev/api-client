@@ -22,6 +22,8 @@ export function useWorkspaceSwitcher() {
     clearPendingRestore,
     getPendingRestore,
     pendingRestoreWorkspaceId,
+    // Optional now with simplified logic, but kept if you want strict prevention
+    // appliedRestoreWorkspaceId, setAppliedRestore, hasAppliedRestore...
   } = useWorkspaceStateCache();
   const { setActiveWorkspace, activeWorkspace } = useWorkspaceState();
 
@@ -82,11 +84,14 @@ export function useWorkspaceSwitcher() {
         } else {
           // No DB requests yet, restore just the tab/draft structure
           // The actual requests will be merged when DB data arrives
+          // No DB requests yet, restore fully from cache
+          // Since we cache full state now, we can just restore everything
           setRequestsState({
             tabIds: snapshot.tabIds,
             draftIds: snapshot.draftIds,
             activeTabId: snapshot.activeTabId,
-            requests: snapshot.draftRequests, // Only restore drafts for now
+            requests: snapshot.requests, // Restore full cached requests
+            activeRequest: snapshot.activeRequest,
           });
         }
       } else {
@@ -210,6 +215,7 @@ export function useWorkspaceSwitcher() {
       setSidebarItems,
       setActiveEnvironment,
       mergeWithDatabaseRequests,
+      setRequestsState,
       setRequestsState,
       clearPendingRestore,
     ]
