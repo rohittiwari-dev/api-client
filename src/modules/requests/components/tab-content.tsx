@@ -12,6 +12,7 @@ const TabContent = ({ id }: { id: string }) => {
   const { activeRequest } = useRequestSyncStoreState();
   return (
     <TabsContent
+      key={id + activeRequest?.id + activeRequest?.type}
       value={id}
       className="flex-1 flex h-full w-full !bg-background items-center justify-center overflow-hidden p-0"
     >
