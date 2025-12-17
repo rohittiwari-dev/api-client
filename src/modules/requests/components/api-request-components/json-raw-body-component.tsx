@@ -25,15 +25,12 @@ const JsonAndRawBodyComponent = ({
   const { resolvedTheme } = useTheme();
 
   useEffect(() => {
-    setData(
-      (prev) =>
-        prev ||
-        (type === "json"
-          ? JSON.stringify(value || {}, null, 4)
-          : value?.toString()) ||
-        ""
-    );
-  }, [value]);
+    const newData =
+      type === "json"
+        ? JSON.stringify(value || {}, null, 4)
+        : value?.toString() || "";
+    setData(newData);
+  }, [value, type]);
 
   const validateJson = (code: string) => {
     try {

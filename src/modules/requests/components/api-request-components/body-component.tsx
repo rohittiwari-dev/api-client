@@ -20,14 +20,12 @@ const bodyTypes = [
 
 const BodyComponent = () => {
   const { activeRequest, updateRequest } = useRequestSyncStoreState();
-
   return (
     <Tabs
       value={activeRequest?.bodyType || BodyType.NONE}
       onValueChange={(val) => {
         updateRequest(activeRequest?.id || "", {
           bodyType: val as BodyType,
-          unsaved: true,
         });
       }}
       className="flex flex-1 min-h-0 flex-col w-full overflow-hidden"
@@ -84,6 +82,7 @@ const BodyComponent = () => {
           className="h-full min-h-0 mt-0 data-[state=active]:flex flex-col overflow-auto"
         >
           <JsonAndRawBodyComponent
+            key={`json-body-${activeRequest?.id}`}
             type="json"
             value={activeRequest?.body?.json || ""}
             onChange={(value) => {
@@ -109,7 +108,10 @@ const BodyComponent = () => {
           value={BodyType.FORM_DATA}
           className="h-full mt-0 data-[state=active]:flex flex-col"
         >
-          <FormDataComponent type="FORM_DATA" />
+          <FormDataComponent
+            key={`formdata-${activeRequest?.id}`}
+            type="FORM_DATA"
+          />
         </TabsContent>
 
         {/* URL Encoded */}
@@ -117,7 +119,10 @@ const BodyComponent = () => {
           value={BodyType.X_WWW_FORM_URLENCODED}
           className="h-full mt-0 data-[state=active]:flex flex-col"
         >
-          <FormDataComponent type="X-WWW-FORM-URLENCODED" />
+          <FormDataComponent
+            key={`urlencoded-${activeRequest?.id}`}
+            type="X-WWW-FORM-URLENCODED"
+          />
         </TabsContent>
 
         {/* Raw Body */}
@@ -126,6 +131,7 @@ const BodyComponent = () => {
           className="h-full min-h-0 mt-0 data-[state=active]:flex flex-col overflow-auto"
         >
           <JsonAndRawBodyComponent
+            key={`raw-body-${activeRequest?.id}`}
             type="raw"
             value={activeRequest?.body?.raw || ""}
             onChange={(value) => {

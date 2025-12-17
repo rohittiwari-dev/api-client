@@ -68,6 +68,7 @@ const useRequestStore = create<RequestsStoreState & RequestStoreStateActions>()(
             );
             const isDraft = request.type === "NEW";
             return {
+              ...state,
               activeTabId: request.id,
               activeRequest: existingRequest
                 ? { ...existingRequest, ...request }
@@ -98,24 +99,21 @@ const useRequestStore = create<RequestsStoreState & RequestStoreStateActions>()(
             );
             if (existingRequest) {
               return {
+                ...state,
                 requests: state.requests.map((r) =>
                   r.id === request.id ? { ...r, ...request } : r
                 ),
-                tabIds: state.tabIds.includes(request.id)
-                  ? state.tabIds
-                  : [...state.tabIds, request.id],
               };
             }
             return {
+              ...state,
               requests: [...state.requests, request],
-              tabIds: state.tabIds.includes(request.id)
-                ? state.tabIds
-                : [...state.tabIds, request.id],
             };
           }),
         getState: () => get(),
         removeRequest: (requestId) =>
           set((state) => ({
+            ...state,
             requests: state.requests.filter((r) => r.id !== requestId),
             tabIds: state.tabIds.filter((id) => id !== requestId),
             draftIds: state.draftIds.filter((id) => id !== requestId),
@@ -129,6 +127,7 @@ const useRequestStore = create<RequestsStoreState & RequestStoreStateActions>()(
         updateRequest: (id, request) =>
           set((state) => {
             return {
+              ...state,
               requests: state.requests.map((r) =>
                 r.id === id ? { ...r, ...request } : r
               ),
@@ -140,11 +139,12 @@ const useRequestStore = create<RequestsStoreState & RequestStoreStateActions>()(
           }),
         setActiveTabId: (activeTabId) =>
           set((state) => {
+            const newActiveRequest =
+              state.requests.find((r) => r.id === activeTabId) || null;
             return {
-              activeTabId:
-                state.requests?.find((r) => r.id === activeTabId)?.id || null,
-              activeRequest:
-                state.requests?.find((r) => r.id === activeTabId) || null,
+              ...state,
+              activeTabId: activeTabId,
+              activeRequest: newActiveRequest,
             };
           }),
         getRequestById: (id) => get().requests.find((r) => r.id === id),
@@ -172,6 +172,7 @@ const useRequestStore = create<RequestsStoreState & RequestStoreStateActions>()(
             }
 
             return {
+              ...state,
               tabIds: state.tabIds.filter((id) => id !== tabId),
               draftIds: isDraft
                 ? state.draftIds.filter((id) => id !== tabId)
@@ -186,7 +187,8 @@ const useRequestStore = create<RequestsStoreState & RequestStoreStateActions>()(
           }),
 
         reset: () =>
-          set(() => ({
+          set((state) => ({
+            ...state,
             requests: [],
             tabIds: [],
             activeTabId: null,

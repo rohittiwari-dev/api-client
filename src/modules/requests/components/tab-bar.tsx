@@ -225,7 +225,7 @@ const TabBar = () => {
     tabs,
     activeTabId,
     setRequestsState,
-    addRequest,
+    openRequest,
     setActiveTabId,
     closeTab,
     closeOtherTabs,
@@ -370,7 +370,7 @@ const TabBar = () => {
 
   const handleAddNewTab = () => {
     const requestId = createId();
-    addRequest({
+    openRequest({
       id: requestId,
       name: "New Request",
       type: "API" as RequestType,
