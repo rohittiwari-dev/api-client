@@ -19,13 +19,19 @@ import useResetStore from "@/store/reset";
 import { useWorkspaceSwitcher } from "../hooks/use-workspace-switcher";
 import auth from "@/lib/auth";
 import authClient from "@/lib/authClient";
+import { useUnsavedChangesGuard } from "@/modules/requests/hooks/useUnsavedChangesGuard";
+import UnsavedChangesDialog from "@/modules/requests/components/UnsavedChangesDialog";
 
 const WorkspaceSwitcher = () => {
   const { resetCollectionsRequestsAndCookies } = useResetStore();
   const { workspaces, activeWorkspace } = useWorkspaceState();
-  const { switchWorkspace, initializeWorkspaceTracking, currentWorkspaceId } = useWorkspaceSwitcher();
+  const { switchWorkspace, initializeWorkspaceTracking, currentWorkspaceId } =
+    useWorkspaceSwitcher();
   const [workspaceSetupModalOpen, setWorkspaceSetupModalOpen] =
     React.useState(false);
+
+  // Unsaved changes guard for workspace switching
+  const unsavedGuard = useUnsavedChangesGuard();
 
   // Initialize workspace tracking on mount
   useEffect(() => {
@@ -34,17 +40,27 @@ const WorkspaceSwitcher = () => {
     }
   }, [activeWorkspace?.id, currentWorkspaceId, initializeWorkspaceTracking]);
 
-  const handleWorkspaceSwitch = async (workspaceId: string) => {
+  const performWorkspaceSwitch = async (workspaceId: string) => {
     const workspace = workspaces?.find((w) => w.id === workspaceId);
     if (workspace) {
       authClient.organization.setActive({
         organizationId: workspace.id,
-        organizationSlug: workspace.slug || ""
-      })
+        organizationSlug: workspace.slug || "",
+      });
       switchWorkspace(workspace);
       resetCollectionsRequestsAndCookies();
       redirect(`/workspace/${workspace.slug}`);
     }
+  };
+
+  const handleWorkspaceSwitch = (workspaceId: string) => {
+    // Don't show modal if switching to the same workspace
+    if (workspaceId === activeWorkspace?.id) return;
+
+    // Use the unsaved changes guard to check before switching
+    unsavedGuard.confirmWorkspaceSwitch(() => {
+      performWorkspaceSwitch(workspaceId);
+    });
   };
 
   return (
@@ -64,7 +80,7 @@ const WorkspaceSwitcher = () => {
               </span>
               <div className="flex items-center gap-1.5 w-full">
                 <span className="text-sm font-semibold text-foreground truncate block w-full leading-none mt-0.5">
-                  {activeWorkspace?.name || 'Select Workspace'}
+                  {activeWorkspace?.name || "Select Workspace"}
                 </span>
                 <ChevronDown className="size-3 text-muted-foreground/50 group-hover:text-foreground transition-colors shrink-0" />
               </div>
@@ -75,7 +91,9 @@ const WorkspaceSwitcher = () => {
           {/* Header */}
           <div className="px-2 py-1.5 mb-1">
             <p className="text-xs font-semibold text-foreground">Workspaces</p>
-            <p className="text-[10px] text-muted-foreground">Switch between workspaces</p>
+            <p className="text-[10px] text-muted-foreground">
+              Switch between workspaces
+            </p>
           </div>
 
           <DropdownMenuSeparator className="my-1" />
@@ -91,24 +109,30 @@ const WorkspaceSwitcher = () => {
                   activeWorkspace?.id === workspace.id && "bg-primary/10"
                 )}
               >
-                <div className={cn(
-                  "flex items-center justify-center size-7 rounded-md",
-                  activeWorkspace?.id === workspace.id
-                    ? "bg-primary/20"
-                    : "bg-muted"
-                )}>
-                  <Briefcase className={cn(
-                    "size-3.5",
+                <div
+                  className={cn(
+                    "flex items-center justify-center size-7 rounded-md",
                     activeWorkspace?.id === workspace.id
-                      ? "text-primary"
-                      : "text-muted-foreground"
-                  )} />
+                      ? "bg-primary/20"
+                      : "bg-muted"
+                  )}
+                >
+                  <Briefcase
+                    className={cn(
+                      "size-3.5",
+                      activeWorkspace?.id === workspace.id
+                        ? "text-primary"
+                        : "text-muted-foreground"
+                    )}
+                  />
                 </div>
                 <div className="flex flex-col flex-1 min-w-0">
-                  <span className={cn(
-                    "text-xs font-medium truncate",
-                    activeWorkspace?.id === workspace.id && "text-primary"
-                  )}>
+                  <span
+                    className={cn(
+                      "text-xs font-medium truncate",
+                      activeWorkspace?.id === workspace.id && "text-primary"
+                    )}
+                  >
                     {workspace.name}
                   </span>
                   <span className="text-[10px] text-muted-foreground truncate">
@@ -168,7 +192,8 @@ const WorkspaceSwitcher = () => {
                   Organize your API testing workflow
                 </h2>
                 <p className="text-white/80 text-sm leading-relaxed">
-                  Create dedicated workspaces for different projects and invite your team to collaborate seamlessly.
+                  Create dedicated workspaces for different projects and invite
+                  your team to collaborate seamlessly.
                 </p>
                 <div className="flex gap-3 pt-2">
                   <div className="flex items-center gap-2 text-white/70 text-xs">
@@ -190,6 +215,11 @@ const WorkspaceSwitcher = () => {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Unsaved Changes Dialog for workspace switching */}
+      {unsavedGuard.dialogProps && (
+        <UnsavedChangesDialog {...unsavedGuard.dialogProps} />
+      )}
     </>
   );
 };

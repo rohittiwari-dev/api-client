@@ -123,7 +123,7 @@ function RequestTreeItem({
   dropPosition,
   isJustMoved,
 }: RequestTreeItemProps) {
-  const { activeTabId, openRequest, requests } = useRequestSyncStoreState();
+  const { openRequest, requests, activeRequest } = useRequestSyncStoreState();
   const { getVariablesAsRecord } = useEnvironmentStore();
 
   const currentRequest = {
@@ -137,7 +137,7 @@ function RequestTreeItem({
 
   const method = currentRequest?.method || "GET";
   const isUnsaved = currentRequest?.unsaved;
-  const isActive = activeTabId === item.id;
+  const isActive = activeRequest?.id === item.id;
 
   const methodBgMap: Record<string, string> = {
     GET: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20",
@@ -172,11 +172,11 @@ function RequestTreeItem({
     >
       {/* Drop indicator - before */}
       {isOver && dropPosition === "before" && (
-        <div className="absolute top-0 left-0 right-0 h-0.5 bg-primary z-[100] rounded-full pointer-events-none" />
+        <div className="absolute top-0 left-0 right-0 h-0.5 bg-primary z-100 rounded-full pointer-events-none" />
       )}
       {/* Drop indicator - after */}
       {isOver && dropPosition === "after" && (
-        <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary z-[100] rounded-full pointer-events-none" />
+        <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary z-100 rounded-full pointer-events-none" />
       )}
       <SidebarMenuButton
         isActive={isActive}
@@ -210,7 +210,7 @@ function RequestTreeItem({
           });
         }}
         className={cn(
-          "group/item relative !h-11 px-2 rounded-lg transition-all",
+          "group/item relative h-11! px-2 rounded-lg transition-all",
           "hover:bg-accent/60 border border-transparent",
           isActive && "bg-accent/80 border-accent-foreground/10"
         )}
@@ -306,8 +306,8 @@ function CollectionTreeItem({
   collapseKey = 0,
   isJustMoved,
 }: CollectionTreeItemProps) {
-  const { activeTabId } = useRequestSyncStoreState();
-  const [isOpen, setIsOpen] = React.useState(item.id === activeTabId);
+  const { activeRequest } = useRequestSyncStoreState();
+  const [isOpen, setIsOpen] = React.useState(item.id === activeRequest?.id);
   const prevCollapseKeyRef = React.useRef(collapseKey);
 
   // Collapse when collapseKey changes (increments)
@@ -344,11 +344,11 @@ function CollectionTreeItem({
     >
       {/* Drop indicator - before */}
       {isOver && dropPosition === "before" && (
-        <div className="absolute top-0 left-0 right-0 h-0.5 bg-primary z-[100] rounded-full pointer-events-none" />
+        <div className="absolute top-0 left-0 right-0 h-0.5 bg-primary z-100 rounded-full pointer-events-none" />
       )}
       {/* Drop indicator - after */}
       {isOver && dropPosition === "after" && (
-        <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary z-[100] rounded-full pointer-events-none" />
+        <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary z-100 rounded-full pointer-events-none" />
       )}
       <Collapsible
         className="w-full select-none"

@@ -32,7 +32,7 @@ const DeleteCollection = ({
     isError,
   } = useDeleteCollection(id);
 
-  const { requests, updateRequest, draftIds } = useRequestSyncStoreState();
+  const { requests, updateRequest } = useRequestSyncStoreState();
   const removeItemDeep = useSidebarStore((s) => s.removeItemDeep);
 
   React.useEffect(() => {
@@ -47,7 +47,7 @@ const DeleteCollection = ({
 
   const handleDelete = () => {
     requests.forEach((req) => {
-      if (req.collectionId === id && req.unsaved && draftIds.includes(req.id)) {
+      if (req.collectionId === id && req.unsaved) {
         updateRequest(req.id, { collectionId: null });
       }
     });

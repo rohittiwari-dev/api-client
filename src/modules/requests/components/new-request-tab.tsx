@@ -42,25 +42,13 @@ const requestTypes = [
 ];
 
 const NewRequestTabContent = () => {
-  const { openRequest, activeTabId } = useRequestSyncStoreState();
+  const { openRequest, activeRequest } = useRequestSyncStoreState();
   const { activeWorkspace } = useWorkspaceState();
   const workspaceId = activeWorkspace?.id || "";
 
   const handleCreateRequest = (type: "API" | "WEBSOCKET" | "SOCKET_IO") => {
-    const newId = activeTabId || createId();
+    const newId = activeRequest?.id || createId();
 
-    // Create tab data
-    const tabData = {
-      id: newId,
-      title: "New Request",
-      type: type,
-      method: type === "API" ? ("GET" as const) : undefined,
-      unsaved: true,
-      workspaceId: workspaceId,
-      collectionId: null,
-    };
-
-    // Create request data
     const requestData = {
       id: newId,
       name: "New Request",
@@ -89,7 +77,6 @@ const NewRequestTabContent = () => {
       unsaved: true,
     };
 
-    // Use the sync hook to open the request (adds to both stores)
     openRequest(requestData);
   };
 

@@ -82,15 +82,10 @@ export function useWorkspaceSwitcher() {
           const mergedState = mergeWithDatabaseRequests(snapshot, dbRequests);
           setRequestsState(mergedState);
         } else {
-          // No DB requests yet, restore just the tab/draft structure
-          // The actual requests will be merged when DB data arrives
           // No DB requests yet, restore fully from cache
-          // Since we cache full state now, we can just restore everything
           setRequestsState({
             tabIds: snapshot.tabIds,
-            draftIds: snapshot.draftIds,
-            activeTabId: snapshot.activeTabId,
-            requests: snapshot.requests, // Restore full cached requests
+            requests: snapshot.requests,
             activeRequest: snapshot.activeRequest,
           });
         }
@@ -99,11 +94,9 @@ export function useWorkspaceSwitcher() {
         setRequestsState({
           requests: [],
           tabIds: [],
-          activeTabId: null,
-          draftIds: [],
+          activeRequest: null,
           requestLoading: false,
           activeRequestLoading: false,
-          activeRequest: null,
         });
         // Sidebar will be populated by the page query
       }

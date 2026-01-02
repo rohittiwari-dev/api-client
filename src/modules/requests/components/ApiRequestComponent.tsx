@@ -82,7 +82,7 @@ function parseSetCookie(setCookieStr: string, defaultDomain: string) {
 }
 
 const ApiRequestComponent = () => {
-  const { activeTabId, updateRequest, activeRequest, activeWorkspace } =
+  const { updateRequest, activeRequest, activeWorkspace } =
     useRequestSyncStoreState();
   const { setResponse, setLoading, setError, setActualRequest } =
     useResponseStore();

@@ -88,6 +88,9 @@ const auth = betterAuth({
     session: {
       create: {
         before: async (session) => {
+          if (session?.activeOrganizationId) {
+            return { data: session };
+          }
           const organization = await getActiveOrganization(session.userId);
           if (!organization) {
             return { data: session };

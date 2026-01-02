@@ -12,10 +12,8 @@ export interface WorkspaceStateSnapshot {
   workspaceId: string;
   // UI State
   tabIds: string[];
-  draftIds: string[];
-  activeTabId: string | null;
   activeRequest: RequestStateInterface | null;
-  // Full request state (captures everything including unsaved changes & drafts)
+  // Full request state (captures everything including unsaved changes)
   requests: RequestStateInterface[];
   // Sidebar state
   sidebarItems: SidebarItemInterface[];
@@ -146,16 +144,13 @@ const useWorkspaceStateCache = create<
           sidebarItems,
           activeEnvironmentId
         ) => {
-          const { requests, tabIds, draftIds, activeTabId, activeRequest } =
-            requestState;
+          const { requests, tabIds, activeRequest } = requestState;
 
           return {
             workspaceId,
             tabIds,
-            draftIds,
-            activeTabId,
             activeRequest,
-            requests, // Save the full request state
+            requests,
             sidebarItems,
             activeEnvironmentId,
             savedAt: Date.now(),
@@ -208,25 +203,16 @@ const useWorkspaceStateCache = create<
           const validTabIds = snapshot.tabIds.filter((id) =>
             validRequestIds.has(id)
           );
-          const validDraftIds = snapshot.draftIds.filter((id) =>
-            validRequestIds.has(id)
-          );
 
           // Validate active tab
-          let activeTabId = snapshot.activeTabId;
-          if (activeTabId && !validRequestIds.has(activeTabId)) {
-            activeTabId = validTabIds[0] || null;
-          }
-
-          const activeRequest = activeTabId
-            ? fusedRequests.find((r) => r.id === activeTabId) || null
+          const activeRequest = snapshot.activeRequest?.id
+            ? fusedRequests.find((r) => r.id === snapshot.activeRequest?.id) ||
+              null
             : null;
 
           return {
             requests: fusedRequests,
             tabIds: validTabIds,
-            draftIds: validDraftIds,
-            activeTabId,
             activeRequest,
           };
         },

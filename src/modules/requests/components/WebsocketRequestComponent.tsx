@@ -53,7 +53,6 @@ const WebsocketRequestComponent = () => {
 
   const [messageInput, setMessageInput] = useState("");
   const [activeTab, setActiveTab] = useState("message");
-  const [messageFormat, setMessageFormat] = useState<MessageFormat>("text");
   const requestId = activeRequest?.id || "";
   const status = connectionStatus[requestId] || "disconnected";
   const requestMessages = messages[requestId] || [];

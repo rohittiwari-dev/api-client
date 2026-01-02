@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef, useState, useCallback } from "react";
+import React, { useLayoutEffect, useRef, useState, useCallback } from "react";
 import { motion, AnimatePresence, LayoutGroup } from "framer-motion";
 import { createId } from "@paralleldrive/cuid2";
 import { MoreHorizontal, Plus, X, Pencil, XCircle } from "lucide-react";
@@ -27,6 +27,8 @@ import { useRenameRequest } from "../hooks/queries";
 import MethodBadge from "@/components/app-ui/method-badge";
 import { RequestStateInterface } from "../types/request.types";
 import useRequestSyncStoreState from "../hooks/requestSyncStore";
+import { useUnsavedChangesGuard } from "../hooks/useUnsavedChangesGuard";
+import UnsavedChangesDialog from "./UnsavedChangesDialog";
 
 // Method badge component for API requests
 
@@ -223,16 +225,17 @@ const TabItem = ({
 const TabBar = () => {
   const {
     tabs,
-    activeTabId,
+    activeRequest,
     setRequestsState,
     openRequest,
-    setActiveTabId,
+    setActiveRequest,
     closeTab,
     closeOtherTabs,
     closeAllTabs,
     getRequestById,
     activeWorkspace,
   } = useRequestSyncStoreState();
+  const activeTabId = activeRequest?.id;
   const currentWorkspaceTabs = tabs;
   const [visibleTabs, setVisibleTabs] = useState<RequestStateInterface[]>([]);
   const [hiddenTabs, setHiddenTabs] = useState<RequestStateInterface[]>([]);
@@ -241,6 +244,9 @@ const TabBar = () => {
   const [isDragging, setIsDragging] = useState(false);
   const [hiddenTabsOpen, setHiddenTabsOpen] = useState(false);
   const tabBarRef = useRef<HTMLDivElement>(null);
+
+  // Unsaved changes guard
+  const unsavedGuard = useUnsavedChangesGuard();
 
   // Track the current visible window start index to minimize shifting
   const visibleStartIndexRef = useRef(0);
@@ -302,7 +308,8 @@ const TabBar = () => {
     ]);
   }, [currentWorkspaceTabs, activeTabId, isDragging]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
+    // eslint-disable-next-line
     calculateVisibleTabs();
     window.addEventListener("resize", calculateVisibleTabs);
 
@@ -373,8 +380,8 @@ const TabBar = () => {
     openRequest({
       id: requestId,
       name: "New Request",
-      type: "API" as RequestType,
-      method: "GET" as HttpMethod,
+      type: "NEW" as RequestType,
+      method: null,
       url: "",
       headers: [],
       body: {
@@ -400,127 +407,144 @@ const TabBar = () => {
   };
 
   return (
-    <TabsList
-      className="relative flex-1 justify-start gap-0.5 bg-muted p-0 px-2 pt-2 pb-0 rounded-none w-full !h-fit max-h-[42px] overflow-hidden"
-      ref={tabBarRef}
-    >
-      {/* Visible tabs with animation wrapper */}
-      <LayoutGroup>
-        <AnimatePresence mode="popLayout">
-          {visibleTabs.map((tab) => (
-            <motion.div
-              key={tab.id}
-              layout="position"
-              layoutId={tab.id}
-              initial={{ opacity: 0, scale: 0.9, x: -10 }}
-              animate={{ opacity: 1, scale: 1, x: 0 }}
-              exit={{ opacity: 0, scale: 0.9, x: -10 }}
-              transition={{
-                layout: { duration: 0.2, ease: [0.25, 0.1, 0.25, 1] },
-                opacity: { duration: 0.15 },
-                scale: { duration: 0.15 },
-                x: { duration: 0.15 },
-              }}
-            >
-              <TabItem
-                id={tab.id}
-                title={tab.name}
-                type={tab.type || "NEW"}
-                method={tab.method || undefined}
-                workspaceId={tab.workspaceId}
-                onCloseClick={() => closeTab(tab.id)}
-                onCloseOthers={() => closeOtherTabs(tab.id)}
-                onCloseAll={() => closeAllTabs()}
-                onTabClick={() => {
-                  setActiveTabId(tab.id);
-                }}
-                onDragStart={handleDragStart}
-                onDragEnd={handleDragEnd}
-                onDragOver={handleDragOver}
-                onDragLeave={handleDragLeave}
-                onDrop={handleDrop}
-                unsaved={tab.unsaved && getRequestById(tab.id)?.unsaved}
-                isDragging={draggedTabId === tab.id}
-                showDropIndicator={
-                  dragOverTabId === tab.id && draggedTabId !== tab.id
-                }
-              />
-            </motion.div>
-          ))}
-        </AnimatePresence>
-      </LayoutGroup>
-
-      {/* Hidden tabs overflow menu */}
-      {hiddenTabs.length > 0 && (
-        <Popover open={hiddenTabsOpen} onOpenChange={setHiddenTabsOpen}>
-          <PopoverTrigger asChild>
-            <Button
-              size="icon"
-              variant="ghost"
-              className="shrink-0 cursor-pointer"
-              title={`${hiddenTabs.length} more tabs`}
-            >
-              <MoreHorizontal />
-              <span className="sr-only">{hiddenTabs.length} more tabs</span>
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent
-            className="p-1 w-auto max-h-[300px] overflow-y-auto"
-            align="end"
-          >
-            <div className="flex flex-col gap-1">
-              {hiddenTabs.map((tab) => (
-                <div
-                  key={tab.id}
-                  onClick={() => {
-                    setActiveTabId(tab.id);
-                    setHiddenTabsOpen(false);
-                  }}
-                  className={cn(
-                    "group flex items-center gap-2 px-2 py-1.5 rounded-md cursor-pointer hover:bg-muted",
-                    activeTabId === tab.id && "bg-muted"
-                  )}
-                >
-                  <span className="flex items-center">
-                    {tab.type === "API" ? (
-                      <MethodBadge method={tab.method || undefined} />
-                    ) : tab.type !== "NEW" ? (
-                      <RequestIcon
-                        type={tab.type || "NEW"}
-                        className="size-4"
-                      />
-                    ) : null}
-                  </span>
-                  <span className="flex-1 text-sm truncate max-w-[150px]">
-                    {tab.name}
-                  </span>
-                  <button
-                    className="opacity-0 group-hover:opacity-100 p-0.5 rounded-full hover:bg-background transition-opacity"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      closeTab(tab.id);
-                    }}
-                  >
-                    <X className="size-3" />
-                  </button>
-                </div>
-              ))}
-            </div>
-          </PopoverContent>
-        </Popover>
-      )}
-
-      {/* Add new tab button */}
-      <Button
-        size="icon"
-        variant="ghost"
-        className="shrink-0 h-8 w-8 rounded-lg hover:bg-primary/10 hover:text-primary cursor-pointer transition-colors"
-        onClick={handleAddNewTab}
-        title="New Tab"
+    <>
+      <TabsList
+        className="relative flex-1 justify-start gap-0.5 bg-muted p-0 px-2 pt-2 pb-0 rounded-none w-full !h-fit max-h-[42px] overflow-hidden"
+        ref={tabBarRef}
       >
-        <Plus className="size-4" />
-      </Button>
-    </TabsList>
+        {/* Visible tabs with animation wrapper */}
+        <LayoutGroup>
+          <AnimatePresence mode="popLayout">
+            {visibleTabs.map((tab) => (
+              <motion.div
+                key={tab.id}
+                layout="position"
+                layoutId={tab.id}
+                initial={{ opacity: 0, scale: 0.9, x: -10 }}
+                animate={{ opacity: 1, scale: 1, x: 0 }}
+                exit={{ opacity: 0, scale: 0.9, x: -10 }}
+                transition={{
+                  layout: { duration: 0.2, ease: [0.25, 0.1, 0.25, 1] },
+                  opacity: { duration: 0.15 },
+                  scale: { duration: 0.15 },
+                  x: { duration: 0.15 },
+                }}
+              >
+                <TabItem
+                  id={tab.id}
+                  title={tab.name}
+                  type={tab.type || "NEW"}
+                  method={tab.method || undefined}
+                  workspaceId={tab.workspaceId}
+                  onCloseClick={() =>
+                    unsavedGuard.confirmClose(tab.id, () => closeTab(tab.id))
+                  }
+                  onCloseOthers={() =>
+                    unsavedGuard.confirmCloseOthers(tab.id, () =>
+                      closeOtherTabs(tab.id)
+                    )
+                  }
+                  onCloseAll={() =>
+                    unsavedGuard.confirmCloseAll(() => closeAllTabs())
+                  }
+                  onTabClick={() => {
+                    setActiveRequest(tab.id);
+                  }}
+                  onDragStart={handleDragStart}
+                  onDragEnd={handleDragEnd}
+                  onDragOver={handleDragOver}
+                  onDragLeave={handleDragLeave}
+                  onDrop={handleDrop}
+                  unsaved={tab.unsaved && getRequestById(tab.id)?.unsaved}
+                  isDragging={draggedTabId === tab.id}
+                  showDropIndicator={
+                    dragOverTabId === tab.id && draggedTabId !== tab.id
+                  }
+                />
+              </motion.div>
+            ))}
+          </AnimatePresence>
+        </LayoutGroup>
+
+        {/* Hidden tabs overflow menu */}
+        {hiddenTabs.length > 0 && (
+          <Popover open={hiddenTabsOpen} onOpenChange={setHiddenTabsOpen}>
+            <PopoverTrigger asChild>
+              <Button
+                size="icon"
+                variant="ghost"
+                className="shrink-0 cursor-pointer"
+                title={`${hiddenTabs.length} more tabs`}
+              >
+                <MoreHorizontal />
+                <span className="sr-only">{hiddenTabs.length} more tabs</span>
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent
+              className="p-1 w-auto max-h-[300px] overflow-y-auto"
+              align="end"
+            >
+              <div className="flex flex-col gap-1">
+                {hiddenTabs.map((tab) => (
+                  <div
+                    key={tab.id}
+                    onClick={() => {
+                      setActiveRequest(tab.id);
+                      setHiddenTabsOpen(false);
+                    }}
+                    className={cn(
+                      "group flex items-center gap-2 px-2 py-1.5 rounded-md cursor-pointer hover:bg-muted",
+                      activeTabId === tab.id && "bg-muted"
+                    )}
+                  >
+                    <span className="flex items-center">
+                      {tab.type === "API" ? (
+                        <MethodBadge method={tab.method || undefined} />
+                      ) : tab.type !== "NEW" ? (
+                        <RequestIcon
+                          type={tab.type || "NEW"}
+                          className="size-4"
+                        />
+                      ) : null}
+                    </span>
+                    <span className="flex-1 text-sm truncate max-w-[150px]">
+                      {tab.name}
+                    </span>
+                    <button
+                      className="opacity-0 group-hover:opacity-100 p-0.5 rounded-full hover:bg-background transition-opacity"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        unsavedGuard.confirmClose(tab.id, () =>
+                          closeTab(tab.id)
+                        );
+                      }}
+                    >
+                      <X className="size-3" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </PopoverContent>
+          </Popover>
+        )}
+
+        {/* Add new tab button */}
+        <Button
+          size="icon"
+          variant="ghost"
+          className="shrink-0 h-8 w-8 rounded-lg hover:bg-primary/10 hover:text-primary cursor-pointer transition-colors"
+          onClick={handleAddNewTab}
+          title="New Tab"
+        >
+          <Plus className="size-4" />
+        </Button>
+      </TabsList>
+
+      {/* Unsaved Changes Dialog */}
+      {unsavedGuard.dialogProps && (
+        <UnsavedChangesDialog {...unsavedGuard.dialogProps} />
+      )}
+    </>
   );
 };
 

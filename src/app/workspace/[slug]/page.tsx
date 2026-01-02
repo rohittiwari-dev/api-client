@@ -10,7 +10,7 @@ import useWorkspaceState from "@/modules/workspace/store";
 import useRequestSyncStoreState from "@/modules/requests/hooks/requestSyncStore";
 
 const Page = () => {
-  const { tabs, setActiveTabId, activeTabId } = useRequestSyncStoreState();
+  const { tabs, setActiveRequest, activeRequest } = useRequestSyncStoreState();
   const { activeWorkspace } = useWorkspaceState();
   const { initializeWorkspaceTracking, currentWorkspaceId } =
     useWorkspaceSwitcher();
@@ -24,15 +24,15 @@ const Page = () => {
 
   return (
     <Tabs
-      value={activeTabId || tabs[0]?.id}
+      value={activeRequest?.id || tabs[0]?.id}
       onValueChange={(id) => {
         // Sync both tab and request stores
-        setActiveTabId(id);
+        setActiveRequest(id);
       }}
-      className="h-full w-full flex flex-col !gap-0"
+      className="h-full w-full flex flex-col gap-0!"
     >
       <TabBar />
-      <TabContent id={activeTabId || tabs[0]?.id} />
+      <TabContent id={activeRequest?.id || tabs[0]?.id} />
       {tabs.length <= 0 && (
         <div className="flex  flex-1 items-center justify-center select-none">
           <div className="flex items-center gap-2 font-medium opacity-25">
