@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 import hljs from "highlight.js";
 import Editor from "react-simple-code-editor";
 import { useTheme } from "next-themes";
@@ -24,13 +24,18 @@ const JsonAndRawBodyComponent = ({
   const [data, setData] = React.useState<string>("");
   const { resolvedTheme } = useTheme();
 
-  useEffect(() => {
+  const [prevValue, setPrevValue] = React.useState(value);
+  const [prevType, setPrevType] = React.useState(type);
+
+  if (value !== prevValue || type !== prevType) {
     const newData =
       type === "json"
         ? JSON.stringify(value || {}, null, 4)
         : value?.toString() || "";
     setData(newData);
-  }, [value, type]);
+    setPrevValue(value);
+    setPrevType(type);
+  }
 
   const validateJson = (code: string) => {
     try {

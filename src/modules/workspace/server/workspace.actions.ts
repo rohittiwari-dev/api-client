@@ -13,6 +13,20 @@ export const getActiveOrganization = async (
   logo: string | null;
   metadata: string | null;
 } | null> => {
+  const lastSession = await db.session.findFirst({
+    where: { userId },
+    orderBy: { createdAt: "desc" },
+  });
+
+  if (lastSession?.activeOrganizationId) {
+    const organization = await db.organization.findUnique({
+      where: { id: lastSession.activeOrganizationId },
+    });
+    if (organization) {
+      return organization;
+    }
+  }
+
   const organizations = await db.organization.findFirst({
     where: {
       members: { some: { userId } },
