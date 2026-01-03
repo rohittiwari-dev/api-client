@@ -21,10 +21,8 @@ export const listMembers = async (workspaceId: string) => {
         user: true,
       },
     });
-    console.log(members);
     return members;
   } catch (error) {
-    console.log(error);
     return null;
   }
 };
