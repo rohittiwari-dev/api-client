@@ -8,6 +8,7 @@ import ThemeSwitcher from "@/components/app-ui/theme-switcher";
 import UserButton from "@/modules/authentication/components/user-button";
 import { useAuthStore } from "@/modules/authentication/store";
 import SearchPanel from "@/modules/layout/components/Search-Panel";
+import CloudSyncButton from "@/modules/layout/components/CloudSyncButton";
 import EnvironmentDropdown from "@/modules/workspace/components/EnvironmentDropdown";
 import WorkspaceInvite from "@/modules/workspace/components/workspace-invite";
 import WorkspaceSwitcher from "@/modules/workspace/components/WorkspaceSwitcher";
@@ -72,6 +73,9 @@ const Header = ({
 
         {/* Right Section - Actions */}
         <div className="flex items-center flex-1 justify-end gap-2">
+          {/* Cloud Sync Button */}
+          <CloudSyncButton />
+
           {/* Theme Switcher */}
           <div className="hidden sm:flex items-center">
             <ThemeSwitcher variant="multiple" />

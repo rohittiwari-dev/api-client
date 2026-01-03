@@ -121,11 +121,6 @@ export async function upsertRequestAction(
     savedMessages?: any[];
   }
 ) {
-  console.log("upsertRequestAction", {
-    requestId,
-    collectionId: data.collectionId,
-    workspaceId: data.workspaceId,
-  });
   // Check if request exists
   const existing = await db.request.findUnique({
     where: { id: requestId },
