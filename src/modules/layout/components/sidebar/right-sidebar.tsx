@@ -74,7 +74,7 @@ const RightSidebar = () => {
       <RightPanel />
 
       {/* Icon Buttons Rail - Glassmorphic with emerald accents */}
-      <div className="w-12 border-l border-border/30 space-y-1 bg-background/80 backdrop-blur-md flex flex-col items-center py-3 gap-2">
+      <div className="w-12 border-l border-white/5 space-y-1 bg-background/40! backdrop-blur-xl! flex flex-col items-center py-3 gap-2 shadow-sm z-20">
         <TooltipProvider delayDuration={100}>
           {menuData.map((item) => {
             const isActive = activePanel === item.id;
@@ -94,7 +94,7 @@ const RightSidebar = () => {
                 >
                   <div
                     className={cn(
-                      "flex items-center justify-center !rounded transition-colors size-6",
+                      "flex items-center justify-center rounded! transition-colors size-6",
                       !isActive
                         ? item.className.iconParentClassName
                         : "bg-slate-500/20"
@@ -102,7 +102,7 @@ const RightSidebar = () => {
                   >
                     <item.icon
                       className={cn(
-                        "size-3.5 transition-colors hover:text-slate-100/60  !text-slate-100",
+                        "size-3.5 transition-colors hover:text-slate-100/60  text-slate-100!",
                         !isActive && item.className.iconClassName
                       )}
                     />

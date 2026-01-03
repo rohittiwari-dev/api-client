@@ -26,12 +26,12 @@ const Header = ({
   }, [currentUserSession, setAuthSession]);
 
   return (
-    <header className="sticky top-0 z-50 w-full h-[var(--header-height)]">
+    <header className="sticky top-0 z-50 w-full h-(--header-height)">
       {/* Glass Background */}
-      <div className="absolute inset-0 bg-background/60 backdrop-blur-xl border-b border-white/5 dark:border-white/5 supports-[backdrop-filter]:bg-background/60" />
+      <div className="absolute inset-0 bg-background/60 backdrop-blur-xl border-b border-white/5 dark:border-white/5 supports-backdrop-filter:bg-background/60" />
 
       {/* Subtle Gradient Line at Bottom */}
-      <div className="absolute bottom-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-border/50 to-transparent" />
+      <div className="absolute bottom-0 left-0 right-0 h-px bg-linear-to-r from-transparent via-border/50 to-transparent" />
 
       <div className="relative flex h-full items-center justify-between gap-4 px-4">
         {/* Left Section - Brand & Navigation */}

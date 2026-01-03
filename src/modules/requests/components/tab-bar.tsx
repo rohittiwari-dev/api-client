@@ -125,12 +125,17 @@ const TabItem = ({
               onDrop={(e) => onDrop(e, id)}
               className={cn(
                 "group relative flex items-center justify-between gap-2 px-3",
-                "bg-muted/40 hover:bg-muted/60",
-                "data-[state=active]:!bg-background/90 data-[state=active]:shadow-none",
-                "border-0",
-                "data-[state=active]:-mb-[1px]",
+                // Inactive state - Visible glass background
+                "bg-muted/20 hover:bg-muted/30 text-muted-foreground border-transparent",
+                // Active state - Blended with content
+                "data-[state=active]:bg-background/60 data-[state=active]:backdrop-blur-xl data-[state=active]:text-foreground data-[state=active]:shadow-none",
+                "data-[state=active]:border-b-transparent", // Seamless transition to content
+
+                // Shape & Layout
                 "rounded-t-md rounded-b-none w-44 max-w-44 !h-[38px]",
-                "text-xs cursor-pointer",
+                "text-xs cursor-pointer transition-all duration-200",
+                "border-r border-t border-l border-white/5", // Subtle border definition
+
                 showDropIndicator && "ml-1",
                 unsaved && "italic"
               )}
@@ -408,7 +413,7 @@ const TabBar = () => {
   return (
     <>
       <TabsList
-        className="relative flex-1 justify-start gap-0.5 bg-muted p-0 px-2 pt-2 pb-0 rounded-none w-full !h-fit max-h-[42px] overflow-hidden"
+        className="relative flex-1 justify-start gap-0.5 bg-background/30 backdrop-blur-sm p-0 px-2 pt-2 pb-0 rounded-none w-full !h-fit max-h-[42px] overflow-hidden"
         ref={tabBarRef}
       >
         {/* Visible tabs with animation wrapper */}

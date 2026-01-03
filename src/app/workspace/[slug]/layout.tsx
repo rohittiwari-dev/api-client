@@ -56,15 +56,21 @@ const WorkspaceLayout = async ({
       workspaces={(workspaces || []) as Organization[]}
       requests={(await getAllRequests(activeWorkspace.id)) || []}
     >
-      <div className="flex h-svh w-full flex-col [--header-height:calc(--spacing(14))]">
-        <SidebarProvider className="flex h-full w-full flex-col">
+      <div className="flex h-svh w-full flex-col [--header-height:calc(--spacing(14))] bg-muted/20 dark:bg-muted/10 relative">
+        {/* Global Background Gradient */}
+        <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden select-none">
+          <div className="absolute top-[-20%] left-[-10%] w-[60%] h-[60%] rounded-full bg-primary/5 blur-[120px]" />
+          <div className="absolute bottom-[-20%] right-[-10%] w-[60%] h-[60%] rounded-full bg-blue-500/5 blur-[120px]" />
+        </div>
+
+        <SidebarProvider className="flex h-full w-full flex-col z-10 relative bg-transparent">
           <Header currentUserSession={currentUserSession!} />
           <div className="flex h-full w-full flex-1 overflow-hidden">
             <AppSidebar
               sidebarData={await getRequestSideBarTree(activeWorkspace.id)}
               workspaceId={activeWorkspace.id}
             />
-            <SidebarInset className="h-full overflow-hidden overflow-y-auto">
+            <SidebarInset className="h-full overflow-hidden overflow-y-auto bg-transparent">
               {children}
             </SidebarInset>
             <RightSidebar />

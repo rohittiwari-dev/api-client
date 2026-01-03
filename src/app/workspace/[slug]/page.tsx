@@ -8,6 +8,7 @@ import TabContent from "@/modules/requests/components/tab-content";
 import { useWorkspaceSwitcher } from "@/modules/workspace/hooks/use-workspace-switcher";
 import useWorkspaceState from "@/modules/workspace/store";
 import useRequestSyncStoreState from "@/modules/requests/hooks/requestSyncStore";
+import WorkspaceEmptyState from "@/modules/workspace/components/workspace-empty-state";
 
 const Page = () => {
   const { tabs, setActiveRequest, activeRequest } = useRequestSyncStoreState();
@@ -33,20 +34,7 @@ const Page = () => {
     >
       <TabBar />
       <TabContent id={activeRequest?.id || tabs[0]?.id} />
-      {tabs.length <= 0 && (
-        <div className="flex  flex-1 items-center justify-center select-none">
-          <div className="flex items-center gap-2 font-medium opacity-25">
-            <Image
-              src="/logo.png"
-              alt="ApiClient"
-              width={100}
-              height={100}
-              priority
-              className="h-[160px] w-[170px]"
-            />
-          </div>
-        </div>
-      )}
+      {tabs.length <= 0 && <WorkspaceEmptyState />}
     </Tabs>
   );
 };

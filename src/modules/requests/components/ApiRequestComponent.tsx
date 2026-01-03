@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useLocalStorage } from "@/hooks/use-local-storage";
-import { cn, requestBgColorMap } from "@/lib/utils";
+import { cn, requestBgColorMap, requestTextColorMap } from "@/lib/utils";
 import {
   substituteVariables,
   substituteVariablesInObject,
@@ -424,8 +424,10 @@ const ApiRequestComponent = () => {
   const isLoading = currentResponse?.loading || false;
 
   return (
-    <div className="flex h-full w-full flex-col backdrop-blur-md">
-      <div className="flex w-full items-center border-t-0! gap-3 px-4 py-3 border-b border-primary/15 glass-subtle">
+    <div className="flex h-full w-full flex-col bg-transparent">
+      {/* Request Bar */}
+      <div className="group/req-bar flex w-full items-center gap-2 px-4 py-3 bg-muted/20 border-b border-border/40 backdrop-blur-md">
+        {/* Method Selector */}
         <Select
           value={activeRequest?.method || "GET"}
           onValueChange={(value) => {
@@ -441,36 +443,44 @@ const ApiRequestComponent = () => {
         >
           <SelectTrigger
             className={cn(
-              "w-24 h-9",
-              "cursor-pointer rounded-lg",
-              "font-bold text-xs",
-              "border shadow-md",
-              "hover:opacity-90",
-              "focus:ring-2 focus:ring-primary/40",
-              "transition-all duration-200",
-              requestBgColorMap[
+              "w-[85px] h-[34px]",
+              "rounded-md border text-xs font-bold shadow-sm transition-all duration-200",
+              "focus:ring-2 focus:ring-primary/20",
+              // Dynamic colors based on method
+              requestTextColorMap[
                 (activeRequest?.method ||
-                  "GET") as keyof typeof requestBgColorMap
+                  "GET") as keyof typeof requestTextColorMap
               ],
-              "text-white"
+              "bg-background/50 hover:bg-background/80 border-border/60",
+              "data-[state=open]:border-primary/50"
             )}
           >
-            <SelectValue placeholder="Method" />
+            <div className="flex items-center justify-between w-full">
+              <span className="truncate">{activeRequest?.method || "GET"}</span>
+            </div>
           </SelectTrigger>
           <SelectContent
             align="start"
-            className="rounded-lg p-1.5 shadow-2xl shadow-primary/20 bg-popover/98 backdrop-blur-xl border border-primary/20"
+            className="rounded-lg p-1 shadow-xl shadow-black/10 bg-popover/95 backdrop-blur-xl border border-border/50"
           >
             {["GET", "POST", "PUT", "DELETE", "PATCH", "HEAD", "OPTIONS"].map(
-              (method) => (
-                <SelectItem
-                  key={method}
-                  value={method}
-                  className="cursor-pointer rounded-md text-xs font-semibold px-3 py-2.5 focus:bg-primary/15 transition-colors"
-                >
-                  {method}
-                </SelectItem>
-              )
+              (method) => {
+                const textColor =
+                  requestTextColorMap[method as HttpMethod] ||
+                  "text-foreground";
+                return (
+                  <SelectItem
+                    key={method}
+                    value={method}
+                    className={cn(
+                      "cursor-pointer rounded-md text-xs font-bold px-3 py-2 transition-colors focus:bg-accent focus:text-accent-foreground",
+                      textColor
+                    )}
+                  >
+                    {method}
+                  </SelectItem>
+                );
+              }
             )}
           </SelectContent>
         </Select>
@@ -479,7 +489,7 @@ const ApiRequestComponent = () => {
         <InputGroup className="flex-1">
           <EnvironmentVariableInput
             id="url"
-            placeholder="Enter request URL (use {{variable}} for env vars)"
+            placeholder="Enter request URL..."
             value={activeRequest?.url || ""}
             onChange={(value) => {
               const updatedRequest = {
@@ -496,64 +506,81 @@ const ApiRequestComponent = () => {
                 handleSend();
               }
             }}
-            className="flex-1 h-9 rounded-lg border-primary/20 focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:border-primary/40 transition-all duration-200"
+            className={cn(
+              "flex-1 h-[34px] rounded-md",
+              "bg-background/40 hover:bg-background/60 focus:bg-background/80",
+              "border-border/40 focus:border-primary/30",
+              "text-sm placeholder:text-muted-foreground/50",
+              "transition-all duration-200",
+              "focus-visible:ring-2 focus-visible:ring-primary/10"
+            )}
           />
         </InputGroup>
 
         {/* Loading Indicator */}
         {isLoading && (
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-gradient-to-r from-amber-500/15 to-orange-500/15 border border-amber-500/30 shadow-md shadow-amber-500/10">
-            <div className="size-2.5 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 animate-pulse shadow-lg shadow-amber-500/50" />
-            <span className="text-[11px] font-bold text-amber-600 dark:text-amber-400">
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/20">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
+            </span>
+            <span className="text-[10px] font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider">
               Sending
             </span>
           </div>
         )}
 
-        {/* Send Button */}
-        <Button
-          className={cn(
-            "h-9 px-5 rounded-lg font-bold text-sm",
-            "transition-all duration-200 active:scale-[0.97]",
-            "shadow-lg",
-            "bg-gradient-to-r from-primary via-primary/90 to-primary text-primary-foreground hover:from-primary/90 hover:via-primary/80 hover:to-primary/90 shadow-primary/30"
-          )}
-          onClick={handleSend}
-          disabled={isSending || !activeRequest?.url}
-        >
-          {isSending ? (
-            <Loader2 className="h-4 w-4 animate-spin mr-2" />
-          ) : (
-            <IconSend className="size-4 mr-2 fill-current" />
-          )}
-          {isSending ? "Sending..." : "Send"}
-        </Button>
+        {/* Actions */}
+        <div className="flex items-center gap-2">
+          <Button
+            className={cn(
+              "h-[34px] px-4 rounded-md font-semibold text-xs",
+              "bg-primary hover:bg-primary/90 text-primary-foreground",
+              "shadow-lg shadow-primary/20 hover:shadow-primary/30",
+              "transition-all duration-200 active:scale-[0.98]",
+              "border border-primary/50"
+            )}
+            onClick={handleSend}
+            disabled={isSending || !activeRequest?.url}
+          >
+            {isSending ? (
+              <Loader2 className="size-3.5 animate-spin mr-1.5" />
+            ) : (
+              <IconSend className="size-3.5 mr-1.5" />
+            )}
+            {isSending ? "Sending..." : "Send"}
+          </Button>
 
-        {/* Save Button */}
-        <Button
-          variant="outline"
-          className={cn(
-            "h-9 px-4 rounded-lg font-medium text-sm",
-            "border-border/60 hover:bg-muted/50 hover:border-border",
-            "transition-all duration-200 active:scale-[0.98]",
-            isUnsaved &&
-              "border-orange-500/50 text-orange-600 dark:text-orange-400"
-          )}
-          onClick={handleSave}
-          disabled={isSaving}
-        >
-          {isSaving ? (
-            <Loader2 className="h-4 w-4 animate-spin mr-2" />
-          ) : isUnsaved ? (
-            <CircleDot className="size-3 mr-2 text-orange-500" />
-          ) : (
-            <SaveIcon className="size-4 mr-2" />
-          )}
-          {isSaving ? "Saving..." : "Save"}
-        </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            className={cn(
+              "h-[34px] w-[34px] rounded-md",
+              "text-muted-foreground hover:text-foreground",
+              "hover:bg-muted/50",
+              "transition-all duration-200",
+              isUnsaved &&
+                "text-orange-500 hover:text-orange-600 bg-orange-500/10 hover:bg-orange-500/20"
+            )}
+            onClick={handleSave}
+            disabled={isSaving}
+            title={isUnsaved ? "Unsaved changes" : "Save request"}
+          >
+            {isSaving ? (
+              <Loader2 className="size-4 animate-spin" />
+            ) : isUnsaved ? (
+              <div className="relative">
+                <SaveIcon className="size-4" />
+                <span className="absolute -top-1 -right-1 size-2 bg-orange-500 rounded-full border-2 border-background" />
+              </div>
+            ) : (
+              <SaveIcon className="size-4" />
+            )}
+          </Button>
+        </div>
       </div>
 
-      {/* Tabs Section */}
+      {/* Main Tabs Section */}
       <Tabs
         value={requestInfoTab}
         className="flex flex-1 min-h-0 flex-col w-full overflow-hidden"
@@ -561,8 +588,8 @@ const ApiRequestComponent = () => {
           setRequestInfoTab(val);
         }}
       >
-        <div className="px-4  pt-1">
-          <TabsList className="h-9 gap-1 p-1 rounded-lg bg-muted/70">
+        <div className="px-4 py-2 border-b border-border/30 bg-muted/5">
+          <TabsList className="h-8 gap-0 p-1 rounded-lg bg-muted/40 border border-border/20 inline-flex w-auto">
             {[
               {
                 value: "parameters",
@@ -583,15 +610,20 @@ const ApiRequestComponent = () => {
                 key={tab.value}
                 value={tab.value}
                 className={cn(
-                  "h-7 px-4 rounded-md text-xs font-medium cursor-pointer",
-                  "transition-all",
-                  "data-[state=active]:bg-primary/20 dark:data-[state=active]:bg-primary/25 data-[state=active]:text-primary dark:data-[state=active]:text-primary-foreground data-[state=active]:border data-[state=active]:border-primary/40",
-                  "data-[state=inactive]:text-muted-foreground data-[state=inactive]:hover:text-foreground data-[state=inactive]:hover:bg-accent"
+                  "h-[26px] px-3 rounded-md text-[11px] font-medium transition-all duration-200",
+                  "data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm",
+                  "data-[state=inactive]:text-muted-foreground data-[state=inactive]:hover:bg-muted/50",
+                  "focus-visible:ring-0 focus-visible:ring-offset-0"
                 )}
               >
                 {tab.label}
                 {tab.count !== undefined && tab.count > 0 && (
-                  <span className="ml-1.5 px-1.5 py-0.5 text-[9px] rounded-full bg-primary/20 text-primary font-bold">
+                  <span
+                    className={cn(
+                      "ml-1.5 min-w-[14px] h-[14px] flex items-center justify-center text-[9px] rounded-full font-bold",
+                      "bg-primary/10 text-primary border border-primary/20"
+                    )}
+                  >
                     {tab.count}
                   </span>
                 )}
@@ -608,44 +640,56 @@ const ApiRequestComponent = () => {
             defaultSize={70}
             minSize={10}
             maxSize={90}
-            className="flex flex-col min-h-0 !overflow-hidden"
+            className="flex flex-col min-h-0 relative z-0 !overflow-hidden bg-background/30"
           >
             <TabsContent
               value="parameters"
-              className="w-full flex-1 min-h-0 overflow-y-auto !p-4 !pt-0 data-[state=active]:flex data-[state=active]:flex-col"
+              className="w-full flex-1 min-h-0 overflow-y-auto data-[state=active]:flex data-[state=active]:flex-col"
             >
-              <ParameterComponent />
+              <div className="flex-1 p-4">
+                <ParameterComponent />
+              </div>
             </TabsContent>
             <TabsContent
               value="headers"
-              className="w-full flex-1 min-h-0 overflow-y-auto !p-4 !pt-0 data-[state=active]:flex data-[state=active]:flex-col"
+              className="w-full flex-1 min-h-0 overflow-y-auto data-[state=active]:flex data-[state=active]:flex-col"
             >
-              <HeaderComponent />
+              <div className="flex-1 p-4">
+                <HeaderComponent />
+              </div>
             </TabsContent>
             <TabsContent
               value="body"
-              className="w-full flex-1 min-h-0 overflow-y-auto !p-4 !pt-0 data-[state=active]:flex data-[state=active]:flex-col"
+              className="w-full flex-1 min-h-0 overflow-y-auto data-[state=active]:flex data-[state=active]:flex-col"
             >
-              <BodyComponent />
+              <div className="flex-1 p-4">
+                <BodyComponent />
+              </div>
             </TabsContent>
             <TabsContent
               value="auth"
-              className="w-full flex-1 min-h-0 overflow-y-auto !p-4 !pt-0 data-[state=active]:flex data-[state=active]:flex-col"
+              className="w-full flex-1 min-h-0 overflow-y-auto data-[state=active]:flex data-[state=active]:flex-col"
             >
-              <AuthComponent />
+              <div className="flex-1 p-4">
+                <AuthComponent />
+              </div>
             </TabsContent>
           </ResizablePanel>
+
           <ResizableHandle
             withHandle
-            className="bg-border/30 hover:bg-primary/20 transition-colors"
+            className="bg-border/40 hover:bg-primary/40 transition-colors h-1"
           />
+
           <ResizablePanel
             defaultSize={30}
             minSize={4}
             maxSize={90}
-            className="flex flex-col !overflow-y-auto px-4 !pb-4"
+            className="flex flex-col !overflow-y-auto bg-background/50 border-t border-border/10"
           >
-            <ApiResponse />
+            <div className="h-full w-full p-4">
+              <ApiResponse />
+            </div>
           </ResizablePanel>
         </ResizablePanelGroup>
       </Tabs>
