@@ -59,7 +59,7 @@ export function AppSidebar({
 
   return (
     <Sidebar
-      className="top-(--header-height) h-[calc(100svh-var(--header-height))]! border-r border-white/5 bg-background/40! backdrop-blur-xl! shadow-sm"
+      className="top-(--header-height) h-[calc(100svh-var(--header-height))]! border-r border-white/5 bg-background/40! backdrop-blur-xl! shadow-sm **:data-[sidebar=sidebar]:bg-transparent!"
       {...props}
     >
       <SidebarContent className="pt-2 bg-transparent">
