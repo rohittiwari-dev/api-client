@@ -37,7 +37,7 @@ export const inviteMember = async ({
 }: {
   workspaceId: string;
   email: string;
-  role?: "member" | "owner";
+  role?: "member" | "admin" | "owner";
   resend?: boolean;
 }) => {
   try {
@@ -152,6 +152,57 @@ export const deleteInvitation = async (invitationId: string) => {
     });
 
     return invitation;
+  } catch (error) {
+    return null;
+  }
+};
+
+export const removeMember = async (
+  memberId: string,
+  organizationId: string
+) => {
+  try {
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
+
+    if (!session?.user?.id) {
+      return null;
+    }
+
+    const member = await auth.api.removeMember({
+      headers: await headers(),
+      body: {
+        memberIdOrEmail: memberId,
+        organizationId,
+      },
+    });
+
+    return member;
+  } catch (error) {
+    return null;
+  }
+};
+
+export const updateMemberRole = async (memberId: string, role: string) => {
+  try {
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
+
+    if (!session?.user?.id) {
+      return null;
+    }
+
+    const member = await auth.api.updateMemberRole({
+      headers: await headers(),
+      body: {
+        memberId,
+        role,
+      },
+    });
+
+    return member;
   } catch (error) {
     return null;
   }

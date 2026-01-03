@@ -5,6 +5,8 @@ import {
   inviteMember,
   listMembers,
   rejectInvitation,
+  removeMember,
+  updateMemberRole,
 } from "../server/invitation.actions";
 import useWorkspaceState from "../store";
 
@@ -33,7 +35,7 @@ export const useInviteMemberMutation = () => {
       resend = false,
     }: {
       email: string;
-      role?: "member" | "owner";
+      role?: "member" | "admin" | "owner";
       resend?: boolean;
     }) => {
       const member = await inviteMember({
@@ -90,6 +92,44 @@ export const useCancelInvitationMutation = () => {
   return useMutation({
     mutationFn: async (invitationId: string) => {
       const member = await deleteInvitation(invitationId);
+      return member;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["members", activeWorkspace?.id],
+      });
+    },
+  });
+};
+
+export const useUpdateMemberRoleMutation = () => {
+  const queryClient = useQueryClient();
+  const { activeWorkspace } = useWorkspaceState();
+  return useMutation({
+    mutationFn: async ({
+      memberId,
+      role,
+    }: {
+      memberId: string;
+      role: "member" | "admin" | "owner";
+    }) => {
+      const member = await updateMemberRole(memberId, role);
+      return member;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["members", activeWorkspace?.id],
+      });
+    },
+  });
+};
+
+export const useRemoveMemberMutation = () => {
+  const queryClient = useQueryClient();
+  const { activeWorkspace } = useWorkspaceState();
+  return useMutation({
+    mutationFn: async (memberId: string) => {
+      const member = await removeMember(memberId, activeWorkspace?.id || "");
       return member;
     },
     onSuccess: () => {
