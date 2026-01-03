@@ -313,12 +313,15 @@ const WebsocketRequestComponent = () => {
         </div>
 
         <TabsContent value="message" className="flex-1 flex overflow-hidden">
-          <ResizablePanelGroup direction="horizontal" className="h-full w-full">
-            <ResizablePanel defaultSize={75} minSize={2}>
-              <ResizablePanelGroup direction="vertical">
+          <ResizablePanelGroup
+            orientation="horizontal"
+            className="h-full w-full"
+          >
+            <ResizablePanel defaultSize={"75%"} minSize={"2%"}>
+              <ResizablePanelGroup orientation="vertical">
                 <ResizablePanel
-                  defaultSize={60}
-                  minSize={2}
+                  defaultSize={"60%"}
+                  minSize={"2%"}
                   className="flex flex-col"
                 >
                   <WebSocketMessageLog
@@ -332,8 +335,8 @@ const WebsocketRequestComponent = () => {
                   className="bg-border/30 hover:bg-primary/20 transition-colors"
                 />
                 <ResizablePanel
-                  defaultSize={30}
-                  minSize={2}
+                  defaultSize={"30%"}
+                  minSize={"2%"}
                   className="flex flex-col p-3 bg-muted/10"
                 >
                   <WebSocketMessageComposer
@@ -351,9 +354,9 @@ const WebsocketRequestComponent = () => {
               className="bg-border/30 hover:bg-primary/20 transition-colors"
             />
             <ResizablePanel
-              defaultSize={25}
-              minSize={2}
-              maxSize={30}
+              defaultSize={"25%"}
+              minSize={"2%"}
+              maxSize={"30%"}
               className="bg-muted/5"
             >
               <WebSocketSavedMessages

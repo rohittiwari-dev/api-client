@@ -633,14 +633,14 @@ const ApiRequestComponent = () => {
         </div>
 
         <ResizablePanelGroup
-          direction="vertical"
+          orientation="vertical"
           className="flex-1 min-h-0 w-full"
         >
           <ResizablePanel
-            defaultSize={70}
-            minSize={10}
-            maxSize={90}
-            className="flex flex-col min-h-0 relative z-0 !overflow-hidden bg-background/30"
+            defaultSize={"70%"}
+            minSize={"10%"}
+            maxSize={"90%"}
+            className="flex flex-col min-h-0 relative z-0 overflow-hidden! bg-background/30"
           >
             <TabsContent
               value="parameters"
@@ -682,10 +682,10 @@ const ApiRequestComponent = () => {
           />
 
           <ResizablePanel
-            defaultSize={30}
-            minSize={4}
-            maxSize={90}
-            className="flex flex-col !overflow-y-auto bg-background/50 border-t border-border/10"
+            defaultSize={"30%"}
+            minSize={"4%"}
+            maxSize={"90%"}
+            className="flex flex-col overflow-y-auto! bg-background/50 border-t border-border/10"
           >
             <div className="h-full w-full p-4">
               <ApiResponse />

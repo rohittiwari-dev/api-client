@@ -33,7 +33,8 @@ const Page = () => {
       className="h-full w-full flex flex-col gap-0!"
     >
       <TabBar />
-      <TabContent id={activeRequest?.id || tabs[0]?.id} />
+      {(tabs.length && <TabContent id={activeRequest?.id || tabs[0]?.id} />) ||
+        null}
       {tabs.length <= 0 && <WorkspaceEmptyState />}
     </Tabs>
   );

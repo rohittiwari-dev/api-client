@@ -4,7 +4,7 @@ import * as React from "react"
 import { Command as CommandPrimitive } from "cmdk"
 import { SearchIcon } from "lucide-react"
 
-import { cn } from "@/lib/utils"
+import { cn } from "@/lib/utils/index"
 import {
   Dialog,
   DialogContent,
@@ -67,15 +67,13 @@ function CommandInput({
   return (
     <div
       data-slot="command-input-wrapper"
-      className="flex h-14 items-center gap-3 border-b border-border/50 px-4 bg-muted/30"
+      className="flex h-9 items-center gap-2 border-b px-3"
     >
-      <div className="flex items-center justify-center size-8 rounded-lg bg-primary/10">
-        <SearchIcon className="size-4 text-primary" />
-      </div>
+      <SearchIcon className="size-4 shrink-0 opacity-50" />
       <CommandPrimitive.Input
         data-slot="command-input"
         className={cn(
-          "placeholder:text-muted-foreground/70 flex h-12 w-full bg-transparent text-base outline-hidden disabled:cursor-not-allowed disabled:opacity-50",
+          "placeholder:text-muted-foreground flex h-10 w-full rounded-md bg-transparent py-3 text-sm outline-hidden disabled:cursor-not-allowed disabled:opacity-50",
           className
         )}
         {...props}
@@ -83,7 +81,6 @@ function CommandInput({
     </div>
   )
 }
-
 
 function CommandList({
   className,

@@ -225,12 +225,15 @@ const SocketIORequestComponent = () => {
           value="message"
           className="flex-1 flex overflow-hidden mt-2 border-t"
         >
-          <ResizablePanelGroup direction="horizontal" className="h-full w-full">
-            <ResizablePanel defaultSize={75} minSize={30}>
-              <ResizablePanelGroup direction="vertical">
+          <ResizablePanelGroup
+            orientation="horizontal"
+            className="h-full w-full"
+          >
+            <ResizablePanel defaultSize={"75%"} minSize={"30%"}>
+              <ResizablePanelGroup orientation="vertical">
                 <ResizablePanel
-                  defaultSize={60}
-                  minSize={30}
+                  defaultSize={"60%"}
+                  minSize={"30%"}
                   className="flex flex-col"
                 >
                   <div className="flex items-center justify-between p-2 border-b bg-muted/20">
@@ -279,8 +282,8 @@ const SocketIORequestComponent = () => {
                 </ResizablePanel>
                 <ResizableHandle withHandle />
                 <ResizablePanel
-                  defaultSize={40}
-                  minSize={20}
+                  defaultSize={"40%"}
+                  minSize={"20%"}
                   className="flex flex-col p-4 gap-2"
                 >
                   <div className="flex gap-2 items-center">
@@ -312,7 +315,7 @@ const SocketIORequestComponent = () => {
               </ResizablePanelGroup>
             </ResizablePanel>
             <ResizableHandle withHandle />
-            <ResizablePanel defaultSize={25} minSize={15} maxSize={40}>
+            <ResizablePanel defaultSize={"25%"} minSize={"15%"} maxSize={"40%"}>
               <SavedMessages
                 requestId={requestId}
                 type="SOCKET_IO"
