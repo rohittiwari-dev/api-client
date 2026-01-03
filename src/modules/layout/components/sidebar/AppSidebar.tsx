@@ -102,7 +102,7 @@ export function AppSidebar({
 }
 
 const AddNewCollectionOption = ({ workspaceId }: { workspaceId: string }) => {
-  const { addRequest } = useRequestSyncStoreState();
+  const { openRequest } = useRequestSyncStoreState();
   const [showAddCollectionDialog, setShowAddCollectionDialog] =
     React.useState(false);
 
@@ -124,7 +124,7 @@ const AddNewCollectionOption = ({ workspaceId }: { workspaceId: string }) => {
             onClick={(e) => {
               const id = createId();
               e.stopPropagation();
-              addRequest({
+              openRequest({
                 id,
                 type: "API",
                 name: "New Request",
@@ -169,7 +169,7 @@ const AddNewCollectionOption = ({ workspaceId }: { workspaceId: string }) => {
             onClick={(e) => {
               const id = createId();
               e.stopPropagation();
-              addRequest({
+              openRequest({
                 id,
                 type: "WEBSOCKET",
                 name: "New Request",
@@ -214,7 +214,7 @@ const AddNewCollectionOption = ({ workspaceId }: { workspaceId: string }) => {
             onClick={(e) => {
               const id = createId();
               e.stopPropagation();
-              addRequest({
+              openRequest({
                 id,
                 type: "SOCKET_IO",
                 name: "New Request",

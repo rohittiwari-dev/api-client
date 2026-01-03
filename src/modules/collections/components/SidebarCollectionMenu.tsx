@@ -36,7 +36,7 @@ export function SidebarCollectionMenu({
   workspaceId,
   collectionId,
 }: SidebarCollectionMenuProps) {
-  const { addRequest } = useRequestSyncStoreState();
+  const { openRequest } = useRequestSyncStoreState();
 
   const [showRenameDialog, setShowRenameDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -77,7 +77,7 @@ export function SidebarCollectionMenu({
                 onClick={(e) => {
                   e.stopPropagation();
                   const id = createId();
-                  addRequest({
+                  openRequest({
                     id,
                     type: "API",
                     name: "New Request",
@@ -114,7 +114,7 @@ export function SidebarCollectionMenu({
                 onClick={(e) => {
                   e.stopPropagation();
                   const id = createId();
-                  addRequest({
+                  openRequest({
                     id,
                     type: "WEBSOCKET",
                     name: "New WS Request",
@@ -151,7 +151,7 @@ export function SidebarCollectionMenu({
                 onClick={(e) => {
                   e.stopPropagation();
                   const id = createId();
-                  addRequest({
+                  openRequest({
                     id,
                     type: "SOCKET_IO",
                     name: "New SocketIO",
