@@ -29,9 +29,15 @@ import { HttpMethod } from "@/generated/prisma/browser";
 import MethodBadge from "@/components/app-ui/method-badge";
 import useRequestSyncStoreState from "@/modules/requests/hooks/requestSyncStore";
 import { useCollections } from "@/modules/collections/hooks/queries";
+import useCommandPaletteStore from "@/modules/layout/store/commandPalette.store";
 
 const SearchPanel = () => {
-  const [open, setOpen] = useState(false);
+  const {
+    isOpen: open,
+    open: setOpenTrue,
+    close: setOpenFalse,
+    toggle,
+  } = useCommandPaletteStore();
   const [query, setQuery] = useState("");
   const [collectionModalOpen, setCollectionModalOpen] = useState(false);
 
@@ -45,12 +51,12 @@ const SearchPanel = () => {
     const down = (e: KeyboardEvent) => {
       if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
         e.preventDefault();
-        setOpen((open) => !open);
+        toggle();
       }
     };
     document.addEventListener("keydown", down);
     return () => document.removeEventListener("keydown", down);
-  }, []);
+  }, [toggle]);
 
   // Filter requests based on query - full text search on name, url, description
   const filteredRequests = useMemo(() => {
@@ -71,7 +77,7 @@ const SearchPanel = () => {
       const descMatch = r.description?.toLowerCase().includes(lowerQuery);
       return nameMatch || urlMatch || descMatch;
     });
-  }, [requests, query, activeWorkspace?.id]);
+  }, [requests, query, activeWorkspace]);
 
   // Create new request handler
   const handleCreateRequest = useCallback(
@@ -109,27 +115,27 @@ const SearchPanel = () => {
       };
 
       openRequest(requestData);
-      setOpen(false);
+      setOpenFalse();
       setQuery("");
     },
-    [activeWorkspace?.id, openRequest]
+    [activeWorkspace, openRequest, setOpenFalse]
   );
 
   // Open new collection modal
   const handleOpenCollectionModal = useCallback(() => {
-    setOpen(false);
+    setOpenFalse();
     setQuery("");
     setCollectionModalOpen(true);
-  }, []);
+  }, [setOpenFalse]);
 
   // Open existing request handler
   const handleOpenRequest = useCallback(
     (request: (typeof requests)[0]) => {
       openRequest(request);
-      setOpen(false);
+      setOpenFalse();
       setQuery("");
     },
-    [openRequest]
+    [openRequest, setOpenFalse]
   );
 
   // Get method badge color
@@ -190,7 +196,7 @@ const SearchPanel = () => {
     <>
       {/* Search Trigger Button */}
       <button
-        onClick={() => setOpen(true)}
+        onClick={setOpenTrue}
         className={cn(
           "group flex items-center gap-3 px-3 py-2 rounded-xl",
           "bg-muted/50 hover:bg-muted/80 dark:bg-muted/30 dark:hover:bg-muted/50",
@@ -216,8 +222,12 @@ const SearchPanel = () => {
       <CommandDialog
         open={open}
         onOpenChange={(isOpen) => {
-          setOpen(isOpen);
-          if (!isOpen) setQuery("");
+          if (isOpen) {
+            setOpenTrue();
+          } else {
+            setOpenFalse();
+            setQuery("");
+          }
         }}
         className="rounded-xl border-0 shadow-2xl"
       >
