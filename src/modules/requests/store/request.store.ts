@@ -140,6 +140,10 @@ const useRequestStore = create<RequestsStoreState & RequestStoreStateActions>()(
             const isActiveRequest = state.activeRequest?.id === tabId;
             const currentIndex = state.tabIds.indexOf(tabId);
 
+            // Check if the request being closed is of type "NEW" (not persisted to DB)
+            const requestToClose = state.requests.find((r) => r.id === tabId);
+            const isNewRequest = requestToClose?.type === "NEW";
+
             // Calculate next active tab if closing the active tab
             let nextActiveRequest: RequestStateInterface | null = null;
 
@@ -157,6 +161,10 @@ const useRequestStore = create<RequestsStoreState & RequestStoreStateActions>()(
             return {
               ...state,
               tabIds: state.tabIds.filter((id) => id !== tabId),
+              // Remove "NEW" type requests from requests array as they are not persisted
+              requests: isNewRequest
+                ? state.requests.filter((r) => r.id !== tabId)
+                : state.requests,
               activeRequest: nextActiveRequest,
             };
           }),
