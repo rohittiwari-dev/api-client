@@ -40,14 +40,15 @@ const WorkspaceLayout = async ({
   if (!activeWorkspace) {
     return redirect("/workspace/get-started");
   }
-
-  if (activeWorkspace.slug !== awaitParams?.slug) {
+  if (activeWorkspace.slug !== awaitParams.slug) {
     await auth.api.setActiveOrganization({
       body: {
         organizationId: activeWorkspace.id,
       },
-      headers: await headers(),
+      headers: headersData,
     });
+
+    return redirect(`/workspace/${activeWorkspace.slug}`);
   }
 
   return (
