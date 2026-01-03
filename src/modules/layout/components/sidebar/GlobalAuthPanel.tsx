@@ -271,7 +271,12 @@ const GlobalAuthPanel = () => {
     };
 
     fetchGlobalAuth();
-  }, [activeWorkspace?.id]);
+  }, [
+    activeWorkspace,
+    activeWorkspace?.id,
+    setActiveWorkspace,
+    updateStoreGlobalAuth,
+  ]);
 
   const handleSave = useCallback(async () => {
     if (!activeWorkspace?.id) return;
@@ -293,7 +298,7 @@ const GlobalAuthPanel = () => {
     } else {
       toast.error("Failed to save global auth");
     }
-  }, [activeWorkspace?.id, authType, authData, updateStoreGlobalAuth]);
+  }, [activeWorkspace, authType, authData, updateStoreGlobalAuth]);
 
   const handleAuthTypeChange = useCallback((type: AuthType) => {
     setAuthType(type);
@@ -580,7 +585,9 @@ const GlobalAuthPanel = () => {
                 className="bg-muted/30 h-7 text-xs font-mono px-2"
                 placeholder="auth or auth-int"
               />
-              <FieldDescription>Usually 'auth' - from server</FieldDescription>
+              <FieldDescription>
+                Usually &apos;auth&apos; - from server
+              </FieldDescription>
             </div>
             <div>
               <FieldLabel tooltip="Opaque string from server (pass back unchanged)">
@@ -1208,8 +1215,8 @@ const GlobalAuthPanel = () => {
                 {authType !== "NONE" ? (
                   <>
                     <span className="text-amber-500 font-medium">Note:</span>{" "}
-                    Global auth will be applied to requests using "Inherit from
-                    Workspace"
+                    Global auth will be applied to requests using &quot;Inherit
+                    from Workspace&quot;
                   </>
                 ) : (
                   "No global authentication configured"

@@ -10,9 +10,9 @@ import {
   ExternalLink,
   Users,
   FileText,
+  Briefcase,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -21,58 +21,38 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import useWorkspaceState from "@/modules/workspace/store";
 import { useRouter } from "next/navigation";
+import { useUnsavedChangesGuard } from "@/modules/requests/hooks/useUnsavedChangesGuard";
+import UnsavedChangesDialog from "@/modules/requests/components/UnsavedChangesDialog";
+import WorkspaceSetup from "@/modules/workspace/components/workspace-setup";
 
 export default function AllWorkspacesPage() {
   const router = useRouter();
   const { activeWorkspace, workspaces, setActiveWorkspace } =
     useWorkspaceState();
 
-  const [newWorkspaceName, setNewWorkspaceName] = useState("");
-  const [isCreating, setIsCreating] = useState(false);
-  const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const [workspaceSetupModalOpen, setWorkspaceSetupModalOpen] = useState(false);
 
-  const handleCreateWorkspace = async () => {
-    if (!newWorkspaceName.trim()) {
-      toast.error("Please enter a workspace name");
-      return;
-    }
+  const unsavedGuard = useUnsavedChangesGuard();
 
-    setIsCreating(true);
-    try {
-      // TODO: Implement workspace creation API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      toast.success(`Workspace "${newWorkspaceName}" created`);
-      setNewWorkspaceName("");
-      setCreateDialogOpen(false);
-    } catch (error) {
-      toast.error("Failed to create workspace");
-    } finally {
-      setIsCreating(false);
-    }
-  };
-
-  const handleSwitchWorkspace = (workspace: typeof activeWorkspace) => {
+  const performWorkspaceSwitch = (workspace: typeof activeWorkspace) => {
     if (workspace) {
       setActiveWorkspace(workspace);
       router.push(`/workspace/${workspace.slug}`);
     }
   };
 
+  const handleSwitchWorkspace = (workspace: typeof activeWorkspace) => {
+    if (!workspace || workspace.id === activeWorkspace?.id) return;
+    unsavedGuard.confirmWorkspaceSwitch(() => {
+      performWorkspaceSwitch(workspace);
+    });
+  };
+
   const handleDeleteWorkspace = async (workspaceId: string) => {
-    // TODO: Implement workspace deletion
     toast.info("Workspace deletion coming soon");
   };
 
@@ -94,45 +74,13 @@ export default function AllWorkspacesPage() {
           </p>
         </div>
 
-        <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
-          <DialogTrigger asChild>
-            <Button className="gap-2">
-              <Plus className="size-4" />
-              New Workspace
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Create New Workspace</DialogTitle>
-              <DialogDescription>
-                Create a new workspace to organize your API requests and
-                collections.
-              </DialogDescription>
-            </DialogHeader>
-            <div className="space-y-4 py-4">
-              <div className="space-y-2">
-                <Label htmlFor="workspace-name">Workspace Name</Label>
-                <Input
-                  id="workspace-name"
-                  value={newWorkspaceName}
-                  onChange={(e) => setNewWorkspaceName(e.target.value)}
-                  placeholder="My New Workspace"
-                />
-              </div>
-            </div>
-            <DialogFooter>
-              <Button
-                variant="outline"
-                onClick={() => setCreateDialogOpen(false)}
-              >
-                Cancel
-              </Button>
-              <Button onClick={handleCreateWorkspace} disabled={isCreating}>
-                {isCreating ? "Creating..." : "Create Workspace"}
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+        <Button
+          className="gap-2"
+          onClick={() => setWorkspaceSetupModalOpen(true)}
+        >
+          <Plus className="size-4" />
+          New Workspace
+        </Button>
       </div>
 
       <Separator />
@@ -257,6 +205,66 @@ export default function AllWorkspacesPage() {
           )}
         </div>
       </div>
+
+      {/* Unsaved Changes Dialog for workspace switching */}
+      {unsavedGuard.dialogProps && (
+        <UnsavedChangesDialog {...unsavedGuard.dialogProps} />
+      )}
+
+      {/* Create Workspace Modal */}
+      <Dialog
+        onOpenChange={(open) => setWorkspaceSetupModalOpen(open || false)}
+        open={workspaceSetupModalOpen}
+        modal={true}
+      >
+        <DialogContent className="!max-w-[700px] !min-w-[800px] p-0 gap-0 overflow-hidden border-0">
+          <DialogTitle className="sr-only">Create Workspace</DialogTitle>
+          <div className="grid md:grid-cols-2 min-h-[420px]">
+            {/* Left side - Decorative */}
+            <div className="hidden md:flex relative bg-gradient-to-br from-primary via-primary/90 to-primary/70 p-8 flex-col justify-between overflow-hidden">
+              {/* Decorative gradient orbs */}
+              <div className="absolute top-1/4 -left-16 w-48 h-48 bg-white/10 rounded-full blur-3xl" />
+              <div className="absolute bottom-1/4 -right-16 w-64 h-64 bg-white/5 rounded-full blur-3xl" />
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 bg-white/10 rounded-full blur-2xl" />
+
+              {/* Content */}
+              <div className="relative z-10">
+                <div className="flex items-center gap-2 text-white/90">
+                  <div className="flex justify-center items-center bg-white/20 backdrop-blur-sm rounded-lg size-8">
+                    <Briefcase className="size-4 text-white" />
+                  </div>
+                  <span className="font-semibold text-lg">New Workspace</span>
+                </div>
+              </div>
+
+              <div className="relative z-10 space-y-4">
+                <h2 className="text-2xl font-bold text-white leading-tight">
+                  Organize your API testing workflow
+                </h2>
+                <p className="text-white/80 text-sm leading-relaxed">
+                  Create dedicated workspaces for different projects and invite
+                  your team to collaborate seamlessly.
+                </p>
+                <div className="flex gap-3 pt-2">
+                  <div className="flex items-center gap-2 text-white/70 text-xs">
+                    <div className="size-1.5 rounded-full bg-emerald-400" />
+                    Unlimited collections
+                  </div>
+                  <div className="flex items-center gap-2 text-white/70 text-xs">
+                    <div className="size-1.5 rounded-full bg-emerald-400" />
+                    Team collaboration
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Right side - Form */}
+            <div className="flex items-center justify-center p-8 bg-background">
+              <WorkspaceSetup type={"workspace-setup-modal"} />
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </motion.div>
   );
 }

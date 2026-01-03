@@ -16,6 +16,8 @@ type AuthStoreActions = {
     session: Session | null;
     user: User | null;
   }) => void;
+  setUser: (user: User) => void;
+  setSession: (session: Session) => void;
   setError: (error: Error | null) => void;
   setMessage: (message?: string | null) => void;
   setIsLoading: (isLoading: boolean) => void;
@@ -44,6 +46,24 @@ export const useAuthStore = create<AuthStoreState & AuthStoreActions>()(
         },
         setAuthSession: (data) => {
           set({ data });
+        },
+        setUser: (user) => {
+          set((state) => ({
+            ...state,
+            data: {
+              ...state.data,
+              user,
+            },
+          }));
+        },
+        setSession: (session) => {
+          set((state) => ({
+            ...state,
+            data: {
+              ...state.data,
+              session,
+            },
+          }));
         },
         setAuthStoreState: (state: AuthStoreState) => {
           set(state);

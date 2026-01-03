@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { User, Mail, Camera, Save, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import { useAuthStore } from "@/modules/authentication/store";
 import Avatar from "@/modules/authentication/components/avatar";
 import { getInitialsFromName } from "@/lib/utils";
+import authClient from "@/lib/authClient";
 
 export default function ProfileSettingsPage() {
   const { data } = useAuthStore();
@@ -20,16 +21,25 @@ export default function ProfileSettingsPage() {
   const [isSaving, setIsSaving] = useState(false);
 
   const handleSave = async () => {
-    setIsSaving(true);
-    try {
-      // TODO: Implement profile update API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      toast.success("Profile updated successfully");
-    } catch (error) {
-      toast.error("Failed to update profile");
-    } finally {
-      setIsSaving(false);
-    }
+    await authClient.updateUser({
+      name,
+      fetchOptions: {
+        onRequest: () => {
+          setIsSaving(true);
+        },
+        onError(ctx) {
+          toast.error("Failed to update profile error: " + ctx.error?.message);
+          setIsSaving(false);
+        },
+        onSuccess() {
+          toast.success("Profile updated successfully");
+          setIsSaving(false);
+        },
+        onResponse: () => {
+          setIsSaving(false);
+        },
+      },
+    });
   };
 
   return (
@@ -55,8 +65,8 @@ export default function ProfileSettingsPage() {
         <div className="flex items-center gap-6">
           <div className="relative group">
             <Avatar
-              className="size-20 rounded-xl"
-              fallbackClassName="rounded-xl text-xl"
+              className="size-20 rounded-2xl"
+              fallbackClassName="rounded-2xl text-xl"
               href={user?.image || ""}
               alt={user?.name || ""}
               initial={getInitialsFromName(user?.name || "")}
@@ -68,7 +78,7 @@ export default function ProfileSettingsPage() {
           <div className="space-y-1">
             <p className="text-sm font-medium">Change avatar</p>
             <p className="text-xs text-muted-foreground">
-              Click on the avatar to upload a custom image
+              Click on the avatar to upload a custom image (Comming Soon...)
             </p>
           </div>
         </div>
