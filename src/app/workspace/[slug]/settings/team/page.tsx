@@ -23,11 +23,21 @@ import {
 } from "@/components/ui/dropdown-menu";
 import Avatar from "@/modules/authentication/components/avatar";
 import { getInitialsFromName } from "@/lib/utils";
-import { useListMembersQuery } from "@/modules/workspace/hooks/use-invitaions-query";
+import {
+  useInviteMemberMutation,
+  useListMembersQuery,
+} from "@/modules/workspace/hooks/use-invitaions-query";
+import { InputField } from "@/components/app-ui/inputs";
+import z from "zod";
 
 export default function TeamSettingsPage() {
   const { data, isPending, error } = useListMembersQuery();
-  const [inviteEmail, setInviteEmail] = useState("");
+  const { mutate: inviteMember, isPending: isInviting } =
+    useInviteMemberMutation();
+  const [inviteEmail, setInviteEmail] = useState({
+    value: "",
+    error: "",
+  });
 
   const getRoleBadge = (role: string) => {
     switch (role) {
@@ -81,22 +91,54 @@ export default function TeamSettingsPage() {
         <h3 className="text-sm font-medium">Invite Team Members</h3>
         <div className="flex gap-3">
           <div className="relative flex-1">
-            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
-            <Input
-              value={inviteEmail}
-              onChange={(e) => setInviteEmail(e.target.value)}
-              className="pl-10"
+            <InputField
+              leftIcon={<Mail className="size-4" />}
+              value={inviteEmail.value}
+              onChange={(e) =>
+                setInviteEmail({ value: e.target.value, error: "" })
+              }
+              error={inviteEmail.error || undefined}
               placeholder="Enter email address"
               type="email"
+              onBlur={(e) => {
+                if (!e.target.value) {
+                  setInviteEmail({ value: "", error: "Email is required" });
+                } else {
+                  const validate = z.email().safeParse(e.target.value);
+                  if (!validate.success) {
+                    setInviteEmail({
+                      value: "",
+                      error: "Invalid email address",
+                    });
+                  } else {
+                    setInviteEmail({ value: e.target.value, error: "" });
+                  }
+                }
+              }}
             />
           </div>
           <Button
-            // onClick={handleInvite}
-            // disabled={isInviting}
+            onClick={() => {
+              if (!inviteEmail.value) {
+                setInviteEmail({ value: "", error: "Email is required" });
+              } else {
+                const validate = z.email().safeParse(inviteEmail.value);
+                if (!validate.success) {
+                  setInviteEmail({
+                    value: "",
+                    error: "Invalid email address",
+                  });
+                } else {
+                  inviteMember({ email: inviteEmail.value });
+                  setInviteEmail({ value: "", error: "" });
+                }
+              }
+            }}
+            disabled={isInviting}
             className="gap-2"
           >
             <UserPlus className="size-4" />
-            {isPending ? "Inviting..." : "Invite"}
+            {isInviting ? "Inviting..." : "Invite"}
           </Button>
         </div>
         <p className="text-xs text-muted-foreground">
