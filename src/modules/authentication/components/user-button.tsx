@@ -146,7 +146,7 @@ function UserButton({
             className="hover:!bg-accent/30 cursor-pointer"
             asChild
           >
-            <Link href="/workspace/settings/profile">
+            <Link href={`/workspace/${workspaceSlug}/settings/profile`}>
               <UserIcon className="size-4" />
               Profile Settings
             </Link>
@@ -155,7 +155,7 @@ function UserButton({
             className="hover:!bg-accent/30 cursor-pointer"
             asChild
           >
-            <Link href="/workspace/settings/workspace">
+            <Link href={`/workspace/${workspaceSlug}/settings/workspace`}>
               <Building2 className="size-4" />
               Workspace Settings
             </Link>
@@ -164,7 +164,7 @@ function UserButton({
             className="hover:!bg-accent/30 cursor-pointer"
             asChild
           >
-            <Link href="/workspace/settings/team">
+            <Link href={`/workspace/${workspaceSlug}/settings/team`}>
               <Users className="size-4" />
               Team Members
             </Link>

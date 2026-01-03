@@ -337,7 +337,6 @@ export function useDuplicateRequest(
 
         // Helper to add to request store if needed (optional since we might fetch on click)
         // But good for consistency
-        // @ts-ignore
         useRequestStore.getState().addRequest({
           ...data,
           headers: data.headers as any[],

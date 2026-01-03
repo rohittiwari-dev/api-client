@@ -19,34 +19,34 @@ interface SettingsLayoutProps {
   children: React.ReactNode;
 }
 
-const navItems = [
+const navItems = (slug: string) => [
   {
     title: "Profile",
-    href: "/workspace/settings/profile",
+    href: `/workspace/${slug}/settings/profile`,
     icon: User,
     description: "Manage your personal information",
   },
   {
     title: "Security",
-    href: "/workspace/settings/security",
+    href: `/workspace/${slug}/settings/security`,
     icon: Shield,
     description: "Password and authentication",
   },
   {
     title: "Current Workspace",
-    href: "/workspace/settings/workspace",
+    href: `/workspace/${slug}/settings/workspace`,
     icon: Building2,
     description: "Configure workspace settings",
   },
   {
     title: "All Workspaces",
-    href: "/workspace/settings/workspaces",
+    href: `/workspace/${slug}/settings/workspaces`,
     icon: Layers,
     description: "Manage all your workspaces",
   },
   {
     title: "Team",
-    href: "/workspace/settings/team",
+    href: `/workspace/${slug}/settings/team`,
     icon: Users,
     description: "Manage team members and roles",
   },
@@ -90,7 +90,7 @@ export default function SettingsLayout({ children }: SettingsLayoutProps) {
 
           {/* Navigation */}
           <nav className="space-y-1 flex-1">
-            {navItems.map((item) => {
+            {navItems(slug).map((item) => {
               const isActive = pathname === item.href;
               return (
                 <Link
