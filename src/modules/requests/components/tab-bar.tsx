@@ -363,10 +363,9 @@ const TabBar = () => {
     const [draggedTab] = workspaceTabs.splice(draggedIndex, 1);
     workspaceTabs.splice(targetIndex, 0, draggedTab);
 
-    // Rebuild full tabs array: other workspace tabs + reordered current workspace tabs
-
+    // Update tabIds with the reordered array
     setRequestsState({
-      tabIds: [...tabs, ...workspaceTabs].map((tab) => tab.id),
+      tabIds: workspaceTabs.map((tab) => tab.id),
     });
 
     // Don't change active tab on drop - just reorder

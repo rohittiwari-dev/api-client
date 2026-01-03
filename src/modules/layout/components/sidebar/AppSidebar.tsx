@@ -59,37 +59,36 @@ export function AppSidebar({
 
   return (
     <Sidebar
-      className="top-(--header-height) h-[calc(100svh-var(--header-height))]! border-r-0 "
+      className="top-(--header-height) h-[calc(100svh-var(--header-height))]! border-r border-white/5 bg-background/50 backdrop-blur-md"
       {...props}
     >
-      <SidebarContent className="pt-3 bg-gradient-to-b from-sidebar to-background/95">
-        <SidebarGroup>
+      <SidebarContent className="pt-2 bg-transparent">
+        <SidebarGroup className="px-2">
           {/* Header Section */}
-          <SidebarGroupLabel className="sticky top-0 z-10 !min-h-fit flex justify-between items-center gap-2 px-3 !py-2 w-full mb-3 rounded-lg bg-muted/50 backdrop-blur-sm border border-border/40">
-            <div className="flex items-center gap-2">
-              <div className="flex items-center justify-center size-6 rounded-md bg-primary/10">
-                <IconFolderFilled className="size-3.5 text-primary" />
-              </div>
-              <span className="font-semibold text-sm text-foreground">
+          <SidebarGroupLabel className="group/label sticky top-0 z-10 flex min-h-[36px] items-center justify-between gap-2 px-2 py-1 mb-2 rounded-lg bg-transparent hover:bg-muted/50 transition-colors">
+            <div className="flex items-center gap-2 text-muted-foreground group-hover/label:text-foreground transition-colors">
+              <IconFolderFilled className="size-3.5 opacity-70" />
+              <span className="font-medium text-xs uppercase tracking-wider">
                 Collections
               </span>
             </div>
-            <div className="flex items-center gap-1">
+
+            <div className="flex items-center gap-0.5 opacity-0 group-hover/label:opacity-100 transition-opacity">
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-7 w-7 hover:bg-accent/80 rounded-lg transition-colors"
+                className="h-6 w-6 rounded-md hover:bg-background/80 hover:shadow-sm transition-all"
                 onClick={handleCollapseAll}
                 title="Collapse All Folders"
               >
-                <ChevronsDownUp className="size-3.5 text-muted-foreground" />
+                <ChevronsDownUp className="size-3" />
               </Button>
               <AddNewCollectionOption workspaceId={workspaceId} />
             </div>
           </SidebarGroupLabel>
 
           {/* Tree Content */}
-          <SidebarGroupContent>
+          <SidebarGroupContent className="pr-1">
             <DraggableSidebarTree
               workspaceId={workspaceId}
               collapseKey={collapseKey}
@@ -97,7 +96,7 @@ export function AppSidebar({
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
-      <SidebarRail className="hover:after:bg-primary/20 after:transition-colors" />
+      <SidebarRail className="hover:after:bg-violet-500/50 after:w-[2px]" />
     </Sidebar>
   );
 }

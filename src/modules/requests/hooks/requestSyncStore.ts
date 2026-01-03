@@ -15,9 +15,11 @@ const useRequestSyncStoreState = () => {
     ...rest
   } = useRequestStore();
 
-  const tabs = requests.filter(
-    (r) => tabIds.includes(r.id) && r.workspaceId === activeWorkspace?.id
-  );
+  const tabs = requests
+    .filter(
+      (r) => tabIds.includes(r.id) && r.workspaceId === activeWorkspace?.id
+    )
+    .sort((a, b) => tabIds.indexOf(a.id) - tabIds.indexOf(b.id));
 
   const closeAllTabs = () => {
     setRequestsState({
