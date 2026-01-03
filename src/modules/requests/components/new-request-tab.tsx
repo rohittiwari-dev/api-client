@@ -9,7 +9,7 @@ const requestTypes = [
   {
     type: "API" as const,
     title: "HTTP Request",
-    description: "REST API, GraphQL, or any HTTP endpoint",
+    description: "REST API, or any HTTP endpoint",
     icon: Code2,
     gradient: "from-violet-500/10 via-purple-500/5 to-fuchsia-500/10",
     iconBg: "bg-violet-500/10 border-violet-500/20",
