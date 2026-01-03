@@ -111,6 +111,28 @@ export default function TeamSettingsPage() {
         <div className="flex min-h-[200px] items-center justify-center flex-1">
           <Loader2 className="animate-spin size-7 w-[30px] h-[30px] text-indigo-500/60" />
         </div>
+      ) : error ? (
+        <div className="flex flex-col min-h-[200px] items-center justify-center flex-1 text-center">
+          <div className="p-3 rounded-full bg-red-500/10 mb-3">
+            <Users className="size-6 text-red-500" />
+          </div>
+          <p className="text-sm font-medium text-red-500">
+            Failed to load team members
+          </p>
+          <p className="text-xs text-muted-foreground mt-1">
+            Please try refreshing the page
+          </p>
+        </div>
+      ) : !data?.members || data.members.length === 0 ? (
+        <div className="flex flex-col min-h-[200px] items-center justify-center flex-1 text-center">
+          <div className="p-3 rounded-full bg-muted mb-3">
+            <Users className="size-6 text-muted-foreground" />
+          </div>
+          <p className="text-sm font-medium">No team members yet</p>
+          <p className="text-xs text-muted-foreground mt-1">
+            Invite team members using the form above
+          </p>
+        </div>
       ) : (
         <div className="space-y-4">
           <div className="flex items-center justify-between">
