@@ -44,6 +44,7 @@ export function useUnsavedChangesGuard() {
         (r) =>
           tabIdsToCheck.includes(r.id) &&
           r.unsaved &&
+          r.type != "NEW" &&
           r.workspaceId === activeWorkspace?.id
       );
     },
@@ -53,32 +54,37 @@ export function useUnsavedChangesGuard() {
   // Check if any of the given tabs have unsaved changes
   const hasUnsavedChanges = useCallback(
     (tabIdsToCheck: string[]): boolean => {
-      return getUnsavedRequests(tabIdsToCheck).length > 0;
+      return (
+        getUnsavedRequests(tabIdsToCheck).filter((req) => req.type != "NEW")
+          .length > 0
+      );
     },
     [getUnsavedRequests]
   );
 
   // Save all unsaved requests
   const saveAllRequests = async (requestsToSave: RequestStateInterface[]) => {
-    const savePromises = requestsToSave.map(async (request) => {
-      await upsertRequestAction(request.id, {
-        name: request.name,
-        url: request.url || "",
-        workspaceId: request.workspaceId,
-        collectionId: request.collectionId,
-        type: (request.type || "API") as any,
-        method: request.method,
-        headers: request.headers,
-        parameters: request.parameters,
-        body: request.body,
-        auth: request.auth,
-        bodyType: request.bodyType,
-        savedMessages: request.savedMessages ?? [],
-      });
+    const savePromises = requestsToSave
+      .filter((req) => req.type !== "NEW")
+      .map(async (request) => {
+        await upsertRequestAction(request.id, {
+          name: request.name,
+          url: request.url || "",
+          workspaceId: request.workspaceId,
+          collectionId: request.collectionId,
+          type: (request.type || "API") as any,
+          method: request.method,
+          headers: request.headers,
+          parameters: request.parameters,
+          body: request.body,
+          auth: request.auth,
+          bodyType: request.bodyType,
+          savedMessages: request.savedMessages ?? [],
+        });
 
-      // Mark as saved in store
-      updateRequest(request.id, { unsaved: false });
-    });
+        // Mark as saved in store
+        updateRequest(request.id, { unsaved: false });
+      });
 
     await Promise.all(savePromises);
   };
@@ -86,6 +92,9 @@ export function useUnsavedChangesGuard() {
   // Revert request to database state
   const revertRequest = async (request: RequestStateInterface) => {
     // Fetch original from database
+    if (request.type === "NEW") {
+      return;
+    }
     try {
       const dbRequest = await getRequestById(
         request.id,
@@ -121,7 +130,9 @@ export function useUnsavedChangesGuard() {
 
     setIsSaving(true);
     try {
-      await saveAllRequests(pendingAction.unsavedRequests);
+      await saveAllRequests(
+        pendingAction.unsavedRequests.filter((req) => req.type !== "NEW")
+      );
       toast.success(
         pendingAction.unsavedRequests.length === 1
           ? "Request saved"
@@ -145,9 +156,9 @@ export function useUnsavedChangesGuard() {
     setIsDiscarding(true);
     try {
       // Revert all unsaved requests from database
-      const revertPromises = pendingAction.unsavedRequests.map((r) =>
-        revertRequest(r)
-      );
+      const revertPromises = pendingAction.unsavedRequests
+        .filter((req) => req.type !== "NEW")
+        .map((r) => revertRequest(r));
 
       await Promise.all(revertPromises);
 
