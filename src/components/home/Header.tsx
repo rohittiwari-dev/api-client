@@ -1,190 +1,230 @@
-'use client';
+"use client";
 
-import Link from 'next/link';
-import Image from 'next/image';
-import { useAuthStore } from '@/modules/authentication/store';
-import { Menu, X, Github, Sparkles } from 'lucide-react';
-import { useState } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+import Link from "next/link";
+import Image from "next/image";
+import { useAuthStore } from "@/modules/authentication/store";
+import { Menu, X, Github, Sparkles, ChevronRight } from "lucide-react";
+import { useState, useEffect } from "react";
+import { motion, AnimatePresence, useScroll, useTransform } from "motion/react";
+import ThemeSwitcher from "@/components/app-ui/theme-switcher";
 
 const MotionLink = motion.create(Link);
 
 export default function Header() {
-    const { data } = useAuthStore();
-    const isSignedIn = !!data?.session;
-    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { data } = useAuthStore();
+  const isSignedIn = !!data?.session;
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { scrollY } = useScroll();
 
-    return (
-        <motion.header
-            initial={{ y: -100, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ duration: 0.5 }}
-            className="fixed top-0 left-0 right-0 z-50"
-        >
-            <div className="mx-4 mt-4">
-                <div className="max-w-6xl mx-auto rounded-2xl bg-background/60 backdrop-blur-xl border border-white/10 shadow-lg shadow-black/5">
-                    <div className="px-6 py-3">
-                        <div className="flex items-center justify-between">
-                            {/* Logo */}
-                            <Link href="/" className="flex items-center gap-2 group">
-                                <motion.div
-                                    className="relative w-8 h-8"
-                                    whileHover={{ rotate: 360 }}
-                                    transition={{ duration: 0.5 }}
-                                >
-                                    <Image
-                                        src="/logo.png"
-                                        alt="ApiClient Logo"
-                                        fill
-                                        className="object-contain"
-                                    />
-                                </motion.div>
-                                <span className="text-xl font-bold bg-gradient-to-r from-violet-400 to-indigo-400 bg-clip-text text-transparent">
-                                    ApiClient
-                                </span>
-                            </Link>
+  // Dynamic header styles based on scroll
+  const headerY = useTransform(scrollY, [0, 100], [0, -10]);
+  const headerBorder = useTransform(
+    scrollY,
+    [0, 20],
+    ["rgba(255,255,255,0)", "rgba(255,255,255,0.1)"]
+  );
+  const headerBackdrop = useTransform(
+    scrollY,
+    [0, 20],
+    ["blur(0px)", "blur(12px)"]
+  );
+  const headerBg = useTransform(
+    scrollY,
+    [0, 20],
+    ["rgba(var(--background), 0)", "rgba(var(--background), 0.8)"]
+  );
 
-                            {/* Desktop Navigation */}
-                            <nav className="hidden md:flex items-center gap-1">
-                                {[
-                                    { label: 'Features', href: '#features' },
-                                    { label: 'Community', href: '#testimonials' },
-                                    { label: 'Docs', href: '/docs' },
-                                ].map((link) => (
-                                    <Link
-                                        key={link.label}
-                                        href={link.href}
-                                        className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground rounded-lg hover:bg-white/5 transition-colors"
-                                    >
-                                        {link.label}
-                                    </Link>
-                                ))}
-                                <a
-                                    href="https://github.com/rohittiwari-dev/api-client"
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground rounded-lg hover:bg-white/5 transition-colors flex items-center gap-1.5"
-                                >
-                                    <Github className="w-4 h-4" />
-                                    GitHub
-                                </a>
-                            </nav>
+  return (
+    <motion.header
+      style={{
+        y: headerY,
+      }}
+      className="fixed top-0 left-0 right-0 z-50 pt-4 px-4"
+    >
+      <motion.div
+        className="max-w-7xl mx-auto rounded-full border border-transparent transition-all duration-300"
+        style={{
+          backgroundColor: "rgba(255, 255, 255, 0.05)",
+          backdropFilter: "blur(16px)",
+          borderColor: "rgba(255, 255, 255, 0.1)",
+          boxShadow: "0 4px 30px rgba(0, 0, 0, 0.1)",
+        }}
+      >
+        <div className="px-6 py-2.5">
+          <div className="flex items-center justify-between">
+            {/* Logo */}
+            <Link href="/" className="flex items-center gap-3 group">
+              <motion.div
+                className="relative w-9 h-9"
+                whileHover={{ rotate: 180 }}
+                transition={{ duration: 0.6, type: "spring" }}
+              >
+                <Image
+                  src="/logo.png"
+                  alt="ApiClient Logo"
+                  fill
+                  className="object-contain"
+                />
+              </motion.div>
+              <span className="text-lg font-bold tracking-tight">
+                ApiClient
+              </span>
+            </Link>
 
-                            {/* Auth Buttons */}
-                            <div className="hidden md:flex items-center gap-2">
-                                {isSignedIn ? (
-                                    <MotionLink
-                                        href="/workspace"
-                                        whileHover={{ scale: 1.02 }}
-                                        whileTap={{ scale: 0.98 }}
-                                        className="px-5 py-2 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 text-white font-medium text-sm shadow-lg shadow-violet-500/25 flex items-center gap-1.5"
-                                    >
-                                        <Sparkles className="w-4 h-4" />
-                                        Open App
-                                    </MotionLink>
-                                ) : (
-                                    <>
-                                        <Link
-                                            href="/sign-in"
-                                            className="px-4 py-2 rounded-xl text-foreground font-medium text-sm hover:bg-white/5 transition-colors"
-                                        >
-                                            Sign In
-                                        </Link>
-                                        <MotionLink
-                                            href="/sign-up"
-                                            whileHover={{ scale: 1.02 }}
-                                            whileTap={{ scale: 0.98 }}
-                                            className="px-5 py-2 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 text-white font-medium text-sm shadow-lg shadow-violet-500/25"
-                                        >
-                                            Get Started
-                                        </MotionLink>
-                                    </>
-                                )}
-                            </div>
+            {/* Desktop Navigation */}
+            <nav className="hidden md:flex items-center bg-secondary/30 rounded-full px-2 py-1.5 border border-white/5">
+              {[
+                { label: "Features", href: "/#features" },
+                { label: "Community", href: "/#testimonials" },
+                { label: "Docs", href: "/docs" },
+              ].map((link) => (
+                <Link
+                  key={link.label}
+                  href={link.href}
+                  className="px-4 py-1.5 text-sm font-medium text-muted-foreground hover:text-foreground rounded-full hover:bg-background/80 transition-all duration-300"
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </nav>
 
-                            {/* Mobile Menu Button */}
-                            <motion.button
-                                whileTap={{ scale: 0.95 }}
-                                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                                className="md:hidden p-2 rounded-lg hover:bg-white/5 transition-colors"
-                            >
-                                {mobileMenuOpen ? (
-                                    <X className="w-5 h-5" />
-                                ) : (
-                                    <Menu className="w-5 h-5" />
-                                )}
-                            </motion.button>
-                        </div>
+            <div className="hidden md:flex items-center gap-3">
+              <ThemeSwitcher variant="single" className="w-9 h-9" />
 
-                        {/* Mobile Menu */}
-                        <AnimatePresence>
-                            {mobileMenuOpen && (
-                                <motion.div
-                                    initial={{ opacity: 0, height: 0 }}
-                                    animate={{ opacity: 1, height: 'auto' }}
-                                    exit={{ opacity: 0, height: 0 }}
-                                    className="md:hidden overflow-hidden"
-                                >
-                                    <nav className="py-4 border-t border-white/10 mt-4 flex flex-col gap-2">
-                                        {[
-                                            { label: 'Features', href: '#features' },
-                                            { label: 'Community', href: '#testimonials' },
-                                            { label: 'Docs', href: '/docs' },
-                                        ].map((link) => (
-                                            <Link
-                                                key={link.label}
-                                                href={link.href}
-                                                className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground rounded-lg hover:bg-white/5 transition-colors"
-                                                onClick={() => setMobileMenuOpen(false)}
-                                            >
-                                                {link.label}
-                                            </Link>
-                                        ))}
-                                        <a
-                                            href="https://github.com/rohittiwari-dev/api-client"
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground rounded-lg hover:bg-white/5 transition-colors flex items-center gap-1.5"
-                                        >
-                                            <Github className="w-4 h-4" />
-                                            GitHub
-                                        </a>
+              <motion.a
+                href="https://github.com/rohittiwari-dev/api-client"
+                target="_blank"
+                rel="noopener noreferrer"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className="p-2 text-muted-foreground hover:text-foreground transition-colors"
+              >
+                <Github className="w-5 h-5" />
+              </motion.a>
 
-                                        <div className="flex flex-col gap-2 pt-4 border-t border-white/10 mt-2">
-                                            {isSignedIn ? (
-                                                <Link
-                                                    href="/workspace"
-                                                    className="px-5 py-3 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 text-white font-medium text-sm text-center"
-                                                    onClick={() => setMobileMenuOpen(false)}
-                                                >
-                                                    Open App
-                                                </Link>
-                                            ) : (
-                                                <>
-                                                    <Link
-                                                        href="/sign-in"
-                                                        className="px-4 py-3 rounded-xl text-foreground font-medium text-sm text-center hover:bg-white/5 transition-colors"
-                                                        onClick={() => setMobileMenuOpen(false)}
-                                                    >
-                                                        Sign In
-                                                    </Link>
-                                                    <Link
-                                                        href="/sign-up"
-                                                        className="px-5 py-3 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 text-white font-medium text-sm text-center"
-                                                        onClick={() => setMobileMenuOpen(false)}
-                                                    >
-                                                        Get Started
-                                                    </Link>
-                                                </>
-                                            )}
-                                        </div>
-                                    </nav>
-                                </motion.div>
-                            )}
-                        </AnimatePresence>
-                    </div>
-                </div>
+              <div className="w-px h-6 bg-border/50 mx-1" />
+
+              {isSignedIn ? (
+                <MotionLink
+                  href="/workspace"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="pl-4 pr-3 py-2 rounded-full bg-primary text-primary-foreground font-medium text-sm shadow-lg shadow-primary/20 flex items-center gap-1.5 hover:brightness-110 transition-all"
+                >
+                  Open App
+                  <div className="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center">
+                    <ChevronRight className="w-3 h-3" />
+                  </div>
+                </MotionLink>
+              ) : (
+                <>
+                  <Link
+                    href="/sign-in"
+                    className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors px-2"
+                  >
+                    Sign In
+                  </Link>
+                  <MotionLink
+                    href="/sign-up"
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    className="px-5 py-2 rounded-full bg-foreground text-background font-medium text-sm hover:opacity-90 transition-opacity"
+                  >
+                    Get Started
+                  </MotionLink>
+                </>
+              )}
             </div>
-        </motion.header>
-    );
+
+            {/* Mobile Menu Button */}
+            <div className="flex items-center gap-3 md:hidden">
+              <ThemeSwitcher variant="single" className="w-9 h-9" />
+              <motion.button
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                className="p-2 rounded-full hover:bg-muted/50 transition-colors"
+              >
+                {mobileMenuOpen ? (
+                  <X className="w-5 h-5" />
+                ) : (
+                  <Menu className="w-5 h-5" />
+                )}
+              </motion.button>
+            </div>
+          </div>
+        </div>
+      </motion.div>
+
+      {/* Mobile Menu Overlay */}
+      <AnimatePresence>
+        {mobileMenuOpen && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95, y: -20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: -20 }}
+            transition={{ duration: 0.2 }}
+            className="absolute top-20 left-4 right-4 p-4 rounded-3xl bg-background/90 backdrop-blur-2xl border border-border shadow-2xl md:hidden"
+          >
+            <nav className="flex flex-col gap-2">
+              {[
+                { label: "Features", href: "/#features" },
+                { label: "Community", href: "/#testimonials" },
+                { label: "Docs", href: "/docs" },
+              ].map((link) => (
+                <Link
+                  key={link.label}
+                  href={link.href}
+                  className="px-4 py-3 text-base font-medium text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-xl transition-colors"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  {link.label}
+                </Link>
+              ))}
+
+              <div className="h-px bg-border/50 my-2" />
+
+              <a
+                href="https://github.com/rohittiwari-dev/api-client"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-4 py-3 text-base font-medium text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-xl transition-colors flex items-center gap-2"
+              >
+                <Github className="w-5 h-5" />
+                GitHub
+              </a>
+
+              <div className="grid grid-cols-2 gap-3 mt-2">
+                {isSignedIn ? (
+                  <Link
+                    href="/workspace"
+                    className="col-span-2 px-4 py-3 rounded-xl bg-primary text-primary-foreground font-medium text-center"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    Open App
+                  </Link>
+                ) : (
+                  <>
+                    <Link
+                      href="/sign-in"
+                      className="px-4 py-3 rounded-xl bg-muted text-foreground font-medium text-center hover:bg-muted/80 transition-colors"
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      Sign In
+                    </Link>
+                    <Link
+                      href="/sign-up"
+                      className="px-4 py-3 rounded-xl bg-foreground text-background font-medium text-center hover:opacity-90 transition-opacity"
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      Get Started
+                    </Link>
+                  </>
+                )}
+              </div>
+            </nav>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.header>
+  );
 }

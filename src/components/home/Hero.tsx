@@ -1,342 +1,279 @@
-'use client';
+"use client";
 
-import Link from 'next/link';
-import Image from 'next/image';
-import { useAuthStore } from '@/modules/authentication/store';
-import { ArrowRight, Sparkles, Github, CheckCircle2, Star, Heart, Zap } from 'lucide-react';
-import { motion } from 'motion/react';
+import Link from "next/link";
+import Image from "next/image";
+import { useAuthStore } from "@/modules/authentication/store";
+import {
+  ArrowRight,
+  Sparkles,
+  Github,
+  CheckCircle2,
+  Star,
+  Heart,
+  Zap,
+  Terminal,
+} from "lucide-react";
+import { motion } from "motion/react";
 
 const MotionLink = motion.create(Link);
 
 export default function Hero() {
-    const { data } = useAuthStore();
-    const isSignedIn = !!data?.session;
+  const { data } = useAuthStore();
+  const isSignedIn = !!data?.session;
 
-    return (
-        <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-24 pb-20">
-            {/* Stunning Background */}
-            <div className="absolute inset-0">
-                {/* Aurora-like gradient */}
-                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(120,119,198,0.15),transparent_50%)]" />
-                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,rgba(168,85,247,0.15),transparent_50%)]" />
-                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_right,rgba(79,70,229,0.1),transparent_50%)]" />
+  return (
+    <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-32 pb-20">
+      {/* Background Effects */}
+      <div className="absolute inset-0 z-0">
+        {/* Refined gradient mesh */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-7xl opacity-40 dark:opacity-20 pointer-events-none">
+          <div className="absolute top-[-20%] left-[20%] w-[600px] h-[600px] bg-primary/30 rounded-full blur-[120px] mix-blend-screen" />
+          <div className="absolute top-[10%] right-[10%] w-[500px] h-[500px] bg-indigo-500/20 rounded-full blur-[100px] mix-blend-screen" />
+          <div className="absolute bottom-[0%] left-[30%] w-[700px] h-[700px] bg-violet-600/10 rounded-full blur-[140px] mix-blend-screen" />
+        </div>
 
-                {/* Animated floating orbs */}
-                <motion.div
-                    className="absolute top-1/4 left-[10%] w-64 h-64 bg-violet-600/20 rounded-full blur-[80px]"
-                    animate={{
-                        y: [0, -30, 0],
-                        scale: [1, 1.1, 1],
-                        opacity: [0.3, 0.5, 0.3]
-                    }}
-                    transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-                />
-                <motion.div
-                    className="absolute bottom-1/4 right-[10%] w-80 h-80 bg-indigo-600/20 rounded-full blur-[100px]"
-                    animate={{
-                        y: [0, 40, 0],
-                        scale: [1, 1.2, 1],
-                        opacity: [0.2, 0.4, 0.2]
-                    }}
-                    transition={{ duration: 10, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-                />
-                <motion.div
-                    className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-purple-500/10 rounded-full blur-[120px]"
-                    animate={{
-                        scale: [1, 1.3, 1],
-                        opacity: [0.1, 0.2, 0.1]
-                    }}
-                    transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
-                />
+        {/* Grid Pattern */}
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] z-0" />
+      </div>
 
-                {/* Subtle grid */}
-                <div className="absolute inset-0 bg-[linear-gradient(rgba(139,92,246,0.015)_1px,transparent_1px),linear-gradient(90deg,rgba(139,92,246,0.015)_1px,transparent_1px)] bg-[size:64px_64px] [mask-image:radial-gradient(ellipse_70%_70%_at_50%_50%,black_20%,transparent_100%)]" />
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <div className="max-w-4xl mx-auto text-center">
+          {/* Announcement Badge */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-secondary/50 border border-border backdrop-blur-sm mb-8 hover:bg-secondary/70 transition-colors cursor-default"
+          >
+            <span className="flex h-2 w-2 rounded-full bg-green-500 animate-pulse"></span>
+            <span className="text-xs font-medium text-muted-foreground">
+              v1.0 is now available
+            </span>
+          </motion.div>
 
-                {/* Floating particles */}
-                <div className="absolute inset-0 overflow-hidden">
-                    {[...Array(20)].map((_, i) => (
-                        <motion.div
-                            key={i}
-                            className="absolute w-1 h-1 bg-violet-400/30 rounded-full"
-                            style={{
-                                left: `${Math.random() * 100}%`,
-                                top: `${Math.random() * 100}%`,
-                            }}
-                            animate={{
-                                y: [0, -100, 0],
-                                opacity: [0, 1, 0],
-                            }}
-                            transition={{
-                                duration: 5 + Math.random() * 5,
-                                repeat: Infinity,
-                                delay: Math.random() * 5,
-                            }}
-                        />
-                    ))}
+          {/* Main Headline */}
+          <motion.h1
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, delay: 0.1 }}
+            className="text-5xl sm:text-6xl md:text-7xl font-bold tracking-tight mb-8 leading-[1.1] text-foreground"
+          >
+            The API Client for
+            <span className="block mt-2 bg-gradient-to-r from-violet-600 via-indigo-600 to-purple-600 dark:from-violet-400 dark:via-indigo-400 dark:to-purple-400 bg-clip-text text-transparent pb-4">
+              Modern Developers
+            </span>
+          </motion.h1>
+
+          {/* Subheadline */}
+          <motion.p
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, delay: 0.2 }}
+            className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed"
+          >
+            Debug, test, and share your APIs with a beautiful, lightweight tool
+            designed for speed. No subscriptions, no bloat, just code.
+          </motion.p>
+
+          {/* CTA Buttons */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.3 }}
+            className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-20"
+          >
+            <MotionLink
+              href={isSignedIn ? "/workspace" : "/sign-up"}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="px-8 py-4 rounded-full bg-primary text-primary-foreground font-semibold text-lg hover:brightness-110 shadow-xl shadow-primary/20 transition-all flex items-center gap-2"
+            >
+              {isSignedIn ? "Go to Workspace" : "Start Building Free"}
+              <ArrowRight className="w-5 h-5" />
+            </MotionLink>
+
+            <motion.a
+              href="https://github.com/rohittiwari-dev/api-client"
+              target="_blank"
+              rel="noopener noreferrer"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="px-8 py-4 rounded-full bg-card border border-border hover:bg-accent hover:text-accent-foreground font-medium text-lg transition-all flex items-center gap-2"
+            >
+              <Github className="w-5 h-5" />
+              Star on GitHub
+            </motion.a>
+          </motion.div>
+
+          {/* Interactive Preview Mockup */}
+          <motion.div
+            initial={{ opacity: 0, y: 40 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1, delay: 0.4 }}
+            className="relative max-w-6xl mx-auto"
+          >
+            <div className="absolute -inset-1 bg-gradient-to-r from-primary via-indigo-500 to-purple-600 rounded-2xl opacity-20 blur-2xl" />
+
+            <div className="relative rounded-xl border border-border/40 bg-background/50 backdrop-blur-sm shadow-2xl overflow-hidden">
+              {/* Window Actions */}
+              <div className="flex items-center gap-2 px-4 py-3 border-b border-border/40 bg-muted/20">
+                <div className="flex gap-1.5">
+                  <div className="w-3 h-3 rounded-full bg-red-500/80" />
+                  <div className="w-3 h-3 rounded-full bg-yellow-500/80" />
+                  <div className="w-3 h-3 rounded-full bg-green-500/80" />
                 </div>
-            </div>
+                <div className="flex-1 text-center">
+                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-md bg-background/50 border border-border/50 text-[10px] text-muted-foreground font-mono">
+                    <Terminal className="w-3 h-3" />
+                    api-client / workspace
+                  </div>
+                </div>
+              </div>
 
-            <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-                <div className="max-w-5xl mx-auto text-center">
-                    {/* Premium Badge */}
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.6 }}
-                        className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-gradient-to-r from-violet-500/10 via-purple-500/10 to-indigo-500/10 border border-violet-500/20 mb-8 backdrop-blur-md"
-                    >
-                        <motion.div
-                            animate={{ rotate: [0, 10, -10, 0] }}
-                            transition={{ duration: 2, repeat: Infinity }}
-                        >
-                            <Sparkles className="w-4 h-4 text-violet-400" />
-                        </motion.div>
-                        <span className="text-sm font-semibold bg-gradient-to-r from-violet-300 via-purple-300 to-indigo-300 bg-clip-text text-transparent">
-                            Free & Open Source Forever
-                        </span>
-                        <Heart className="w-3.5 h-3.5 text-pink-400 fill-pink-400" />
-                    </motion.div>
-
-                    {/* Main Headline */}
-                    <motion.h1
-                        initial={{ opacity: 0, y: 30 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.7, delay: 0.1 }}
-                        className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight mb-6 leading-[1.1]"
-                    >
-                        <span className="block text-foreground">The API Client</span>
-                        <motion.span
-                            className="block mt-2 bg-gradient-to-r from-violet-400 via-purple-400 via-pink-400 to-indigo-400 bg-clip-text text-transparent bg-[length:300%_auto]"
-                            animate={{ backgroundPosition: ['0%', '100%', '0%'] }}
-                            transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
-                        >
-                            Built with Love
-                        </motion.span>
-                    </motion.h1>
-
-                    {/* Subheadline */}
-                    <motion.p
-                        initial={{ opacity: 0, y: 30 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.7, delay: 0.2 }}
-                        className="text-lg sm:text-xl text-muted-foreground/90 max-w-2xl mx-auto mb-8 leading-relaxed"
-                    >
-                        A beautiful, powerful API testing tool crafted for developers who care about their workflow.
-                        <span className="text-violet-400"> No bloat. No subscriptions. Just pure joy.</span>
-                    </motion.p>
-
-                    {/* Feature Pills */}
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.6, delay: 0.3 }}
-                        className="flex flex-wrap justify-center gap-3 mb-10"
-                    >
-                        {[
-                            { icon: Zap, label: 'Lightning Fast', color: 'text-yellow-400' },
-                            { icon: CheckCircle2, label: 'All Auth Types', color: 'text-green-400' },
-                            { icon: Star, label: 'Self-Hostable', color: 'text-violet-400' },
-                            { icon: Heart, label: 'MIT Licensed', color: 'text-pink-400' },
-                        ].map((feature, index) => (
-                            <motion.div
-                                key={feature.label}
-                                initial={{ opacity: 0, scale: 0.8 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                transition={{ delay: 0.4 + index * 0.1 }}
-                                whileHover={{ scale: 1.05, y: -2 }}
-                                className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 backdrop-blur-sm text-sm text-muted-foreground border border-white/10 hover:border-violet-500/30 hover:bg-violet-500/5 transition-colors cursor-default"
-                            >
-                                <feature.icon className={`w-4 h-4 ${feature.color}`} />
-                                {feature.label}
-                            </motion.div>
-                        ))}
-                    </motion.div>
-
-                    {/* CTA Buttons */}
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.6, delay: 0.5 }}
-                        className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16"
-                    >
-                        <MotionLink
-                            href={isSignedIn ? '/workspace' : '/sign-up'}
-                            whileHover={{ scale: 1.05 }}
-                            whileTap={{ scale: 0.98 }}
-                            className="group relative px-8 py-4 rounded-2xl bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600 text-white font-semibold text-lg overflow-hidden shadow-2xl shadow-violet-500/30"
-                        >
-                            {/* Animated shimmer */}
-                            <motion.div
-                                className="absolute inset-0 bg-gradient-to-r from-transparent via-white/25 to-transparent"
-                                animate={{ x: ['-200%', '200%'] }}
-                                transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
-                            />
-                            <span className="relative flex items-center gap-2">
-                                {isSignedIn ? 'Open App' : 'Start Building Free'}
-                                <motion.span
-                                    animate={{ x: [0, 5, 0] }}
-                                    transition={{ duration: 1.5, repeat: Infinity }}
-                                >
-                                    <ArrowRight className="w-5 h-5" />
-                                </motion.span>
-                            </span>
-                        </MotionLink>
-
-                        <motion.a
-                            href="https://github.com/rohittiwari-dev/api-client"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            whileHover={{ scale: 1.03 }}
-                            whileTap={{ scale: 0.98 }}
-                            className="group px-8 py-4 rounded-2xl bg-white/5 backdrop-blur-md border border-white/10 hover:border-violet-500/40 hover:bg-violet-500/10 font-semibold text-lg transition-all flex items-center gap-3"
-                        >
-                            <Github className="w-5 h-5" />
-                            <span>Star on GitHub</span>
-                            <motion.span
-                                className="text-yellow-400"
-                                animate={{ scale: [1, 1.2, 1] }}
-                                transition={{ duration: 1, repeat: Infinity }}
-                            >
-                                ⭐
-                            </motion.span>
-                        </motion.a>
-                    </motion.div>
-
-                    {/* App Preview */}
-                    <motion.div
-                        initial={{ opacity: 0, y: 50 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.8, delay: 0.6 }}
-                        className="relative max-w-5xl mx-auto"
-                    >
-                        {/* Glow effect */}
-                        <div className="absolute -inset-4 bg-gradient-to-r from-violet-600/30 via-purple-600/30 to-indigo-600/30 rounded-3xl blur-3xl opacity-50" />
-
-                        {/* Browser Frame */}
-                        <div className="relative rounded-2xl bg-gradient-to-b from-[#1a1a1a] to-[#0a0a0a] border border-white/10 shadow-2xl overflow-hidden">
-                            {/* Browser Bar */}
-                            <div className="flex items-center gap-3 px-4 py-3 bg-[#1a1a1a] border-b border-white/5">
-                                <div className="flex gap-2">
-                                    <motion.div
-                                        className="w-3 h-3 rounded-full bg-red-500"
-                                        whileHover={{ scale: 1.2 }}
-                                    />
-                                    <motion.div
-                                        className="w-3 h-3 rounded-full bg-yellow-500"
-                                        whileHover={{ scale: 1.2 }}
-                                    />
-                                    <motion.div
-                                        className="w-3 h-3 rounded-full bg-green-500"
-                                        whileHover={{ scale: 1.2 }}
-                                    />
-                                </div>
-                                <div className="flex-1 mx-4">
-                                    <div className="flex items-center gap-2 bg-[#0a0a0a] rounded-lg px-4 py-2 text-xs text-muted-foreground font-mono max-w-sm mx-auto border border-white/5">
-                                        <span className="text-green-400">🔒</span>
-                                        <span>localhost:3000/workspace</span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Screenshot */}
-                            <motion.div
-                                className="relative"
-                                whileHover={{ scale: 1.01 }}
-                                transition={{ duration: 0.4 }}
-                            >
-                                <Image
-                                    src="/app-screenshot.png"
-                                    alt="ApiClient Interface"
-                                    width={1400}
-                                    height={900}
-                                    className="w-full h-auto"
-                                    priority
-                                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 90vw, 1200px"
-                                />
-                                {/* Gradient overlay */}
-                                <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a]/50 via-transparent to-transparent pointer-events-none" />
-                            </motion.div>
-                        </div>
-
-                        {/* Floating Cards */}
-                        <motion.div
-                            initial={{ opacity: 0, x: 50 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            transition={{ delay: 1, duration: 0.6 }}
-                            className="absolute right-4 top-32 hidden xl:block"
-                        >
-                            <motion.div
-                                animate={{ y: [0, -10, 0] }}
-                                transition={{ duration: 4, repeat: Infinity }}
-                                className="bg-[#1a1a1a]/95 backdrop-blur-xl p-4 rounded-xl border border-green-500/20 shadow-2xl shadow-green-500/10"
-                            >
-                                <div className="flex items-center gap-3">
-                                    <motion.div
-                                        className="w-2.5 h-2.5 rounded-full bg-green-400"
-                                        animate={{ scale: [1, 1.3, 1] }}
-                                        transition={{ duration: 1, repeat: Infinity }}
-                                    />
-                                    <span className="font-mono text-sm font-medium text-green-400">200 OK</span>
-                                </div>
-                                <div className="mt-2 text-xs text-muted-foreground font-mono">45ms • 1.2KB</div>
-                            </motion.div>
-                        </motion.div>
-
-                        <motion.div
-                            initial={{ opacity: 0, x: -50 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            transition={{ delay: 1.2, duration: 0.6 }}
-                            className="absolute left-4 bottom-32 hidden xl:block"
-                        >
-                            <motion.div
-                                animate={{ y: [0, 10, 0] }}
-                                transition={{ duration: 5, repeat: Infinity }}
-                                className="bg-[#1a1a1a]/95 backdrop-blur-xl p-4 rounded-xl border border-violet-500/20 shadow-2xl shadow-violet-500/10"
-                            >
-                                <div className="flex items-center gap-2 mb-2">
-                                    <span className="px-2 py-0.5 rounded text-[10px] bg-violet-500/20 text-violet-300 font-bold">POST</span>
-                                    <span className="font-mono text-xs text-muted-foreground">/api/v1/users</span>
-                                </div>
-                                <div className="flex items-center gap-1.5 text-[10px] text-green-400">
-                                    <CheckCircle2 className="w-3 h-3" />
-                                    <span>Bearer Token Applied</span>
-                                </div>
-                            </motion.div>
-                        </motion.div>
-                    </motion.div>
+              {/* App Content Construction */}
+              <div className="relative aspect-[16/10] bg-background w-full flex flex-col md:flex-row overflow-hidden">
+                {/* Sidebar Mockup */}
+                <div className="w-16 md:w-64 border-r border-border/40 bg-muted/10 hidden md:flex flex-col gap-4 p-4">
+                  <div className="h-8 w-24 rounded-md bg-muted animate-pulse" />
+                  <div className="space-y-3">
+                    <div className="h-4 w-full rounded bg-muted/50" />
+                    <div className="h-4 w-3/4 rounded bg-muted/50" />
+                    <div className="h-4 w-5/6 rounded bg-muted/50" />
+                  </div>
+                  <div className="mt-auto h-12 w-full rounded-lg bg-card border border-border/50 p-2 flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-full bg-primary/20" />
+                    <div className="h-3 w-16 rounded bg-muted/50" />
+                  </div>
                 </div>
 
-                {/* Stats */}
-                <motion.div
-                    initial={{ opacity: 0, y: 30 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.8, duration: 0.6 }}
-                    className="mt-20 pt-12 border-t border-white/5"
-                >
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-3xl mx-auto">
-                        {[
-                            { value: '100%', label: 'Free Forever', emoji: '🎉' },
-                            { value: 'MIT', label: 'Licensed', emoji: '📜' },
-                            { value: '6+', label: 'Auth Methods', emoji: '🔐' },
-                            { value: '∞', label: 'API Calls', emoji: '⚡' },
-                        ].map((stat, index) => (
-                            <motion.div
-                                key={index}
-                                whileHover={{ scale: 1.05, y: -5 }}
-                                className="text-center cursor-default"
-                            >
-                                <div className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-violet-400 via-purple-400 to-indigo-400 bg-clip-text text-transparent">
-                                    {stat.value}
-                                </div>
-                                <div className="text-sm text-muted-foreground mt-1 flex items-center justify-center gap-1.5">
-                                    <span>{stat.emoji}</span>
-                                    <span>{stat.label}</span>
-                                </div>
-                            </motion.div>
-                        ))}
+                {/* Main Content Mockup */}
+                <div className="flex-1 flex flex-col min-w-0">
+                  {/* Tab Bar Mockup */}
+                  <div className="h-12 border-b border-border/40 flex items-center px-4 gap-4">
+                    <div className="h-8 w-32 rounded-t-lg bg-background border-t border-x border-border/40 relative top-2 flex items-center px-3 gap-2">
+                      <span className="w-2 h-2 rounded-full bg-green-500" />
+                      <div className="h-2 w-16 rounded bg-foreground/10" />
                     </div>
-                </motion.div>
+                    <div className="h-4 w-4 rounded bg-muted/50 ml-auto" />
+                  </div>
+
+                  {/* Request Bar Mockup */}
+                  <div className="p-4 md:p-6 space-y-6">
+                    <div className="flex gap-2">
+                      <div className="h-10 w-20 rounded-md bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-xs font-bold text-emerald-500">
+                        GET
+                      </div>
+                      <div className="h-10 flex-1 rounded-md bg-muted/30 border border-border/30 flex items-center px-4 text-sm text-muted-foreground font-mono">
+                        https://api.example.com/v1/users
+                      </div>
+                      <div className="h-10 w-24 rounded-md bg-primary flex items-center justify-center text-sm font-medium text-primary-foreground shadow-lg shadow-primary/25">
+                        Send
+                      </div>
+                    </div>
+
+                    {/* Response Area Mockup */}
+                    <div className="rounded-lg border border-border/40 bg-card/50 flex flex-col h-64 md:h-80 overflow-hidden">
+                      <div className="h-10 border-b border-border/40 bg-muted/10 flex items-center px-4 gap-4">
+                        <div className="h-3 w-12 rounded bg-muted/50" />
+                        <div className="h-3 w-12 rounded bg-muted/50" />
+                        <div className="h-3 w-12 rounded bg-muted/50" />
+                      </div>
+                      <div className="p-4 space-y-2 font-mono text-xs md:text-sm text-muted-foreground/80">
+                        <div className="flex">
+                          <span className="text-purple-400">
+                            &quot;status&quot;
+                          </span>
+                          :{" "}
+                          <span className="text-green-400">
+                            &quot;success&quot;
+                          </span>
+                          ,
+                        </div>
+                        <div className="flex">
+                          <span className="text-purple-400">
+                            &quot;data&quot;
+                          </span>
+                          : {"{"}
+                        </div>
+                        <div className="pl-4 flex">
+                          <span className="text-purple-400">
+                            &quot;id&quot;
+                          </span>
+                          : <span className="text-orange-400">12345</span>,
+                        </div>
+                        <div className="pl-4 flex">
+                          <span className="text-purple-400">
+                            &quot;username&quot;
+                          </span>
+                          :{" "}
+                          <span className="text-green-400">
+                            &quot;developer&quot;
+                          </span>
+                          ,
+                        </div>
+                        <div className="pl-4 flex">
+                          <span className="text-purple-400">
+                            &quot;role&quot;
+                          </span>
+                          :{" "}
+                          <span className="text-green-400">
+                            &quot;admin&quot;
+                          </span>
+                        </div>
+                        <div>{"}"}</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Overlay Gradient */}
+                <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent opacity-20 pointer-events-none" />
+              </div>
             </div>
-        </section>
-    );
+
+            {/* Feature Badges interacting with screen */}
+            <div className="absolute -right-4 top-1/4 hidden xl:block">
+              <motion.div
+                className="glass-card p-3 rounded-lg flex items-center gap-3 pr-6"
+                animate={{ y: [0, -10, 0] }}
+                transition={{
+                  duration: 3,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                }}
+              >
+                <div className="w-8 h-8 rounded-full bg-green-500/20 flex items-center justify-center text-green-500">
+                  <CheckCircle2 className="w-5 h-5" />
+                </div>
+                <div>
+                  <div className="text-xs font-medium">Status</div>
+                  <div className="text-sm font-bold text-green-500">200 OK</div>
+                </div>
+              </motion.div>
+            </div>
+
+            <div className="absolute -left-4 bottom-1/4 hidden xl:block">
+              <motion.div
+                className="glass-card p-3 rounded-lg flex items-center gap-3 pr-6"
+                animate={{ y: [0, 10, 0] }}
+                transition={{
+                  duration: 4,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                }}
+              >
+                <div className="w-8 h-8 rounded-full bg-violet-500/20 flex items-center justify-center text-violet-500">
+                  <Zap className="w-5 h-5" />
+                </div>
+                <div>
+                  <div className="text-xs font-medium">Latency</div>
+                  <div className="text-sm font-bold text-violet-500">45ms</div>
+                </div>
+              </motion.div>
+            </div>
+          </motion.div>
+        </div>
+      </div>
+    </section>
+  );
 }

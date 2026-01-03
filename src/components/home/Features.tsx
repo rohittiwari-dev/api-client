@@ -20,6 +20,7 @@ const features = [
       "Execute REST, and WebSocket requests with zero overhead. Built for speed.",
     gradient: "from-yellow-500 to-orange-500",
     bgGradient: "from-yellow-500/10 to-orange-500/10",
+    textColor: "text-yellow-500",
     delay: 0,
   },
   {
@@ -29,6 +30,7 @@ const features = [
       "Basic, Bearer, OAuth 1.0/2.0, Digest, and API Key authentication built-in.",
     gradient: "from-blue-500 to-cyan-500",
     bgGradient: "from-blue-500/10 to-cyan-500/10",
+    textColor: "text-blue-500",
     delay: 0.1,
   },
   {
@@ -38,6 +40,7 @@ const features = [
       "Real-time debugging for WebSocket, Socket.io, and Server-Sent Events.",
     gradient: "from-pink-500 to-rose-500",
     bgGradient: "from-pink-500/10 to-rose-500/10",
+    textColor: "text-pink-500",
     delay: 0.2,
   },
   {
@@ -47,6 +50,7 @@ const features = [
       "Manage multiple environments with {{variable}} syntax and auto-complete.",
     gradient: "from-green-500 to-emerald-500",
     bgGradient: "from-green-500/10 to-emerald-500/10",
+    textColor: "text-green-500",
     delay: 0.3,
   },
   {
@@ -56,6 +60,7 @@ const features = [
       "Organize requests into collections and folders. Share and collaborate easily.",
     gradient: "from-violet-500 to-purple-500",
     bgGradient: "from-violet-500/10 to-purple-500/10",
+    textColor: "text-violet-500",
     delay: 0.4,
   },
   {
@@ -65,6 +70,7 @@ const features = [
       "Automatic cookie handling with jar view, attributes, and domain grouping.",
     gradient: "from-amber-500 to-yellow-500",
     bgGradient: "from-amber-500/10 to-yellow-500/10",
+    textColor: "text-amber-500",
     delay: 0.5,
   },
   {
@@ -74,6 +80,7 @@ const features = [
       "Export requests to 20+ languages and frameworks with one click.",
     gradient: "from-indigo-500 to-blue-500",
     bgGradient: "from-indigo-500/10 to-blue-500/10",
+    textColor: "text-indigo-500",
     delay: 0.6,
   },
   {
@@ -83,17 +90,21 @@ const features = [
       "A gorgeous, dark-themed interface designed with love for developers.",
     gradient: "from-purple-500 to-pink-500",
     bgGradient: "from-purple-500/10 to-pink-500/10",
+    textColor: "text-purple-500",
     delay: 0.7,
   },
 ];
 
 export default function Features() {
   return (
-    <section id="features" className="py-24 relative overflow-hidden">
+    <section
+      id="features"
+      className="py-24 relative overflow-hidden bg-background"
+    >
       {/* Background */}
-      <div className="absolute inset-0">
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-violet-950/30 to-transparent" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-violet-500/5 rounded-full blur-[150px]" />
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute inset-0 bg-gradient-to-b from-background via-violet-500/5 to-background" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-primary/5 rounded-full blur-[150px]" />
       </div>
 
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
@@ -109,21 +120,21 @@ export default function Features() {
             initial={{ opacity: 0, scale: 0.8 }}
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-violet-500/10 border border-violet-500/20 mb-6"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 mb-6"
           >
-            <Sparkles className="w-4 h-4 text-violet-400" />
-            <span className="text-sm font-medium text-violet-300">
+            <Sparkles className="w-4 h-4 text-primary" />
+            <span className="text-sm font-medium text-primary">
               Packed with Features
             </span>
           </motion.div>
 
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-6">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-6 text-foreground">
             Everything you need to{" "}
-            <span className="bg-gradient-to-r from-violet-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-violet-600 via-purple-600 to-pink-600 dark:from-violet-400 dark:via-purple-400 dark:to-pink-400 bg-clip-text text-transparent">
               master APIs
             </span>
           </h2>
-          <p className="text-lg text-muted-foreground/80">
+          <p className="text-lg text-muted-foreground">
             From simple GET requests to complex authentication flows, ApiClient
             has all the tools you need, crafted with care and attention to
             detail.
@@ -140,7 +151,7 @@ export default function Features() {
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: feature.delay }}
               whileHover={{ y: -8, scale: 1.02 }}
-              className={`group relative rounded-2xl bg-gradient-to-br ${feature.bgGradient} border border-white/10 p-6 hover:border-white/20 transition-all duration-300 cursor-default overflow-hidden`}
+              className={`group relative rounded-2xl bg-card border border-border p-6 hover:border-primary/50 transition-all duration-300 cursor-default overflow-hidden shadow-sm hover:shadow-md`}
             >
               {/* Glow on hover */}
               <div
@@ -153,17 +164,15 @@ export default function Features() {
                   transition={{ duration: 0.5 }}
                   className={`w-12 h-12 rounded-xl bg-gradient-to-br ${feature.gradient} p-0.5 mb-4`}
                 >
-                  <div className="w-full h-full rounded-xl bg-[#0a0a0a] flex items-center justify-center">
-                    <feature.icon
-                      className={`w-5 h-5 bg-gradient-to-br ${feature.gradient} bg-clip-text text-white`}
-                    />
+                  <div className="w-full h-full rounded-xl bg-background flex items-center justify-center">
+                    <feature.icon className={`w-5 h-5 ${feature.textColor}`} />
                   </div>
                 </motion.div>
 
-                <h3 className="text-lg font-bold mb-2 group-hover:text-white transition-colors">
+                <h3 className="text-lg font-bold mb-2 text-foreground group-hover:text-primary transition-colors">
                   {feature.title}
                 </h3>
-                <p className="text-sm text-muted-foreground group-hover:text-muted-foreground/90 transition-colors leading-relaxed">
+                <p className="text-sm text-muted-foreground group-hover:text-muted-foreground/80 transition-colors leading-relaxed">
                   {feature.description}
                 </p>
               </div>
@@ -179,10 +188,10 @@ export default function Features() {
           transition={{ duration: 0.6, delay: 0.3 }}
           className="mt-16 max-w-4xl mx-auto"
         >
-          <div className="relative rounded-3xl bg-gradient-to-r from-violet-600/20 via-purple-600/20 to-indigo-600/20 border border-white/10 p-8 md:p-10 overflow-hidden">
+          <div className="relative rounded-3xl bg-secondary/50 border border-border p-8 md:p-10 overflow-hidden">
             {/* Animated background */}
             <motion.div
-              className="absolute inset-0 bg-gradient-to-r from-violet-600/10 via-purple-600/10 to-indigo-600/10"
+              className="absolute inset-0 bg-gradient-to-r from-violet-500/5 via-purple-500/5 to-indigo-500/5"
               animate={{
                 backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"],
               }}
@@ -192,9 +201,9 @@ export default function Features() {
 
             <div className="relative z-10 flex flex-col md:flex-row items-center gap-8">
               <div className="flex-1 text-center md:text-left">
-                <h3 className="text-2xl md:text-3xl font-bold mb-3">
+                <h3 className="text-2xl md:text-3xl font-bold mb-3 text-foreground">
                   Self-host with{" "}
-                  <span className="bg-gradient-to-r from-violet-400 to-pink-400 bg-clip-text text-transparent">
+                  <span className="bg-gradient-to-r from-violet-600 to-pink-600 dark:from-violet-400 dark:to-pink-400 bg-clip-text text-transparent">
                     one command
                   </span>
                 </h3>
@@ -204,7 +213,7 @@ export default function Features() {
                 </p>
               </div>
               <div className="flex-shrink-0">
-                <code className="block px-6 py-4 rounded-xl bg-[#0a0a0a] border border-white/10 font-mono text-sm text-violet-300 shadow-lg">
+                <code className="block px-6 py-4 rounded-xl bg-gray-950 border border-gray-800 font-mono text-sm text-violet-300 shadow-lg dark:bg-black/50">
                   docker compose up -d
                 </code>
               </div>

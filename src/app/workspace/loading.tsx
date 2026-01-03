@@ -1,102 +1,98 @@
-'use client';
+"use client";
 
-import React from 'react';
-import Image from 'next/image';
-import { motion } from 'motion/react';
-import { Folder, FileJson, Globe, Key } from 'lucide-react';
+import React from "react";
+import Image from "next/image";
+import { motion } from "framer-motion";
 
 const Loading = () => {
-	return (
-		<div className="flex flex-col justify-center items-center w-full min-h-screen overflow-hidden bg-background relative">
-			{/* Subtle background gradient */}
-			<div className="absolute inset-0 bg-gradient-to-br from-violet-500/5 via-transparent to-indigo-500/5" />
+  return (
+    <div className="flex flex-col justify-center items-center w-full min-h-screen overflow-hidden bg-background relative">
+      {/* Shared Background Effects */}
+      <div className="absolute inset-0 z-0 pointer-events-none select-none">
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-7xl opacity-30 dark:opacity-20">
+          <motion.div
+            className="absolute top-[20%] left-[20%] w-[500px] h-[500px] bg-primary/20 rounded-full blur-[120px]"
+            animate={{
+              opacity: [0.3, 0.5, 0.3],
+              scale: [1, 1.1, 1],
+            }}
+            transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
+          />
+          <motion.div
+            className="absolute bottom-[20%] right-[20%] w-[500px] h-[500px] bg-indigo-600/10 rounded-full blur-[140px]"
+            animate={{
+              opacity: [0.2, 0.4, 0.2],
+              scale: [1, 1.2, 1],
+            }}
+            transition={{
+              duration: 7,
+              repeat: Infinity,
+              ease: "easeInOut",
+              delay: 1,
+            }}
+          />
+        </div>
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] z-0" />
+      </div>
 
-			{/* Loading content */}
-			<div className="relative z-10 flex flex-col items-center">
-				{/* Logo with pulse */}
-				<motion.div
-					className="relative mb-8"
-					initial={{ opacity: 0, scale: 0.8 }}
-					animate={{ opacity: 1, scale: 1 }}
-					transition={{ duration: 0.5 }}
-				>
-					<motion.div
-						className="absolute -inset-4 bg-violet-500/20 rounded-full blur-xl"
-						animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.5, 0.3] }}
-						transition={{ duration: 2, repeat: Infinity }}
-					/>
-					<div className="relative w-16 h-16 rounded-2xl bg-gradient-to-br from-violet-500 to-indigo-500 p-[2px]">
-						<div className="w-full h-full rounded-2xl bg-background flex items-center justify-center">
-							<Image
-								src="/logo.png"
-								alt="ApiClient"
-								width={36}
-								height={36}
-								className="object-contain"
-							/>
-						</div>
-					</div>
-				</motion.div>
+      {/* Loading Content */}
+      <div className="relative z-10 flex flex-col items-center justify-center gap-8">
+        {/* Modern Spinner Container */}
+        <div className="relative w-20 h-20">
+          {/* Rotating Gradient Ring */}
+          <motion.div
+            className="absolute inset-0 rounded-full bg-gradient-to-tr from-violet-600 via-indigo-600/0 to-indigo-600 p-[2px]"
+            animate={{ rotate: 360 }}
+            transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+          >
+            {/* Inner Mask to create the border look */}
+            <div className="w-full h-full rounded-full bg-background/80 backdrop-blur-xl" />
+          </motion.div>
 
-				{/* Loading text */}
-				<motion.h2
-					initial={{ opacity: 0, y: 10 }}
-					animate={{ opacity: 1, y: 0 }}
-					transition={{ delay: 0.2 }}
-					className="text-lg font-semibold text-foreground mb-2"
-				>
-					Loading Workspace
-				</motion.h2>
+          {/* Static/Breathing Logo Center */}
+          <div className="absolute inset-0 rounded-full flex items-center justify-center">
+            <motion.div
+              initial={{ opacity: 0.5, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{
+                duration: 1.5,
+                repeat: Infinity,
+                repeatType: "reverse",
+                ease: "easeInOut",
+              }}
+              className="relative w-8 h-8 !rounded-full"
+            >
+              <Image
+                src="/logo.png"
+                alt="ApiClient"
+                fill
+                className="object-contain"
+                priority
+              />
+            </motion.div>
+          </div>
 
-				{/* Animated icons representing workspace elements */}
-				<motion.div
-					initial={{ opacity: 0 }}
-					animate={{ opacity: 1 }}
-					transition={{ delay: 0.4 }}
-					className="flex items-center gap-4 mt-6"
-				>
-					{[
-						{ Icon: Folder, delay: 0, color: 'text-amber-400' },
-						{ Icon: FileJson, delay: 0.1, color: 'text-green-400' },
-						{ Icon: Globe, delay: 0.2, color: 'text-blue-400' },
-						{ Icon: Key, delay: 0.3, color: 'text-violet-400' },
-					].map(({ Icon, delay, color }, i) => (
-						<motion.div
-							key={i}
-							className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center"
-							animate={{
-								y: [0, -8, 0],
-								opacity: [0.5, 1, 0.5],
-							}}
-							transition={{
-								duration: 1.2,
-								repeat: Infinity,
-								delay: delay,
-							}}
-						>
-							<Icon className={`w-5 h-5 ${color}`} />
-						</motion.div>
-					))}
-				</motion.div>
+          {/* Subtle Glow behind */}
+          <motion.div
+            className="absolute inset-0 !rounded-full bg-violet-500/20 blur-2xl -z-10"
+            animate={{ opacity: [0.2, 0.5, 0.2] }}
+            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+          />
+        </div>
 
-				{/* Subtle progress indicator */}
-				<motion.p
-					initial={{ opacity: 0 }}
-					animate={{ opacity: 1 }}
-					transition={{ delay: 0.6 }}
-					className="mt-8 text-sm text-muted-foreground flex items-center gap-1"
-				>
-					<span>Preparing your environment</span>
-					<motion.span
-						animate={{ opacity: [0, 1, 0] }}
-						transition={{ duration: 1.5, repeat: Infinity }}
-					>
-						...
-					</motion.span>
-				</motion.p>
-			</div>
-		</div>
-	);
+        {/* Text Status */}
+        <div className="flex flex-col items-center gap-1">
+          <motion.h2
+            className="text-xs font-medium tracking-widest uppercase text-muted-foreground/80"
+            animate={{ opacity: [0.4, 1, 0.4] }}
+            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+          >
+            Loading Workspace
+          </motion.h2>
+        </div>
+      </div>
+    </div>
+  );
 };
 
 export default Loading;

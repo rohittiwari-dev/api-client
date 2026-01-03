@@ -1,45 +1,45 @@
-import { redirect } from 'next/navigation';
-import { headers } from 'next/headers';
-import auth from '@/lib/auth';
+import { redirect } from "next/navigation";
+import { headers } from "next/headers";
+import auth from "@/lib/auth";
 
 // Force dynamic rendering
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
 const WorkspacePage = async () => {
-	const headersList = await headers();
+  const headersList = await headers();
 
-	// Get session with active organization
-	const session = await auth.api.getSession({
-		headers: headersList
-	});
+  // Get session with active organization
+  const session = await auth.api.getSession({
+    headers: headersList,
+  });
 
-	if (!session) {
-		redirect('/sign-in');
-	}
+  if (!session) {
+    redirect("/sign-in");
+  }
 
-	// Check for active organization
-	if (session.session.activeOrganizationId) {
-		const activeOrg = await auth.api.getFullOrganization({
-			query: { organizationId: session.session.activeOrganizationId },
-			headers: headersList
-		});
+  // Check for active organization
+  if (session.session.activeOrganizationId) {
+    const activeOrg = await auth.api.getFullOrganization({
+      query: { organizationId: session.session.activeOrganizationId },
+      headers: headersList,
+    });
 
-		if (activeOrg?.slug) {
-			redirect(`/workspace/${activeOrg.slug}`);
-		}
-	}
+    if (activeOrg?.slug) {
+      redirect(`/workspace/${activeOrg.slug}`);
+    }
+  }
 
-	// Check if user has any organizations
-	const orgs = await auth.api.listOrganizations({
-		headers: headersList
-	});
+  // Check if user has any organizations
+  const orgs = await auth.api.listOrganizations({
+    headers: headersList,
+  });
 
-	if (orgs && orgs.length > 0) {
-		redirect(`/workspace/${orgs[0].slug}`);
-	}
+  if (orgs && orgs.length > 0) {
+    redirect(`/workspace/${orgs[0].slug}`);
+  }
 
-	// No organizations, redirect to get-started
-	redirect('/workspace/get-started');
+  // No organizations, redirect to get-started
+  redirect("/workspace/get-started");
 };
 
 export default WorkspacePage;
