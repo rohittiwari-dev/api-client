@@ -6,8 +6,10 @@ import db from "@/lib/db";
 
 export const currentUser = async () => {
   try {
+    const requestHeaders = await headers();
+
     const session = await auth.api.getSession({
-      headers: await headers(),
+      headers: requestHeaders,
     });
 
     if (!session?.user?.id) {
@@ -30,6 +32,12 @@ export const currentUser = async () => {
     });
     return { user, session: session.session };
   } catch (error) {
+    if (
+      error instanceof Error &&
+      error.message.includes("Dynamic server usage")
+    ) {
+      return null;
+    }
     console.error("Error fetching current user:", error);
     return null;
   }
