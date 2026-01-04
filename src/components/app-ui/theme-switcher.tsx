@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
 import { useTheme } from "next-themes";
 import {
   IconDeviceDesktopFilled,
@@ -11,6 +11,11 @@ import { AnimatePresence, motion } from "motion/react";
 import { cn } from "@/lib/utils";
 import { Button } from "../ui/button";
 
+// Hydration-safe way to detect client-side mounting
+const emptySubscribe = () => () => {};
+const getSnapshot = () => true;
+const getServerSnapshot = () => false;
+
 export default function ThemeSwitcher({
   className,
   variant = "multiple",
@@ -19,7 +24,11 @@ export default function ThemeSwitcher({
   variant?: "single" | "multiple";
 }) {
   const { resolvedTheme, setTheme, theme } = useTheme();
-  const [mounted, setMounted] = useState(false);
+  const mounted = useSyncExternalStore(
+    emptySubscribe,
+    getSnapshot,
+    getServerSnapshot
+  );
 
   // Toggle theme function
   const toggleTheme = () => {
@@ -28,10 +37,6 @@ export default function ThemeSwitcher({
     document.documentElement.setAttribute("data-theme", newTheme);
     localStorage.setItem("theme", newTheme);
   };
-
-  useEffect(() => {
-    setMounted((prev) => (prev === true ? prev : true));
-  }, []);
 
   return (
     mounted &&
@@ -66,7 +71,7 @@ const VariantSingleButton = ({
       size="icon"
       onClick={toggleTheme}
       className={cn(
-        "bg-muted hover:dark:bg-primary dark:bg-secondary !ring-accent rounded-full p-4 ring-1 transition-colors duration-200",
+        "bg-muted hover:dark:bg-primary dark:bg-secondary ring-accent! rounded-full p-4 ring-1 transition-colors duration-200",
         className
       )}
     >
@@ -82,7 +87,7 @@ const VariantSingleButton = ({
             }}
             transition={{ duration: 0.2 }}
           >
-            <IconMoonFilled className="text-shadow-primary text-primary/90 dark:text-primary-foreground h-6 w-6 !opacity-65 transition-colors duration-200" />
+            <IconMoonFilled className="text-shadow-primary text-primary/90 dark:text-primary-foreground h-6 w-6 opacity-65! transition-colors duration-200" />
           </motion.div>
         ) : (
           <motion.div
@@ -95,7 +100,7 @@ const VariantSingleButton = ({
             }}
             transition={{ duration: 0.2 }}
           >
-            <IconSunFilled className="!text-primary-foreground/60 dark:!text-primary-foreground/60 h-6 w-6 opacity-85 transition-colors duration-200" />
+            <IconSunFilled className="text-primary-foreground/60! dark:text-primary-foreground/60! h-6 w-6 opacity-85 transition-colors duration-200" />
           </motion.div>
         )}
       </AnimatePresence>
