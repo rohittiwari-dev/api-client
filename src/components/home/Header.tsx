@@ -61,13 +61,13 @@ export default function Header() {
               >
                 <Image
                   src="/logo.png"
-                  alt="ApiClient Logo"
+                  alt="Api Studio Logo"
                   fill
                   className="object-contain"
                 />
               </motion.div>
               <span className="text-lg font-bold tracking-tight">
-                ApiClient
+                Api Studio
               </span>
             </Link>
 

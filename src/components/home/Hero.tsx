@@ -58,7 +58,7 @@ export default function Hero() {
             transition={{ duration: 0.7, delay: 0.1 }}
             className="text-5xl sm:text-6xl md:text-7xl font-bold tracking-tight mb-8 leading-[1.1] text-foreground"
           >
-            The API Client for
+            The API Studio for
             <span className="block mt-2 bg-gradient-to-r from-violet-600 via-indigo-600 to-purple-600 dark:from-violet-400 dark:via-indigo-400 dark:to-purple-400 bg-clip-text text-transparent pb-4">
               Modern Developers
             </span>
@@ -125,7 +125,7 @@ export default function Hero() {
                 <div className="flex-1 text-center">
                   <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-md bg-background/50 border border-border/50 text-[10px] text-muted-foreground font-mono">
                     <Terminal className="w-3 h-3" />
-                    api-client / workspace
+                    api-studio / workspace
                   </div>
                 </div>
               </div>

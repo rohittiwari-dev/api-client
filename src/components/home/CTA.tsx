@@ -74,7 +74,7 @@ export default function CTA() {
               </h2>
 
               <p className="text-lg text-muted-foreground max-w-xl mx-auto mb-8">
-                Join developers worldwide who have made ApiClient their daily
+                Join developers worldwide who have made Api Studio their daily
                 companion. It&apos;s free, open source, and always will be.
               </p>
 

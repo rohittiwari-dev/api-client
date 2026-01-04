@@ -60,13 +60,13 @@ export default function Footer() {
               >
                 <Image
                   src="/logo.png"
-                  alt="ApiClient Logo"
+                  alt="Api Studio Logo"
                   fill
                   className="object-contain"
                 />
               </motion.div>
               <span className="text-xl font-bold bg-gradient-to-r from-violet-600 to-indigo-600 dark:from-violet-400 dark:to-indigo-400 bg-clip-text text-transparent">
-                ApiClient
+                Api Studio
               </span>
             </Link>
             <p className="text-sm text-muted-foreground mb-6 leading-relaxed">
@@ -97,7 +97,7 @@ export default function Footer() {
                 <Twitter className="w-5 h-5 text-muted-foreground" />
               </motion.a>
               <motion.a
-                href="mailto:hello@apiclient.dev"
+                href="mailto:hello@apistudio.dev"
                 whileHover={{ scale: 1.1, y: -2 }}
                 className="w-10 h-10 rounded-xl bg-card border border-border flex items-center justify-center hover:bg-pink-500/10 hover:border-pink-500/30 hover:text-pink-500 transition-colors"
                 aria-label="Email"
@@ -172,7 +172,7 @@ export default function Footer() {
         {/* Bottom Bar */}
         <div className="mt-12 pt-8 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-sm text-muted-foreground">
-            © {new Date().getFullYear()} ApiClient. MIT License.
+            © {new Date().getFullYear()} Api Studio. MIT License.
           </p>
           <motion.p
             className="text-sm text-muted-foreground flex items-center gap-2"

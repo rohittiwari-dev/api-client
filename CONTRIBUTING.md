@@ -1,6 +1,6 @@
-# Contributing to API Client
+# Contributing to Api Studio
 
-Thank you for your interest in contributing to API Client! This document provides guidelines and information for contributors.
+Thank you for your interest in contributing to Api Studio! This document provides guidelines and information for contributors.
 
 ## 📋 Table of Contents
 
@@ -45,17 +45,20 @@ By participating in this project, you agree to maintain a respectful and inclusi
 ## 💻 Development Setup
 
 1. **Install dependencies**
+
    ```bash
    bun install
    ```
 
 2. **Set up environment**
+
    ```bash
    cp .env.example .env
    # Edit .env with your local database credentials
    ```
 
 3. **Initialize database**
+
    ```bash
    bun run db:push
    ```
@@ -70,6 +73,7 @@ By participating in this project, you agree to maintain a respectful and inclusi
 ### Branch Naming
 
 Use descriptive branch names:
+
 - `feature/add-oauth2-support`
 - `fix/cookie-parsing-bug`
 - `docs/update-readme`
@@ -86,6 +90,7 @@ git checkout -b feature/your-feature-name
 ## 🔄 Pull Request Process
 
 1. **Update your branch** with the latest upstream changes:
+
    ```bash
    git fetch upstream
    git rebase upstream/main
@@ -94,11 +99,13 @@ git checkout -b feature/your-feature-name
 2. **Test your changes** thoroughly
 
 3. **Push your branch**:
+
    ```bash
    git push origin feature/your-feature-name
    ```
 
 4. **Create a Pull Request** on GitHub with:
+
    - Clear title describing the change
    - Description of what and why
    - Screenshots for UI changes

@@ -1,8 +1,8 @@
-# 🚀 API Client
+# 🚀 Api Studio
 
 A modern, powerful API testing and development tool built with Next.js 16 and React 19. Test, debug, and manage your APIs with a beautiful, intuitive interface.
 
-![API Client](https://img.shields.io/badge/version-0.1.0-blue.svg)
+![Api Studio](https://img.shields.io/badge/version-0.1.0-blue.svg)
 ![Next.js](https://img.shields.io/badge/Next.js-16-black.svg)
 ![React](https://img.shields.io/badge/React-19-61dafb.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
@@ -13,14 +13,14 @@ A modern, powerful API testing and development tool built with Next.js 16 and Re
 
 Full support for all major authentication methods with server-side processing for maximum reliability:
 
-| Auth Type | Description | Features |
-|-----------|-------------|----------|
-| **Basic Auth** | Username/Password | Base64 encoding |
-| **Bearer Token** | JWT/API tokens | Direct token usage |
-| **API Key** | Key-Value pairs | Header or Query param |
-| **Digest Auth** | Challenge-response | MD5 hash computation |
-| **OAuth 1.0** | 3-legged auth | HMAC-SHA1 signatures |
-| **OAuth 2.0** | Modern OAuth | Multiple grant types |
+| Auth Type        | Description        | Features              |
+| ---------------- | ------------------ | --------------------- |
+| **Basic Auth**   | Username/Password  | Base64 encoding       |
+| **Bearer Token** | JWT/API tokens     | Direct token usage    |
+| **API Key**      | Key-Value pairs    | Header or Query param |
+| **Digest Auth**  | Challenge-response | MD5 hash computation  |
+| **OAuth 1.0**    | 3-legged auth      | HMAC-SHA1 signatures  |
+| **OAuth 2.0**    | Modern OAuth       | Multiple grant types  |
 
 - ✅ Server-side auth processing (no browser crypto issues)
 - ✅ Required field indicators with helpful tooltips
@@ -77,18 +77,18 @@ Full support for all major authentication methods with server-side processing fo
 
 ## 🛠️ Tech Stack
 
-| Category | Technology |
-|----------|------------|
-| **Framework** | Next.js 16 (App Router) |
-| **UI Library** | React 19 |
-| **Styling** | Tailwind CSS 4 |
-| **Components** | Radix UI Primitives |
-| **State** | Zustand |
-| **Data Fetching** | TanStack Query |
-| **Database** | PostgreSQL + Prisma ORM |
-| **Auth** | Better Auth |
-| **Animations** | Framer Motion |
-| **Icons** | Lucide React, Tabler Icons |
+| Category          | Technology                 |
+| ----------------- | -------------------------- |
+| **Framework**     | Next.js 16 (App Router)    |
+| **UI Library**    | React 19                   |
+| **Styling**       | Tailwind CSS 4             |
+| **Components**    | Radix UI Primitives        |
+| **State**         | Zustand                    |
+| **Data Fetching** | TanStack Query             |
+| **Database**      | PostgreSQL + Prisma ORM    |
+| **Auth**          | Better Auth                |
+| **Animations**    | Framer Motion              |
+| **Icons**         | Lucide React, Tabler Icons |
 
 ## 🚀 Getting Started
 
@@ -101,12 +101,14 @@ Full support for all major authentication methods with server-side processing fo
 ### Installation
 
 1. **Clone the repository**
+
    ```bash
    git clone https://github.com/rohittiwari-dev/api-client.git
    cd api-client
    ```
 
 2. **Install dependencies**
+
    ```bash
    bun install
    # or
@@ -114,18 +116,21 @@ Full support for all major authentication methods with server-side processing fo
    ```
 
 3. **Set up environment variables**
+
    ```bash
    cp .env.example .env
    ```
 
    Configure your `.env` file:
+
    ```env
-   DATABASE_URL="postgresql://user:password@localhost:5432/api_client"
+   DATABASE_URL="postgresql://user:password@localhost:5432/api_studio"
    BETTER_AUTH_SECRET="your-secret-key"
    BETTER_AUTH_URL="http://localhost:3000"
    ```
 
 4. **Initialize the database**
+
    ```bash
    bun run db:push
    # or
@@ -133,6 +138,7 @@ Full support for all major authentication methods with server-side processing fo
    ```
 
 5. **Start the development server**
+
    ```bash
    bun run dev
    # or
@@ -145,7 +151,6 @@ Full support for all major authentication methods with server-side processing fo
 ### 🐳 Self-Hosting
 
 Want to deploy your own instance? Check out the [Self-Hosting Guide](SELF_HOSTING.md) for Docker and VPS deployment instructions.
-
 
 ## 📁 Project Structure
 
@@ -175,6 +180,7 @@ src/
 ### Proxy API (`/api/proxy`)
 
 All requests are routed through a server-side proxy that:
+
 - Handles CORS issues
 - Computes authentication headers (MD5, HMAC-SHA1)
 - Manages cookies
@@ -183,6 +189,7 @@ All requests are routed through a server-side proxy that:
 ### Auth Component
 
 Comprehensive authentication UI with:
+
 - Required field markers (red asterisks)
 - Helpful tooltips and descriptions
 - Environment variable support
@@ -191,6 +198,7 @@ Comprehensive authentication UI with:
 ### Request Builder
 
 Full-featured request configuration:
+
 - Method selection with color coding
 - URL with environment variable support
 - Tabbed interface for params, headers, body, auth

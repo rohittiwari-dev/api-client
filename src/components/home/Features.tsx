@@ -135,7 +135,7 @@ export default function Features() {
             </span>
           </h2>
           <p className="text-lg text-muted-foreground">
-            From simple GET requests to complex authentication flows, ApiClient
+            From simple GET requests to complex authentication flows, Api Studio
             has all the tools you need, crafted with care and attention to
             detail.
           </p>

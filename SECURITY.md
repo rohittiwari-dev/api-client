@@ -31,7 +31,7 @@ Instead, please email: **security@example.com** (or create a private security ad
 
 ## 🛡️ Security Best Practices
 
-When self-hosting API Client, follow these security guidelines:
+When self-hosting Api Studio, follow these security guidelines:
 
 ### Environment Variables
 
@@ -69,6 +69,7 @@ BETTER_AUTH_SECRET="generate-a-32-character-random-string"
 ### Server-Side Auth Processing
 
 All authentication computations happen server-side:
+
 - Credentials never exposed to browser
 - Crypto operations use Node.js `crypto`
 - No sensitive data in client bundles
@@ -83,6 +84,7 @@ All authentication computations happen server-side:
 ### Request Proxying
 
 All API requests route through server proxy:
+
 - CORS bypass without exposing credentials
 - Server-side header computation
 - No direct client-to-API exposure
@@ -106,8 +108,8 @@ All API requests route through server proxy:
 
 ## 🏆 Hall of Fame
 
-We appreciate security researchers who help keep API Client secure. Contributors who responsibly disclose vulnerabilities will be acknowledged here (with permission).
+We appreciate security researchers who help keep Api Studio secure. Contributors who responsibly disclose vulnerabilities will be acknowledged here (with permission).
 
 ---
 
-Thank you for helping keep API Client secure! 🔐
+Thank you for helping keep Api Studio secure! 🔐

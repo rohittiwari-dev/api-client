@@ -10,7 +10,7 @@ const testimonials = [
     company: "TechCorp",
     avatar: "SC",
     content:
-      "ApiClient has completely transformed how I test APIs. The WebSocket support is incredible, and the UI is so much cleaner than other tools I've used.",
+      "Api Studio has completely transformed how I test APIs. The WebSocket support is incredible, and the UI is so much cleaner than other tools I've used.",
     gradient: "from-violet-500 to-purple-500",
   },
   {
@@ -46,7 +46,7 @@ const testimonials = [
     company: "InnovateTech",
     avatar: "JT",
     content:
-      "Our entire team switched to ApiClient. The collaboration features and shared collections make API development so much smoother.",
+      "Our entire team switched to Api Studio. The collaboration features and shared collections make API development so much smoother.",
     gradient: "from-orange-500 to-amber-500",
   },
   {
@@ -100,7 +100,7 @@ export default function Testimonials() {
             </span>
           </h2>
           <p className="text-lg text-muted-foreground">
-            Join the growing community of developers who have made ApiClient
+            Join the growing community of developers who have made Api Studio
             their daily driver for API development and testing.
           </p>
         </motion.div>
