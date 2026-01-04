@@ -38,7 +38,6 @@ export const currentUser = async () => {
     ) {
       return null;
     }
-    console.error("Error fetching current user:", error);
     return null;
   }
 };
