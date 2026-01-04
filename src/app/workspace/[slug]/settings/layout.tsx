@@ -1,8 +1,8 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   User,
   Building2,
@@ -10,10 +10,15 @@ import {
   ChevronLeft,
   Shield,
   Layers,
+  LogOut,
+  Loader2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import useWorkspaceState from "@/modules/workspace/store";
+import Image from "next/image";
+import authClient from "@/lib/authClient";
+import { useAuthStore } from "@/modules/authentication/store";
 
 interface SettingsLayoutProps {
   children: React.ReactNode;
@@ -52,6 +57,46 @@ const navItems = (slug: string) => [
   },
 ];
 
+function LogoutButton() {
+  const [loading, setLoading] = useState(false);
+  const { setAuthSession } = useAuthStore();
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    setLoading(true);
+    await authClient.signOut({
+      fetchOptions: {
+        onSuccess: () => {
+          setAuthSession({ session: null, user: null });
+          document.cookie =
+            "better-auth.session_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+          document.cookie =
+            "__Secure-better-auth.session_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+          router.push("/sign-in");
+        },
+        onError: () => {
+          setLoading(false);
+        },
+      },
+    });
+  };
+
+  return (
+    <button
+      onClick={handleLogout}
+      disabled={loading}
+      className="flex items-center gap-2 w-full px-3 py-2 rounded-lg text-sm font-medium text-red-500 hover:bg-red-500/10 transition-colors disabled:opacity-50"
+    >
+      {loading ? (
+        <Loader2 className="size-4 animate-spin" />
+      ) : (
+        <LogOut className="size-4" />
+      )}
+      Log out
+    </button>
+  );
+}
+
 export default function SettingsLayout({ children }: SettingsLayoutProps) {
   const pathname = usePathname();
   const { activeWorkspace } = useWorkspaceState();
@@ -88,6 +133,44 @@ export default function SettingsLayout({ children }: SettingsLayoutProps) {
             </p>
           </div>
 
+          {activeWorkspace && (
+            <div className="mb-6 relative group">
+              <div className="relative p-3 rounded-xl border border-border/50 bg-background/80 backdrop-blur-sm hover:border-primary/30 transition-all duration-300">
+                {/* Active indicator dot */}
+                <div className="absolute top-2.5 right-2.5 size-1.5 rounded-full bg-emerald-500" />
+
+                <div className="flex items-center gap-3">
+                  {/* Logo */}
+                  <div className="size-9 rounded-lg bg-linear-to-br from-primary/20 via-violet-500/15 to-blue-500/20 border border-white/10 flex items-center justify-center overflow-hidden">
+                    {activeWorkspace.logo ? (
+                      <Image
+                        src={activeWorkspace.logo}
+                        alt={activeWorkspace.name}
+                        width={36}
+                        height={36}
+                        className="size-full object-cover"
+                      />
+                    ) : (
+                      <span className="text-sm font-bold text-primary">
+                        {activeWorkspace.name.charAt(0).toUpperCase()}
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Info */}
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium truncate">
+                      {activeWorkspace.name}
+                    </p>
+                    <p className="text-[11px] text-muted-foreground/60 truncate">
+                      /{activeWorkspace.slug}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Navigation */}
           <nav className="space-y-1 flex-1">
             {navItems(slug).map((item) => {
@@ -112,7 +195,8 @@ export default function SettingsLayout({ children }: SettingsLayoutProps) {
           </nav>
 
           {/* Footer */}
-          <div className="pt-6 border-t border-border/40">
+          <div className="pt-6 border-t border-border/40 space-y-3">
+            <LogoutButton />
             <p className="text-xs text-muted-foreground/60">ApiClient v1.0.0</p>
           </div>
         </aside>

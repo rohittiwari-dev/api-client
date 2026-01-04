@@ -16,10 +16,11 @@ export const useListMembersQuery = () => {
   return useQuery({
     queryKey: ["members", activeWorkspace?.id],
     queryFn: async () => {
-      const members = await listMembers(activeWorkspace?.id || "").catch(() => {
-        return [];
-      });
-      return { members, total: members?.length || 0 };
+      const members = await listMembers(activeWorkspace?.id || "");
+      if (members?.error) {
+        return { members: [], total: 0 };
+      }
+      return { members: members?.data, total: members?.data?.length || 0 };
     },
     enabled: !!activeWorkspace?.id,
   });
@@ -44,7 +45,10 @@ export const useInviteMemberMutation = () => {
         role,
         resend,
       });
-      return member;
+      if (member?.error) {
+        throw member?.error;
+      }
+      return member?.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({
@@ -60,6 +64,9 @@ export const useAcceptInvitationMutation = () => {
   return useMutation({
     mutationFn: async (invitationId: string) => {
       const member = await acceptInvitation(invitationId);
+      if (member?.error) {
+        throw member?.error;
+      }
       return member;
     },
     onSuccess: () => {
@@ -76,6 +83,9 @@ export const useRejectInvitationMutation = () => {
   return useMutation({
     mutationFn: async (invitationId: string) => {
       const member = await rejectInvitation(invitationId);
+      if (member?.error) {
+        throw member?.error;
+      }
       return member;
     },
     onSuccess: () => {
@@ -92,6 +102,9 @@ export const useCancelInvitationMutation = () => {
   return useMutation({
     mutationFn: async (invitationId: string) => {
       const member = await deleteInvitation(invitationId);
+      if (member?.error) {
+        throw member?.error;
+      }
       return member;
     },
     onSuccess: () => {
@@ -114,6 +127,9 @@ export const useUpdateMemberRoleMutation = () => {
       role: "member" | "admin" | "owner";
     }) => {
       const member = await updateMemberRole(memberId, role);
+      if (member?.error) {
+        throw member?.error;
+      }
       return member;
     },
     onSuccess: () => {
@@ -130,6 +146,9 @@ export const useRemoveMemberMutation = () => {
   return useMutation({
     mutationFn: async (memberId: string) => {
       const member = await removeMember(memberId, activeWorkspace?.id || "");
+      if (member?.error) {
+        throw member?.error;
+      }
       return member;
     },
     onSuccess: () => {
@@ -137,5 +156,74 @@ export const useRemoveMemberMutation = () => {
         queryKey: ["members", activeWorkspace?.id],
       });
     },
+  });
+};
+
+export const useLeaveOrganizationMutation = () => {
+  const queryClient = useQueryClient();
+  const { activeWorkspace, reset } = useWorkspaceState();
+  return useMutation({
+    mutationFn: async () => {
+      const { default: authClient } = await import("@/lib/authClient");
+      const result = await authClient.organization.leave({
+        organizationId: activeWorkspace?.id || "",
+      });
+      if (result?.error) {
+        throw result?.error;
+      }
+      return result?.data;
+    },
+    onSuccess: () => {
+      reset();
+      queryClient.invalidateQueries({
+        queryKey: ["members", activeWorkspace?.id],
+      });
+    },
+  });
+};
+
+export const useOrganizationPermissions = () => {
+  const { activeWorkspace } = useWorkspaceState();
+
+  return useQuery({
+    queryKey: ["organization-permissions", activeWorkspace?.id],
+    queryFn: async () => {
+      const { default: authClient } = await import("@/lib/authClient");
+
+      // Check permissions in parallel
+      const [canInvite, canUpdateRole, canRemoveMember] = await Promise.all([
+        authClient.organization.hasPermission({
+          permissions: { invitation: ["create"] },
+        }),
+        authClient.organization.hasPermission({
+          permissions: { member: ["update"] },
+        }),
+        authClient.organization.hasPermission({
+          permissions: { member: ["delete"] },
+        }),
+      ]);
+
+      return {
+        canInvite: canInvite?.data?.success ?? false,
+        canUpdateRole: canUpdateRole?.data?.success ?? false,
+        canRemoveMember: canRemoveMember?.data?.success ?? false,
+      };
+    },
+    enabled: !!activeWorkspace?.id,
+    staleTime: 1000 * 60 * 5, // Cache for 5 minutes
+  });
+};
+
+export const useActiveMember = () => {
+  const { activeWorkspace } = useWorkspaceState();
+
+  return useQuery({
+    queryKey: ["active-member", activeWorkspace?.id],
+    queryFn: async () => {
+      const { default: authClient } = await import("@/lib/authClient");
+      const result = await authClient.organization.getActiveMember();
+      return result?.data ?? null;
+    },
+    enabled: !!activeWorkspace?.id,
   });
 };

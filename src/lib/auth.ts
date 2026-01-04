@@ -43,8 +43,9 @@ const auth = betterAuth({
   account: {
     accountLinking: {
       enabled: true,
-      trustedProviders: ["google", "microsoft"],
+      trustedProviders: ["google", "microsoft", "email-password"],
       allowDifferentEmails: true,
+      updateUserInfoOnLink: true,
     },
   },
   socialProviders: {
@@ -69,9 +70,16 @@ const auth = betterAuth({
     twoFactor(),
     nextCookies(),
     organization({
-      membershipLimit: 3,
+      membershipLimit: 10,
       organizationLimit: 5,
-      cancelPendingInvitationsOnReInvite: true,
+      allowInvitationToUnverifiedEmail: true,
+      sendInvitationEmail: async (data, request) => {
+        // await sendEmail({
+        //     to: data.email,
+        //     subject: "You have been invited to join an organization | Plug Point",
+        //     text: `Click the link to accept your invitation: ${request.url}`,
+        // });
+      },
       schema: {
         organization: {
           additionalFields: {

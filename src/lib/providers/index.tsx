@@ -3,6 +3,7 @@ import { ThemeProvider } from "@/lib/providers/theme.provider";
 import { QueryProvider } from "./query-provider";
 import AuthProvider from "@/modules/authentication/store/AuthProvider";
 import { currentUser } from "@/modules/authentication/server/auth.actions";
+import { Toaster } from "@/components/ui/sonner";
 
 const SystemProviders = async ({
   children,
@@ -20,7 +21,10 @@ const SystemProviders = async ({
           },
         }}
       >
-        <ThemeProvider>{children}</ThemeProvider>
+        <ThemeProvider>
+          <Toaster />
+          {children}
+        </ThemeProvider>
       </AuthProvider>
     </QueryProvider>
   );

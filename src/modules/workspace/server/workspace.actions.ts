@@ -1,7 +1,9 @@
 "use server";
 
 import { Organization } from "@/generated/prisma/client";
+import auth from "@/lib/auth";
 import db from "@/lib/db";
+import { headers } from "next/headers";
 
 export const getActiveOrganization = async (
   userId: string
@@ -13,27 +15,29 @@ export const getActiveOrganization = async (
   logo: string | null;
   metadata: string | null;
 } | null> => {
-  const lastSession = await db.session.findFirst({
-    where: { userId },
-    orderBy: { createdAt: "desc" },
-  });
-
-  if (lastSession?.activeOrganizationId) {
-    const organization = await db.organization.findUnique({
-      where: { id: lastSession.activeOrganizationId },
-    });
-    if (organization) {
-      return organization;
-    }
-  }
-
-  const organizations = await db.organization.findFirst({
+  // Get the most recent session with an active org for this user
+  const recentSession = await db.session.findFirst({
     where: {
-      members: { some: { userId } },
+      userId,
+      activeOrganizationId: { not: null },
     },
     orderBy: { createdAt: "desc" },
+    select: { activeOrganizationId: true },
   });
-  return organizations;
+
+  // If we have an org ID from session, fetch and return it
+  if (recentSession?.activeOrganizationId) {
+    const org = await db.organization.findUnique({
+      where: { id: recentSession.activeOrganizationId },
+    });
+    if (org) return org;
+  }
+
+  // Fallback: Get the most recent organization the user is a member of
+  return db.organization.findFirst({
+    where: { members: { some: { userId } } },
+    orderBy: { createdAt: "desc" },
+  });
 };
 
 export const updateWorkspaceGlobalAuth = async (
@@ -52,6 +56,19 @@ export const updateWorkspaceGlobalAuth = async (
 };
 
 export const getWorkspaceWithGlobalAuth = async (
+  workspaceId: string
+): Promise<Organization | null> => {
+  try {
+    const workspace = await db.organization.findUnique({
+      where: { id: workspaceId },
+    });
+    return workspace;
+  } catch (error) {
+    return null;
+  }
+};
+
+export const getWorkspaceById = async (
   workspaceId: string
 ): Promise<Organization | null> => {
   try {

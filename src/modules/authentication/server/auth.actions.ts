@@ -3,6 +3,7 @@
 import { headers } from "next/headers";
 import auth from "@/lib/auth";
 import db from "@/lib/db";
+import { createId } from "@paralleldrive/cuid2";
 
 export const currentUser = async () => {
   try {
@@ -33,5 +34,25 @@ export const currentUser = async () => {
   } catch (error) {
     console.error("Error fetching current user:", error);
     return null;
+  }
+};
+
+export const addCredentialsAccount = async (password: string) => {
+  try {
+    const result = await auth.api.setPassword({
+      body: {
+        newPassword: password,
+      },
+      headers: await headers(),
+    });
+
+    return {
+      data: result,
+      message: "Password added successfully",
+      error: null,
+    };
+  } catch (error) {
+    console.error("Error adding credentials account:", error);
+    return { data: null, message: "Failed to add password", error: error };
   }
 };

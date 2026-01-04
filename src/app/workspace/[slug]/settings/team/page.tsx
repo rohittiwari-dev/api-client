@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import { useState } from "react";
 import { motion } from "framer-motion";
 import {
   Users,
@@ -12,6 +12,7 @@ import {
   Loader2,
   ShieldCheck,
   UserCog,
+  LogOut,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -29,8 +30,11 @@ import {
 import Avatar from "@/modules/authentication/components/avatar";
 import { getInitialsFromName } from "@/lib/utils";
 import {
+  useActiveMember,
   useInviteMemberMutation,
+  useLeaveOrganizationMutation,
   useListMembersQuery,
+  useOrganizationPermissions,
   useRemoveMemberMutation,
   useUpdateMemberRoleMutation,
 } from "@/modules/workspace/hooks/use-invitaions-query";
@@ -38,15 +42,23 @@ import { InputField } from "@/components/app-ui/inputs";
 import InviteMemberModal from "@/modules/workspace/components/InviteMemberModal";
 import z from "zod";
 import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 export default function TeamSettingsPage() {
+  const router = useRouter();
   const { data, isPending, error } = useListMembersQuery();
+  const { data: permissions, isPending: isLoadingPermissions } =
+    useOrganizationPermissions();
+  const { data: activeMember, isPending: isLoadingActiveMember } =
+    useActiveMember();
   const { mutate: inviteMember, isPending: isInviting } =
     useInviteMemberMutation();
   const { mutate: removeMember, isPending: isRemoving } =
     useRemoveMemberMutation();
   const { mutate: updateRole, isPending: isUpdatingRole } =
     useUpdateMemberRoleMutation();
+  const { mutate: leaveOrg, isPending: isLeaving } =
+    useLeaveOrganizationMutation();
   const [inviteEmail, setInviteEmail] = useState({
     value: "",
     error: "",
@@ -58,7 +70,7 @@ export default function TeamSettingsPage() {
       setInviteEmail({ value: "", error: "Email is required" });
       return;
     }
-    const validate = z.string().email().safeParse(inviteEmail.value);
+    const validate = z.email().safeParse(inviteEmail.value);
     if (!validate.success) {
       setInviteEmail({
         value: inviteEmail.value,
@@ -118,6 +130,18 @@ export default function TeamSettingsPage() {
     );
   };
 
+  const handleLeaveOrganization = () => {
+    leaveOrg(undefined, {
+      onSuccess: () => {
+        toast.success("You have left the organization");
+        router.push("/workspace");
+      },
+      onError: () => {
+        toast.error("Failed to leave organization");
+      },
+    });
+  };
+
   const getRoleBadge = (role: string) => {
     switch (role) {
       case "owner":
@@ -149,7 +173,16 @@ export default function TeamSettingsPage() {
     }
   };
 
-  const isMutating = isRemoving || isUpdatingRole;
+  const isMutating = isRemoving || isUpdatingRole || isLeaving;
+  const isInitialLoading =
+    isPending || isLoadingPermissions || isLoadingActiveMember;
+  const canInvite = permissions?.canInvite ?? false;
+  const canUpdateRole = permissions?.canUpdateRole ?? false;
+  const canRemoveMember = permissions?.canRemoveMember ?? false;
+  const isCurrentUserOwner = activeMember?.role === "owner";
+
+  // Check if member is the current user
+  const isCurrentUser = (memberId: string) => activeMember?.id === memberId;
 
   return (
     <>
@@ -169,46 +202,53 @@ export default function TeamSettingsPage() {
 
         <Separator />
 
-        {/* Invite Section */}
-        <div className="space-y-4">
-          <h3 className="text-sm font-medium">Invite Team Members</h3>
-          <div className="flex gap-3">
-            <div className="relative flex-1">
-              <InputField
-                leftIcon={<Mail className="size-4" />}
-                value={inviteEmail.value}
-                onChange={(e) =>
-                  setInviteEmail({ value: e.target.value, error: "" })
-                }
-                error={inviteEmail.error || undefined}
-                placeholder="Enter email address"
-                type="email"
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    validateAndOpenModal();
-                  }
-                }}
-              />
+        {/* Invite Section - Only show if user has permission */}
+        {canInvite && (
+          <>
+            <div className="space-y-4">
+              <h3 className="text-sm font-medium">Invite Team Members</h3>
+              <div className="flex gap-3">
+                <div className="relative flex-1">
+                  <InputField
+                    leftIcon={<Mail className="size-4" />}
+                    value={inviteEmail.value}
+                    onChange={(e) =>
+                      setInviteEmail({ value: e.target.value, error: "" })
+                    }
+                    error={inviteEmail.error || undefined}
+                    placeholder="Enter email address"
+                    type="email"
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        validateAndOpenModal();
+                      }
+                    }}
+                  />
+                </div>
+                <Button
+                  onClick={validateAndOpenModal}
+                  disabled={isInviting}
+                  className="gap-2"
+                >
+                  {isInviting ? (
+                    <Loader2 className="size-4 animate-spin" />
+                  ) : (
+                    <UserPlus className="size-4" />
+                  )}
+                  Invite
+                </Button>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Team members will receive an email invitation to join this
+                workspace.
+              </p>
             </div>
-            <Button
-              onClick={validateAndOpenModal}
-              disabled={isInviting}
-              className="gap-2"
-            >
-              <UserPlus className="size-4" />
-              Invite
-            </Button>
-          </div>
-          <p className="text-xs text-muted-foreground">
-            Team members will receive an email invitation to join this
-            workspace.
-          </p>
-        </div>
-
-        <Separator />
+            <Separator />
+          </>
+        )}
 
         {/* Team Members List */}
-        {isPending ? (
+        {isInitialLoading ? (
           <div className="flex min-h-[200px] items-center justify-center flex-1">
             <Loader2 className="animate-spin size-7 w-[30px] h-[30px] text-indigo-500/60" />
           </div>
@@ -245,113 +285,152 @@ export default function TeamSettingsPage() {
             </div>
 
             <div className="space-y-2">
-              {data?.members?.map((member) => (
-                <div
-                  key={member.id}
-                  className="flex items-center justify-between p-3 rounded-lg border border-border/40 bg-background/40 hover:bg-background/60 transition-colors"
-                >
-                  <div className="flex items-center gap-3">
-                    <Avatar
-                      className="size-10 rounded-lg"
-                      fallbackClassName="rounded-lg"
-                      href={member.user?.image || ""}
-                      alt={member.user?.name}
-                      initial={getInitialsFromName(member.user?.name)}
-                    />
-                    <div>
-                      <p className="text-sm font-medium">{member.user?.name}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {member.user?.email}
-                      </p>
+              {data?.members?.map((member) => {
+                const isMe = isCurrentUser(member.id);
+                const isOwner = member.role === "owner";
+                const showActionsMenu =
+                  (!isOwner && (canUpdateRole || canRemoveMember)) ||
+                  (isMe && !isOwner);
+
+                return (
+                  <div
+                    key={member.id}
+                    className="flex items-center justify-between p-3 rounded-lg border border-border/40 bg-background/40 hover:bg-background/60 transition-colors"
+                  >
+                    <div className="flex items-center gap-3">
+                      <Avatar
+                        className="size-10 rounded-lg"
+                        fallbackClassName="rounded-lg"
+                        href={member.user?.image || ""}
+                        alt={member.user?.name}
+                        initial={getInitialsFromName(member.user?.name)}
+                      />
+                      <div>
+                        <p className="text-sm font-medium">
+                          {member.user?.name}
+                          {isMe && (
+                            <span className="ml-2 text-xs text-muted-foreground">
+                              (You)
+                            </span>
+                          )}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {member.user?.email}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                      {getRoleBadge(member.role)}
+
+                      {showActionsMenu && (
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="size-8"
+                              disabled={isMutating}
+                            >
+                              {isMutating ? (
+                                <Loader2 className="size-4 animate-spin" />
+                              ) : (
+                                <MoreHorizontal className="size-4" />
+                              )}
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="w-48">
+                            {/* Change Role Submenu - Only show if user has permission and it's not their own card */}
+                            {canUpdateRole && !isMe && !isOwner && (
+                              <>
+                                <DropdownMenuSub>
+                                  <DropdownMenuSubTrigger className="gap-2">
+                                    <UserCog className="size-4" />
+                                    Change Role
+                                  </DropdownMenuSubTrigger>
+                                  <DropdownMenuSubContent>
+                                    <DropdownMenuItem
+                                      onClick={() =>
+                                        handleChangeRole(
+                                          member.id,
+                                          "member",
+                                          member.user?.name
+                                        )
+                                      }
+                                      disabled={member.role === "member"}
+                                      className="gap-2"
+                                    >
+                                      <Users className="size-4" />
+                                      Member
+                                      {member.role === "member" && (
+                                        <span className="ml-auto text-xs text-muted-foreground">
+                                          Current
+                                        </span>
+                                      )}
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem
+                                      onClick={() =>
+                                        handleChangeRole(
+                                          member.id,
+                                          "admin",
+                                          member.user?.name
+                                        )
+                                      }
+                                      disabled={member.role === "admin"}
+                                      className="gap-2"
+                                    >
+                                      <ShieldCheck className="size-4" />
+                                      Admin
+                                      {member.role === "admin" && (
+                                        <span className="ml-auto text-xs text-muted-foreground">
+                                          Current
+                                        </span>
+                                      )}
+                                    </DropdownMenuItem>
+                                  </DropdownMenuSubContent>
+                                </DropdownMenuSub>
+                                <DropdownMenuSeparator />
+                              </>
+                            )}
+
+                            {/* Remove Member - Only show if user has permission and it's not their own card */}
+                            {canRemoveMember && !isMe && !isOwner && (
+                              <DropdownMenuItem
+                                onClick={() =>
+                                  handleRemoveMember(
+                                    member.id,
+                                    member.user?.name
+                                  )
+                                }
+                                className="text-red-500 focus:text-red-500 gap-2"
+                              >
+                                <Trash2 className="size-4" />
+                                Remove Member
+                              </DropdownMenuItem>
+                            )}
+
+                            {/* Leave Organization - Only show on current user's card if not owner */}
+                            {isMe && !isOwner && (
+                              <DropdownMenuItem
+                                onClick={handleLeaveOrganization}
+                                className="text-red-500 focus:text-red-500 gap-2"
+                                disabled={isLeaving}
+                              >
+                                {isLeaving ? (
+                                  <Loader2 className="size-4 animate-spin" />
+                                ) : (
+                                  <LogOut className="size-4" />
+                                )}
+                                Leave Organization
+                              </DropdownMenuItem>
+                            )}
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      )}
                     </div>
                   </div>
-
-                  <div className="flex items-center gap-3">
-                    {getRoleBadge(member.role)}
-
-                    {member.role !== "owner" && (
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="size-8"
-                            disabled={isMutating}
-                          >
-                            {isMutating ? (
-                              <Loader2 className="size-4 animate-spin" />
-                            ) : (
-                              <MoreHorizontal className="size-4" />
-                            )}
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-48">
-                          {/* Change Role Submenu */}
-                          <DropdownMenuSub>
-                            <DropdownMenuSubTrigger className="gap-2">
-                              <UserCog className="size-4" />
-                              Change Role
-                            </DropdownMenuSubTrigger>
-                            <DropdownMenuSubContent>
-                              <DropdownMenuItem
-                                onClick={() =>
-                                  handleChangeRole(
-                                    member.id,
-                                    "member",
-                                    member.user?.name
-                                  )
-                                }
-                                disabled={member.role === "member"}
-                                className="gap-2"
-                              >
-                                <Users className="size-4" />
-                                Member
-                                {member.role === "member" && (
-                                  <span className="ml-auto text-xs text-muted-foreground">
-                                    Current
-                                  </span>
-                                )}
-                              </DropdownMenuItem>
-                              <DropdownMenuItem
-                                onClick={() =>
-                                  handleChangeRole(
-                                    member.id,
-                                    "admin",
-                                    member.user?.name
-                                  )
-                                }
-                                disabled={member.role === "admin"}
-                                className="gap-2"
-                              >
-                                <ShieldCheck className="size-4" />
-                                Admin
-                                {member.role === "admin" && (
-                                  <span className="ml-auto text-xs text-muted-foreground">
-                                    Current
-                                  </span>
-                                )}
-                              </DropdownMenuItem>
-                            </DropdownMenuSubContent>
-                          </DropdownMenuSub>
-
-                          <DropdownMenuSeparator />
-
-                          {/* Remove Member */}
-                          <DropdownMenuItem
-                            onClick={() =>
-                              handleRemoveMember(member.id, member.user?.name)
-                            }
-                            className="text-red-500 focus:text-red-500 gap-2"
-                          >
-                            <Trash2 className="size-4" />
-                            Remove Member
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    )}
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         )}

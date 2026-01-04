@@ -178,6 +178,7 @@ model Invitation {
   expiresAt      DateTime
   inviterId      String
   user           User         @relation(fields: [inviterId], references: [id], onDelete: Cascade)
+  createdAt      DateTime
 
   @@map("invitation")
 }

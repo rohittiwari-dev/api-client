@@ -182,7 +182,8 @@ export const InvitationScalarFieldEnum = {
   role: 'role',
   status: 'status',
   expiresAt: 'expiresAt',
-  inviterId: 'inviterId'
+  inviterId: 'inviterId',
+  createdAt: 'createdAt'
 } as const
 
 export type InvitationScalarFieldEnum = (typeof InvitationScalarFieldEnum)[keyof typeof InvitationScalarFieldEnum]
