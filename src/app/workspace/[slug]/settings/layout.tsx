@@ -103,107 +103,111 @@ export default function SettingsLayout({ children }: SettingsLayoutProps) {
   const slug = activeWorkspace?.slug || "";
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="h-screen overflow-hidden bg-background">
       {/* Background Effects */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute -top-[20%] -left-[10%] w-[50%] h-[50%] rounded-full bg-primary/5 blur-[100px]" />
         <div className="absolute bottom-[-20%] right-[-10%] w-[40%] h-[40%] rounded-full bg-blue-500/5 blur-[100px]" />
       </div>
 
-      <div className="relative flex min-h-screen">
+      <div className="relative flex h-full">
         {/* Sidebar */}
-        <aside className="w-64 border-r border-border/40 bg-background/60 backdrop-blur-xl p-6 flex flex-col">
-          {/* Back Button */}
-          <Link href={slug ? `/workspace/${slug}` : "/workspace"}>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="mb-6 -ml-2 gap-2 text-muted-foreground hover:text-foreground"
-            >
-              <ChevronLeft className="size-4" />
-              Back to Workspace
-            </Button>
-          </Link>
+        <aside className="w-64 border-r border-border/40 bg-background/60 backdrop-blur-xl flex flex-col h-full shrink-0">
+          <div className="flex flex-col h-full overflow-y-auto p-6">
+            {/* Back Button */}
+            <Link href={slug ? `/workspace/${slug}` : "/workspace"}>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="mb-6 -ml-2 gap-2 text-muted-foreground hover:text-foreground"
+              >
+                <ChevronLeft className="size-4" />
+                Back to Workspace
+              </Button>
+            </Link>
 
-          {/* Header */}
-          <div className="mb-8">
-            <h1 className="text-xl font-semibold tracking-tight">Settings</h1>
-            <p className="text-sm text-muted-foreground mt-1">
-              Manage your account and preferences
-            </p>
-          </div>
+            {/* Header */}
+            <div className="mb-8">
+              <h1 className="text-xl font-semibold tracking-tight">Settings</h1>
+              <p className="text-sm text-muted-foreground mt-1">
+                Manage your account and preferences
+              </p>
+            </div>
 
-          {activeWorkspace && (
-            <div className="mb-6 relative group">
-              <div className="relative p-3 rounded-xl border border-border/50 bg-background/80 backdrop-blur-sm hover:border-primary/30 transition-all duration-300">
-                {/* Active indicator dot */}
-                <div className="absolute top-2.5 right-2.5 size-1.5 rounded-full bg-emerald-500" />
+            {activeWorkspace && (
+              <div className="mb-6 relative group">
+                <div className="relative p-3 rounded-xl border border-border/50 bg-background/80 backdrop-blur-sm hover:border-primary/30 transition-all duration-300">
+                  {/* Active indicator dot */}
+                  <div className="absolute top-2.5 right-2.5 size-1.5 rounded-full bg-emerald-500" />
 
-                <div className="flex items-center gap-3">
-                  {/* Logo */}
-                  <div className="size-9 rounded-lg bg-linear-to-br from-primary/20 via-violet-500/15 to-blue-500/20 border border-white/10 flex items-center justify-center overflow-hidden">
-                    {activeWorkspace.logo ? (
-                      <Image
-                        src={activeWorkspace.logo}
-                        alt={activeWorkspace.name}
-                        width={36}
-                        height={36}
-                        className="size-full object-cover"
-                      />
-                    ) : (
-                      <span className="text-sm font-bold text-primary">
-                        {activeWorkspace.name.charAt(0).toUpperCase()}
-                      </span>
-                    )}
-                  </div>
+                  <div className="flex items-center gap-3">
+                    {/* Logo */}
+                    <div className="size-9 rounded-lg bg-linear-to-br from-primary/20 via-violet-500/15 to-blue-500/20 border border-white/10 flex items-center justify-center overflow-hidden">
+                      {activeWorkspace.logo ? (
+                        <Image
+                          src={activeWorkspace.logo}
+                          alt={activeWorkspace.name}
+                          width={36}
+                          height={36}
+                          className="size-full object-cover"
+                        />
+                      ) : (
+                        <span className="text-sm font-bold text-primary">
+                          {activeWorkspace.name.charAt(0).toUpperCase()}
+                        </span>
+                      )}
+                    </div>
 
-                  {/* Info */}
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium truncate">
-                      {activeWorkspace.name}
-                    </p>
-                    <p className="text-[11px] text-muted-foreground/60 truncate">
-                      /{activeWorkspace.slug}
-                    </p>
+                    {/* Info */}
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium truncate">
+                        {activeWorkspace.name}
+                      </p>
+                      <p className="text-[11px] text-muted-foreground/60 truncate">
+                        /{activeWorkspace.slug}
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>
+            )}
+
+            {/* Navigation */}
+            <nav className="space-y-1 flex-1">
+              {navItems(slug).map((item) => {
+                const isActive = pathname === item.href;
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className={cn(
+                      "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200",
+                      "text-sm font-medium",
+                      isActive
+                        ? "bg-primary/10 text-primary border border-primary/20"
+                        : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                    )}
+                  >
+                    <item.icon className="size-4" />
+                    {item.title}
+                  </Link>
+                );
+              })}
+            </nav>
+
+            {/* Footer */}
+            <div className="pt-6 mt-auto border-t border-border/40 space-y-3">
+              <LogoutButton />
+              <p className="text-xs text-muted-foreground/60">
+                ApiClient v1.0.0
+              </p>
             </div>
-          )}
-
-          {/* Navigation */}
-          <nav className="space-y-1 flex-1">
-            {navItems(slug).map((item) => {
-              const isActive = pathname === item.href;
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={cn(
-                    "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200",
-                    "text-sm font-medium",
-                    isActive
-                      ? "bg-primary/10 text-primary border border-primary/20"
-                      : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
-                  )}
-                >
-                  <item.icon className="size-4" />
-                  {item.title}
-                </Link>
-              );
-            })}
-          </nav>
-
-          {/* Footer */}
-          <div className="pt-6 border-t border-border/40 space-y-3">
-            <LogoutButton />
-            <p className="text-xs text-muted-foreground/60">ApiClient v1.0.0</p>
           </div>
         </aside>
 
         {/* Main Content */}
-        <main className="flex-1 p-8 overflow-auto">
-          <div className="max-w-3xl mx-auto">{children}</div>
+        <main className="flex-1 h-full overflow-y-auto">
+          <div className="p-8 max-w-3xl mx-auto">{children}</div>
         </main>
       </div>
     </div>
