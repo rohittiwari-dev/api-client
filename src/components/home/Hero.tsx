@@ -14,6 +14,7 @@ import {
   Terminal,
 } from "lucide-react";
 import { motion } from "motion/react";
+import { APP_VERSION } from "@/constants";
 
 const MotionLink = motion.create(Link);
 
@@ -47,7 +48,7 @@ export default function Hero() {
           >
             <span className="flex h-2 w-2 rounded-full bg-green-500 animate-pulse"></span>
             <span className="text-xs font-medium text-muted-foreground">
-              v1.0 is now available
+              v{APP_VERSION} is now available
             </span>
           </motion.div>
 

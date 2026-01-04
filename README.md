@@ -2,7 +2,7 @@
 
 A modern, powerful API testing and development tool built with Next.js 16 and React 19. Test, debug, and manage your APIs with a beautiful, intuitive interface.
 
-![Api Studio](https://img.shields.io/badge/version-0.1.0-blue.svg)
+![Api Studio](https://img.shields.io/badge/version-1.1.0-blue.svg)
 ![Next.js](https://img.shields.io/badge/Next.js-16-black.svg)
 ![React](https://img.shields.io/badge/React-19-61dafb.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)

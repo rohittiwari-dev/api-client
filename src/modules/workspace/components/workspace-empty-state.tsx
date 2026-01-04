@@ -8,6 +8,7 @@ import useRequestSyncStoreState from "@/modules/requests/hooks/requestSyncStore"
 import useCommandPaletteStore from "@/modules/layout/store/commandPalette.store";
 import MethodBadge from "@/components/app-ui/method-badge";
 import { HttpMethod } from "@/generated/prisma/browser";
+import { APP_VERSION } from "@/constants";
 
 const WorkspaceEmptyState = () => {
   const { openRequest, activeWorkspace, requests } = useRequestSyncStoreState();
@@ -173,7 +174,8 @@ const WorkspaceEmptyState = () => {
           <span>Connected</span>
         </div>
         <div className="w-1 h-1 rounded-full bg-border" />
-        <div>v1.0.0</div>
+
+        <div>v{APP_VERSION}</div>
       </div>
     </div>
   );

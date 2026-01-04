@@ -87,34 +87,37 @@ const WorkspaceSwitcher = () => {
             </div>
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="start" className="w-56 p-1.5">
+        <DropdownMenuContent
+          align="start"
+          className="w-[260px] rounded-2xl p-1.5 border-border/50 bg-background/70 backdrop-blur-xl shadow-2xl"
+        >
           {/* Header */}
-          <div className="px-2 py-1.5 mb-1">
+          <div className="px-2 py-1.5 mb-1 bg-muted/40 rounded-xl border border-border/40">
             <p className="text-xs font-semibold text-foreground">Workspaces</p>
             <p className="text-[10px] text-muted-foreground">
               Switch between workspaces
             </p>
           </div>
 
-          <DropdownMenuSeparator className="my-1" />
+          <DropdownMenuSeparator className="my-1.5 bg-border/50" />
 
           {/* Workspace list */}
-          <div className="flex flex-col gap-1">
+          <div className="flex flex-col gap-0.5 max-h-[200px] overflow-y-auto pr-1 custom-scrollbar">
             {workspaces?.map((workspace) => (
               <DropdownMenuItem
                 key={workspace.id}
                 onClick={() => handleWorkspaceSwitch(workspace.id)}
                 className={cn(
-                  "gap-3 py-2 px-2 rounded-md cursor-pointer",
-                  activeWorkspace?.id === workspace.id && "bg-primary/10"
+                  "gap-3 py-1.5 px-2 rounded-lg cursor-pointer group focus:bg-accent/50",
+                  activeWorkspace?.id === workspace.id && "bg-accent/60"
                 )}
               >
                 <div
                   className={cn(
-                    "flex items-center justify-center size-7 rounded-md",
+                    "flex items-center justify-center size-7 rounded-lg transition-colors border",
                     activeWorkspace?.id === workspace.id
-                      ? "bg-primary/20"
-                      : "bg-muted"
+                      ? "bg-primary/20 border-primary/20"
+                      : "bg-background/50 border-border/50 group-hover:border-primary/30 group-hover:bg-primary/10"
                   )}
                 >
                   <Briefcase
@@ -122,15 +125,17 @@ const WorkspaceSwitcher = () => {
                       "size-3.5",
                       activeWorkspace?.id === workspace.id
                         ? "text-primary"
-                        : "text-muted-foreground"
+                        : "text-muted-foreground group-hover:text-primary"
                     )}
                   />
                 </div>
-                <div className="flex flex-col flex-1 min-w-0">
+                <div className="flex flex-col flex-1 min-w-0 gap-0.5">
                   <span
                     className={cn(
                       "text-xs font-medium truncate",
-                      activeWorkspace?.id === workspace.id && "text-primary"
+                      activeWorkspace?.id === workspace.id
+                        ? "text-primary"
+                        : "text-foreground"
                     )}
                   >
                     {workspace.name}
@@ -140,23 +145,30 @@ const WorkspaceSwitcher = () => {
                   </span>
                 </div>
                 {activeWorkspace?.id === workspace.id && (
-                  <Check className="size-4 text-primary shrink-0" />
+                  <Check className="size-3.5 text-primary shrink-0" />
                 )}
               </DropdownMenuItem>
             ))}
           </div>
 
-          <DropdownMenuSeparator className="my-1" />
+          <DropdownMenuSeparator className="my-1.5 bg-border/50" />
 
           {/* Create new workspace */}
           <DropdownMenuItem
             onClick={() => setWorkspaceSetupModalOpen(true)}
-            className="gap-3 py-2 px-2 rounded-md cursor-pointer text-muted-foreground hover:text-foreground"
+            className="gap-3 py-1.5 px-2 rounded-lg cursor-pointer text-muted-foreground hover:text-foreground group focus:bg-accent/50"
           >
-            <div className="flex items-center justify-center size-7 rounded-md bg-emerald-500/10">
-              <Plus className="size-3.5 text-emerald-500" />
+            <div className="flex items-center justify-center size-7 rounded-lg bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 group-hover:bg-emerald-500/20 transition-colors">
+              <Plus className="size-3.5" />
             </div>
-            <span className="text-xs font-medium">Create Workspace</span>
+            <div className="flex flex-col flex-1 gap-0.5">
+              <span className="text-xs font-medium group-hover:text-emerald-500 transition-colors">
+                Create Workspace
+              </span>
+              <span className="text-[10px] text-muted-foreground">
+                Add a new workspace
+              </span>
+            </div>
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

@@ -19,6 +19,7 @@ import useWorkspaceState from "@/modules/workspace/store";
 import Image from "next/image";
 import authClient from "@/lib/authClient";
 import { useAuthStore } from "@/modules/authentication/store";
+import { APP_VERSION } from "@/constants";
 
 interface SettingsLayoutProps {
   children: React.ReactNode;
@@ -199,7 +200,7 @@ export default function SettingsLayout({ children }: SettingsLayoutProps) {
             <div className="pt-6 mt-auto border-t border-border/40 space-y-3">
               <LogoutButton />
               <p className="text-xs text-muted-foreground/60">
-                ApiClient v1.0.0
+                ApiClient v{APP_VERSION}
               </p>
             </div>
           </div>

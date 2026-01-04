@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Plus,
   Trash2,
@@ -16,7 +16,9 @@ import {
   Copy,
   LayoutGrid,
   List,
+  ArrowRight,
 } from "lucide-react";
+import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -49,7 +51,6 @@ import {
 import useWorkspaceState from "@/modules/workspace/store";
 import { toast } from "sonner";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const EnvironmentSwitcher = () => {
@@ -64,6 +65,7 @@ const EnvironmentSwitcher = () => {
   } = useEnvironmentStore();
 
   const { activeWorkspace } = useWorkspaceState();
+  const activeWorkspaceId = activeWorkspace?.id;
   const [selectedEnvId, setSelectedEnvId] = useState<string | null>(null);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [newEnvName, setNewEnvName] = useState("");
@@ -92,33 +94,47 @@ const EnvironmentSwitcher = () => {
     toast.success("Copied to clipboard");
   };
 
-  useEffect(() => {
-    if (!selectedEnvId && activeEnvironmentId) {
-      setSelectedEnvId(activeEnvironmentId);
-    } else if (!selectedEnvId && environments.length > 0) {
-      setSelectedEnvId(environments[0].id);
-    }
-  }, [activeEnvironmentId, environments, selectedEnvId]);
+  // Compute the effective selected environment ID without using effects
+  const effectiveSelectedEnvId =
+    selectedEnvId ?? activeEnvironmentId ?? environments[0]?.id ?? null;
 
-  useEffect(() => {
-    if (selectedEnvId) {
-      const env = environments.find((e) => e.id === selectedEnvId);
-      if (env) {
-        setEditedVariables(env.variables || []);
+  // Compute the currently selected environment from the ID
+  const selectedEnv = environments.find((e) => e.id === effectiveSelectedEnvId);
+
+  // Helper to select an environment and load its variables atomically
+  const selectEnvironment = useCallback(
+    (envId: string | null) => {
+      setSelectedEnvId(envId);
+      if (envId) {
+        const env = environments.find((e) => e.id === envId);
+        setEditedVariables(env?.variables || []);
+      } else {
+        setEditedVariables([]);
       }
-    }
-  }, [selectedEnvId, environments]);
+    },
+    [environments]
+  );
 
-  useEffect(() => {
-    if (activeWorkspace?.id) {
-      loadEnvironments();
+  // Initialize editedVariables for the first render when we have a default selection
+  const initialVariables = useMemo(() => {
+    if (selectedEnvId === null && selectedEnv) {
+      return selectedEnv.variables || [];
     }
-  }, [activeWorkspace?.id]);
+    return null;
+  }, [selectedEnvId, selectedEnv]);
 
-  const loadEnvironments = async () => {
-    if (!activeWorkspace?.id) return;
+  if (
+    initialVariables !== null &&
+    editedVariables.length === 0 &&
+    initialVariables.length > 0
+  ) {
+    setEditedVariables(initialVariables);
+  }
+
+  const loadEnvironments = useCallback(async () => {
+    if (!activeWorkspaceId) return;
     try {
-      const envs = await getEnvironmentsByWorkspace(activeWorkspace.id);
+      const envs = await getEnvironmentsByWorkspace(activeWorkspaceId);
       const mapped = envs.map(
         (env): EnvironmentState => ({
           id: env.id,
@@ -135,7 +151,13 @@ const EnvironmentSwitcher = () => {
     } catch (error) {
       console.error("Failed to load environments", error);
     }
-  };
+  }, [activeWorkspaceId, setEnvironments]);
+
+  useEffect(() => {
+    if (activeWorkspaceId) {
+      loadEnvironments();
+    }
+  }, [activeWorkspaceId, loadEnvironments]);
 
   const handleCreate = async () => {
     if (!activeWorkspace?.id || !newEnvName?.trim()) return;
@@ -156,7 +178,7 @@ const EnvironmentSwitcher = () => {
       addEnvironment(newEnv);
       setNewEnvName("");
       setIsCreateDialogOpen(false);
-      setSelectedEnvId(newEnv.id);
+      selectEnvironment(newEnv.id);
       toast.success("Environment created");
     } catch (error) {
       toast.error("Failed to create environment");
@@ -168,8 +190,8 @@ const EnvironmentSwitcher = () => {
     try {
       await deleteEnvironmentAction(id);
       removeEnvironment(id);
-      if (selectedEnvId === id) {
-        setSelectedEnvId(environments[0]?.id || null);
+      if (effectiveSelectedEnvId === id) {
+        selectEnvironment(environments[0]?.id || null);
       }
       if (activeEnvironmentId === id) {
         setActiveEnvironment(null);
@@ -202,23 +224,21 @@ const EnvironmentSwitcher = () => {
   };
 
   const handleSaveVariables = async () => {
-    if (!selectedEnvId) return;
+    if (!effectiveSelectedEnvId) return;
     try {
       const validVariables = editedVariables.filter(
         (v) => v.key?.trim() !== ""
       );
-      await updateEnvironmentAction(selectedEnvId, {
+      await updateEnvironmentAction(effectiveSelectedEnvId, {
         variables: validVariables,
       });
-      updateEnvironment(selectedEnvId, { variables: validVariables });
+      updateEnvironment(effectiveSelectedEnvId, { variables: validVariables });
       setEditedVariables(validVariables);
       toast.success("Variables saved successfully");
     } catch (error) {
       toast.error("Failed to save variables");
     }
   };
-
-  const selectedEnv = environments.find((e) => e.id === selectedEnvId);
 
   // Filter variables for display
   const filteredVariables = editedVariables
@@ -234,101 +254,105 @@ const EnvironmentSwitcher = () => {
   );
 
   return (
-    <div className="flex h-full w-full bg-background rounded-xl overflow-hidden shadow-sm border border-border/40">
+    <div className="flex h-full w-full bg-muted/5 overflow-hidden relative">
+      {/* Background Effects */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-[20%] -left-[10%] w-[50%] h-[50%] rounded-full bg-primary/5 blur-[100px]" />
+        <div className="absolute top-[60%] -right-[5%] w-[30%] h-[30%] rounded-full bg-blue-500/5 blur-[80px]" />
+      </div>
+
       {/* Sidebar list */}
-      <div className="w-[280px] border-r border-border/40 bg-muted/5 flex flex-col">
-        <div className="p-4 border-b border-border/40 bg-background/95 backdrop-blur-sm sticky top-0 z-10">
+      <div className="w-[260px] border-r border-border/40 bg-background/40 backdrop-blur-sm flex flex-col z-10">
+        <div className="p-4 border-b border-border/40 bg-background/50 backdrop-blur-sm">
           <div className="flex items-center justify-between mb-3">
-            <span className="text-sm font-semibold tracking-wide flex items-center gap-2">
-              Env Manager
-              <Badge variant="secondary" className="text-[10px] h-5 px-1.5">
-                {environments.length}
-              </Badge>
+            <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+              Environments
             </span>
             <Button
-              variant="default"
+              variant="ghost"
               size="icon"
-              className="h-7 w-7 bg-foreground text-background hover:bg-foreground/90 rounded-lg shadow-sm"
+              className="size-7 hover:bg-primary/10 hover:text-primary rounded-lg transition-all duration-200"
               onClick={() => setIsCreateDialogOpen(true)}
             >
-              <Plus className="h-3.5 w-3.5" />
+              <Plus className="size-4" />
             </Button>
           </div>
-          <div className="relative">
-            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground" />
+          <div className="relative group">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground group-focus-within:text-primary transition-colors" />
             <Input
-              className="h-8 pl-8 text-xs bg-background border-border/60 focus-visible:ring-1 focus-visible:ring-ring"
-              placeholder="Find environment..."
+              className="h-9 pl-9 text-xs bg-background/50 border-border/40 hover:bg-background/80 focus-visible:bg-background focus-visible:ring-primary/20 rounded-lg transition-all"
+              placeholder="Search environments..."
               value={envSearchTerm}
               onChange={(e) => setEnvSearchTerm(e.target.value)}
             />
           </div>
         </div>
+
         <ScrollArea className="flex-1 px-3 py-3">
           <div className="space-y-1">
-            {filteredEnvironments.map((env) => {
+            {filteredEnvironments.map((env, i) => {
               const isActive = activeEnvironmentId === env.id;
-              const isSelected = selectedEnvId === env.id;
+              const isSelected = effectiveSelectedEnvId === env.id;
 
               return (
-                <div
+                <motion.div
                   key={env.id}
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: i * 0.03 }}
                   className={cn(
-                    "group flex items-center justify-between px-3 py-2.5 rounded-xl text-sm cursor-pointer transition-all duration-200 border relative overflow-hidden",
+                    "group w-full flex items-center justify-between p-3 rounded-xl text-left cursor-pointer transition-all duration-200 border",
                     isSelected
-                      ? "bg-background border-border shadow-sm"
-                      : "bg-transparent border-transparent hover:bg-muted/50 hover:border-border/30 text-muted-foreground hover:text-foreground"
+                      ? "bg-background/60 border-border/60 shadow-sm"
+                      : "bg-transparent border-transparent hover:bg-background/40 hover:border-border/40"
                   )}
-                  onClick={() => setSelectedEnvId(env.id)}
                 >
-                  {isSelected && (
-                    <div className="absolute left-0 top-0 bottom-0 w-1 bg-emerald-500 rounded-l-xl" />
-                  )}
-                  <div
-                    className={cn(
-                      "flex items-center gap-3 min-w-0 transition-transform duration-200",
-                      isSelected ? "translate-x-1.5" : ""
-                    )}
-                  >
+                  <div className="flex items-center gap-3 min-w-0">
                     <div
                       className={cn(
-                        "size-8 rounded-lg flex items-center justify-center shrink-0 transition-colors border",
+                        "size-8 rounded-lg flex items-center justify-center shrink-0 transition-all duration-200",
                         isActive
-                          ? "bg-emerald-500 text-white border-emerald-600 shadow-sm shadow-emerald-500/20"
-                          : "bg-muted border-transparent group-hover:bg-background group-hover:border-border/50 text-muted-foreground"
+                          ? "bg-primary text-primary-foreground shadow-sm"
+                          : "bg-muted/50 text-muted-foreground group-hover:bg-muted"
                       )}
                     >
                       <Zap
-                        className={cn("size-3.5", isActive && "fill-current")}
+                        className={cn("size-4", isActive && "fill-current")}
                       />
                     </div>
-                    <div className="flex flex-col min-w-0 gap-0.5">
+                    <div className="flex flex-col min-w-0">
                       <span
                         className={cn(
-                          "truncate font-medium leading-none",
-                          isSelected ? "text-foreground" : ""
+                          "truncate font-medium text-sm",
+                          isSelected
+                            ? "text-foreground"
+                            : "text-muted-foreground group-hover:text-foreground"
                         )}
                       >
                         {env.name}
                       </span>
-                      <span className="text-[10px] text-muted-foreground truncate">
-                        {(env.variables || []).length} variables
+                      <span className="text-[10px] text-muted-foreground/60">
+                        {env.variables.length} variables
                       </span>
                     </div>
                   </div>
 
-                  <div className="flex items-center opacity-0 group-hover:opacity-100 transition-opacity translate-x-1 group-hover:translate-x-0">
+                  <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="h-7 w-7 rounded-lg hover:bg-muted"
+                          className="size-7 hover:bg-background/80 rounded-lg"
+                          onClick={(e) => e.stopPropagation()}
                         >
-                          <MoreHorizontal className="h-4 w-4 text-muted-foreground" />
+                          <MoreHorizontal className="size-4 text-muted-foreground" />
                         </Button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="w-48">
+                      <DropdownMenuContent
+                        align="end"
+                        className="w-44 p-1.5 rounded-xl border-border/40 bg-background/95 backdrop-blur-xl"
+                      >
                         {!isActive && (
                           <DropdownMenuItem
                             onClick={(e) => {
@@ -336,8 +360,9 @@ const EnvironmentSwitcher = () => {
                               setActiveEnvironment(env.id);
                               toast.success(`Active: ${env.name}`);
                             }}
+                            className="text-xs p-2 rounded-lg"
                           >
-                            <Check className="mr-2 h-4 w-4" /> Set as Active
+                            <Check className="mr-2 size-4" /> Set as Active
                           </DropdownMenuItem>
                         )}
                         <DropdownMenuItem
@@ -347,133 +372,145 @@ const EnvironmentSwitcher = () => {
                               JSON.stringify(env.variables, null, 2)
                             );
                           }}
+                          className="text-xs p-2 rounded-lg"
                         >
-                          <Copy className="mr-2 h-4 w-4" /> Copy Variables
+                          <Copy className="mr-2 size-4" /> Copy Variables
                         </DropdownMenuItem>
-                        <DropdownMenuSeparator />
+                        <DropdownMenuSeparator className="my-1 bg-border/40" />
                         <DropdownMenuItem
                           onClick={(e) => handleDelete(env.id, e as any)}
-                          className="text-destructive focus:text-destructive"
+                          className="text-destructive focus:text-destructive text-xs p-2 rounded-lg"
                         >
-                          <Trash2 className="mr-2 h-4 w-4" /> Delete
+                          <Trash2 className="mr-2 size-4" /> Delete
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </div>
-                </div>
+                </motion.div>
               );
             })}
+
+            {filteredEnvironments.length === 0 && (
+              <div className="text-center py-8 text-muted-foreground/60">
+                <p className="text-xs">No environments found</p>
+              </div>
+            )}
           </div>
         </ScrollArea>
-        <div className="p-3 border-t border-border/40 bg-muted/10 text-[10px] text-muted-foreground text-center">
-          Environment variables are stored locally
-        </div>
       </div>
 
       {/* Main Area */}
-      <div className="flex-1 flex flex-col min-w-0 bg-background/50 h-full overflow-hidden">
+      <div className="flex-1 flex flex-col min-w-0 z-10 relative">
         {selectedEnv ? (
-          <>
-            <div className="px-8 py-6 border-b border-border/40 flex flex-col gap-6 sticky top-0 bg-background/95 backdrop-blur z-20 shrink-0">
-              <div className="flex items-start justify-between">
-                <div className="flex items-center gap-4">
-                  <div className="size-12 rounded-2xl bg-gradient-to-br from-emerald-500/10 to-teal-500/10 border border-emerald-500/20 flex items-center justify-center shadow-sm">
-                    <Globe className="size-6 text-emerald-600 dark:text-emerald-400" />
-                  </div>
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-3">
-                      <h2 className="text-xl font-bold tracking-tight text-foreground">
-                        {selectedEnv.name}
-                      </h2>
-                      {activeEnvironmentId === selectedEnv.id && (
-                        <Badge
-                          variant="outline"
-                          className="bg-emerald-500/5 text-emerald-600 border-emerald-200 dark:border-emerald-800 h-5"
-                        >
-                          Active Context
-                        </Badge>
-                      )}
-                    </div>
-                    <p className="text-sm text-muted-foreground">
-                      Manage and configure your environment variables
-                    </p>
-                  </div>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="flex-1 flex flex-col h-full overflow-hidden"
+          >
+            {/* Header */}
+            <div className="px-6 py-4 border-b border-border/40 flex items-center justify-between bg-background/50 backdrop-blur-sm">
+              <div className="flex items-center gap-4">
+                <div className="size-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                  <Globe className="size-5 text-primary" />
                 </div>
-
-                <Button
-                  onClick={handleSaveVariables}
-                  className="bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm hover:shadow transition-all font-medium rounded-lg px-6"
-                >
-                  Save Changes
-                </Button>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h2 className="text-base font-semibold text-foreground">
+                      {selectedEnv.name}
+                    </h2>
+                    {activeEnvironmentId === selectedEnv.id && (
+                      <span className="px-2 py-0.5 text-[10px] font-semibold rounded-md bg-primary/10 text-primary uppercase tracking-wide">
+                        Active
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    {selectedEnv.variables.length} variables configured
+                  </p>
+                </div>
               </div>
 
-              <div className="flex items-center gap-4">
-                <div className="relative flex-1 group">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground group-focus-within:text-emerald-500 transition-colors" />
+              <div className="flex items-center gap-3">
+                <div className="relative group w-52 transition-all focus-within:w-64">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
                   <Input
-                    className="h-10 pl-9 text-sm bg-muted/30 border-transparent hover:border-border/60 hover:bg-muted/50 focus-visible:bg-background focus-visible:border-emerald-500/50 focus-visible:ring-2 focus-visible:ring-emerald-500/20 transition-all rounded-xl"
-                    placeholder="Filter keys or values..."
+                    className="h-9 pl-9 text-xs bg-background/50 border-border/40 hover:bg-background/80 focus-visible:bg-background focus-visible:ring-primary/20 rounded-lg transition-all"
+                    placeholder="Filter variables..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                   />
                 </div>
+
+                <div className="h-5 w-px bg-border/40" />
+
                 <Tabs
                   value={viewMode}
                   onValueChange={(v: any) => setViewMode(v)}
-                  className="w-[120px]"
                 >
-                  <TabsList className="grid w-full grid-cols-2 h-10 rounded-xl bg-muted/40 p-1">
+                  <TabsList className="h-9 p-1 bg-muted/40 rounded-lg">
                     <TabsTrigger
                       value="list"
-                      className="rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm"
+                      className="size-7 p-0 rounded-md data-[state=active]:bg-background data-[state=active]:shadow-sm"
                     >
                       <List className="size-4" />
                     </TabsTrigger>
                     <TabsTrigger
                       value="grid"
-                      className="rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm"
+                      className="size-7 p-0 rounded-md data-[state=active]:bg-background data-[state=active]:shadow-sm"
                     >
                       <LayoutGrid className="size-4" />
                     </TabsTrigger>
                   </TabsList>
                 </Tabs>
+
+                <Button
+                  onClick={handleSaveVariables}
+                  size="sm"
+                  className="bg-primary hover:bg-primary/90 h-9 text-xs px-4 rounded-lg shadow-sm"
+                >
+                  Save Changes
+                </Button>
               </div>
             </div>
 
-            <div className="flex-1 flex flex-col min-h-0 bg-muted/5 h-full overflow-hidden">
-              {/* Header Row */}
-              <div className="grid grid-cols-[32px_1fr_1fr_100px_32px] gap-4 px-6 py-2 border-b border-border/40 text-[10px] font-semibold text-muted-foreground uppercase tracking-widest bg-background/50 shrink-0">
-                <div className="flex items-center justify-center">On</div>
-                <div>Variable Key</div>
-                <div>Value</div>
-                <div>Type</div>
-                <div className="text-center">Del</div>
-              </div>
+            {/* Variables Content */}
+            <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
+              {viewMode === "list" && (
+                <div className="grid grid-cols-[40px_1fr_1fr_90px_40px] gap-4 px-6 py-3 border-b border-border/40 text-[10px] font-medium text-muted-foreground uppercase tracking-wider bg-muted/10">
+                  <div className="flex justify-center">On</div>
+                  <div>Key</div>
+                  <div>Value</div>
+                  <div>Type</div>
+                  <div className="text-center">Del</div>
+                </div>
+              )}
 
               <ScrollArea className="flex-1 h-full">
                 <div
                   className={cn(
-                    "p-4 pb-20",
+                    "p-6 pb-24",
                     viewMode === "grid"
-                      ? "grid grid-cols-2 gap-4"
-                      : "space-y-px"
+                      ? "grid grid-cols-2 xl:grid-cols-3 gap-4"
+                      : "space-y-1"
                   )}
                 >
                   {filteredVariables.map(
-                    ({ originalIndex: index, ...variable }) => {
+                    ({ originalIndex: index, ...variable }, i) => {
                       const isSecret = variable.type === "secret";
                       const isRevealed = revealedRows.has(index);
 
                       if (viewMode === "grid") {
                         return (
-                          <div
+                          <motion.div
                             key={index}
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            transition={{ delay: i * 0.03 }}
                             className={cn(
-                              "group relative p-4 rounded-xl border bg-background transition-all duration-200 hover:shadow-md hover:-translate-y-0.5",
+                              "group relative p-4 rounded-xl border bg-background/40 backdrop-blur-sm hover:bg-background/60 transition-all duration-300",
                               !variable.enabled
-                                ? "opacity-60 border-dashed"
-                                : "border-border/60 hover:border-emerald-500/30"
+                                ? "opacity-60 border-dashed border-border/40"
+                                : "border-border/40 hover:border-border/60"
                             )}
                           >
                             <div className="flex items-center justify-between mb-3">
@@ -487,103 +524,102 @@ const EnvironmentSwitcher = () => {
                                       Boolean(checked)
                                     )
                                   }
-                                  className="size-4 rounded-md data-[state=checked]:bg-emerald-500 data-[state=checked]:border-emerald-500"
+                                  className="size-4 rounded data-[state=checked]:bg-primary data-[state=checked]:border-primary"
                                 />
-                                <Badge
-                                  variant="outline"
+                                <button
+                                  onClick={() =>
+                                    handleVariableChange(
+                                      index,
+                                      "type",
+                                      isSecret ? "default" : "secret"
+                                    )
+                                  }
                                   className={cn(
-                                    "h-5 text-[10px] px-1.5 font-normal",
+                                    "text-[10px] px-2 py-1 rounded-md font-medium flex items-center gap-1.5 transition-colors",
                                     isSecret
-                                      ? "border-amber-200/50 text-amber-600 bg-amber-500/10 dark:border-amber-800/50 dark:text-amber-400"
-                                      : "border-border text-muted-foreground bg-muted/50"
+                                      ? "bg-amber-500/10 text-amber-600 dark:text-amber-400"
+                                      : "bg-muted text-muted-foreground"
                                   )}
                                 >
                                   {isSecret ? (
-                                    <Lock className="size-2.5 mr-1" />
+                                    <Lock className="size-3" />
                                   ) : (
-                                    <Unlock className="size-2.5 mr-1" />
+                                    <Unlock className="size-3" />
                                   )}
                                   {isSecret ? "Secret" : "Plain"}
-                                </Badge>
+                                </button>
                               </div>
-                              <button
+                              <Button
+                                variant="ghost"
+                                size="icon"
                                 onClick={() => handleRemoveVariable(index)}
-                                className="text-muted-foreground/30 hover:text-rose-500 transition-colors"
+                                className="size-7 text-muted-foreground/40 hover:text-destructive hover:bg-destructive/10 rounded-lg opacity-0 group-hover:opacity-100 transition-all"
                               >
-                                <Trash2 className="size-4" />
-                              </button>
+                                <Trash2 className="size-3.5" />
+                              </Button>
                             </div>
-                            <div className="space-y-3">
-                              <div>
-                                <label className="text-[10px] uppercase font-bold text-muted-foreground/50 mb-1 block">
-                                  Key
-                                </label>
+                            <div className="space-y-2">
+                              <Input
+                                value={variable.key}
+                                onChange={(e) =>
+                                  handleVariableChange(
+                                    index,
+                                    "key",
+                                    e.target.value
+                                  )
+                                }
+                                placeholder="KEY"
+                                className="h-9 font-mono text-xs bg-muted/30 border-transparent focus-visible:bg-background focus-visible:ring-primary/20 px-3 rounded-lg"
+                              />
+                              <div className="relative">
                                 <Input
-                                  value={variable.key}
+                                  type={
+                                    !isSecret || isRevealed
+                                      ? "text"
+                                      : "password"
+                                  }
+                                  value={variable.value}
                                   onChange={(e) =>
                                     handleVariableChange(
                                       index,
-                                      "key",
+                                      "value",
                                       e.target.value
                                     )
                                   }
-                                  placeholder="VARIABLE_KEY"
-                                  className="h-8 font-mono text-xs border-transparent bg-muted/30 focus-visible:bg-background focus-visible:border-emerald-500/50 px-2 rounded-lg"
-                                />
-                              </div>
-                              <div>
-                                <label className="text-[10px] uppercase font-bold text-muted-foreground/50 mb-1 block">
-                                  Value
-                                </label>
-                                <div className="relative">
-                                  <Input
-                                    type={
-                                      !isSecret || isRevealed
-                                        ? "text"
-                                        : "password"
-                                    }
-                                    value={variable.value}
-                                    onChange={(e) =>
-                                      handleVariableChange(
-                                        index,
-                                        "value",
-                                        e.target.value
-                                      )
-                                    }
-                                    placeholder="Value"
-                                    className={cn(
-                                      "h-8 font-mono text-xs border-transparent bg-muted/30 focus-visible:bg-background focus-visible:border-emerald-500/50 px-2 pr-8 rounded-lg",
-                                      isSecret && "text-emerald-600 font-medium"
-                                    )}
-                                  />
-                                  {isSecret && (
-                                    <button
-                                      onClick={() => toggleRowVisibility(index)}
-                                      className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground/50 hover:text-foreground transition-colors"
-                                    >
-                                      {isRevealed ? (
-                                        <EyeOff className="size-3.5" />
-                                      ) : (
-                                        <Eye className="size-3.5" />
-                                      )}
-                                    </button>
+                                  placeholder="Value"
+                                  className={cn(
+                                    "h-9 font-mono text-xs bg-muted/30 border-transparent focus-visible:bg-background focus-visible:ring-primary/20 px-3 pr-9 rounded-lg",
+                                    isSecret && "text-primary font-medium"
                                   )}
-                                </div>
+                                />
+                                {isSecret && (
+                                  <button
+                                    onClick={() => toggleRowVisibility(index)}
+                                    className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-muted-foreground/40 hover:text-foreground rounded transition-colors"
+                                  >
+                                    {isRevealed ? (
+                                      <EyeOff className="size-4" />
+                                    ) : (
+                                      <Eye className="size-4" />
+                                    )}
+                                  </button>
+                                )}
                               </div>
                             </div>
-                          </div>
+                          </motion.div>
                         );
                       }
 
                       return (
-                        <div
+                        <motion.div
                           key={index}
-                          className={cn(
-                            "group grid grid-cols-[32px_1fr_1fr_100px_32px] gap-4 px-6 py-1.5 rounded-lg border border-transparent transition-all duration-200 items-center hover:bg-white dark:hover:bg-accent/50"
-                          )}
+                          initial={{ opacity: 0, y: 5 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: i * 0.02 }}
+                          className="group grid grid-cols-[40px_1fr_1fr_90px_40px] gap-4 px-6 py-2 rounded-lg hover:bg-muted/30 transition-colors items-center"
                         >
                           {/* Checkbox */}
-                          <div className="flex items-center justify-center">
+                          <div className="flex justify-center">
                             <Checkbox
                               checked={variable.enabled}
                               onCheckedChange={(checked) =>
@@ -593,7 +629,7 @@ const EnvironmentSwitcher = () => {
                                   Boolean(checked)
                                 )
                               }
-                              className="size-4 rounded-md data-[state=checked]:bg-emerald-500 data-[state=checked]:border-emerald-500 shadow-sm"
+                              className="size-4 rounded data-[state=checked]:bg-primary data-[state=checked]:border-primary"
                             />
                           </div>
 
@@ -608,8 +644,8 @@ const EnvironmentSwitcher = () => {
                                   e.target.value
                                 )
                               }
-                              placeholder="VARIABLE_KEY"
-                              className="h-8 font-mono text-xs border-transparent bg-transparent hover:bg-muted/40 focus-visible:bg-background focus-visible:border-emerald-500 focus-visible:ring-2 focus-visible:ring-emerald-500/10 px-2.5 rounded-md transition-all"
+                              placeholder="KEY"
+                              className="h-8 font-mono text-xs border-transparent bg-transparent hover:bg-muted/40 focus-visible:bg-background focus-visible:ring-1 focus-visible:ring-primary/30 px-2 rounded-lg transition-all"
                             />
                           </div>
 
@@ -629,15 +665,14 @@ const EnvironmentSwitcher = () => {
                               }
                               placeholder="Value"
                               className={cn(
-                                "h-8 font-mono text-xs border-transparent bg-transparent hover:bg-muted/40 focus-visible:bg-background focus-visible:border-emerald-500 focus-visible:ring-2 focus-visible:ring-emerald-500/10 px-2.5 pr-8 rounded-md transition-all",
-                                isSecret &&
-                                  "text-emerald-600 dark:text-emerald-400 font-medium tracking-wide"
+                                "h-8 font-mono text-xs border-transparent bg-transparent hover:bg-muted/40 focus-visible:bg-background focus-visible:ring-1 focus-visible:ring-primary/30 px-2 pr-8 rounded-lg transition-all",
+                                isSecret && "text-primary font-medium"
                               )}
                             />
                             {isSecret && (
                               <button
                                 onClick={() => toggleRowVisibility(index)}
-                                className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-md text-muted-foreground/40 hover:text-emerald-600 hover:bg-emerald-50 transition-all opacity-0 group-hover/value:opacity-100"
+                                className="absolute right-1 top-1/2 -translate-y-1/2 p-1 rounded-md text-muted-foreground/30 hover:text-primary opacity-0 group-hover/value:opacity-100 transition-all"
                               >
                                 {isRevealed ? (
                                   <EyeOff className="size-3.5" />
@@ -648,33 +683,31 @@ const EnvironmentSwitcher = () => {
                             )}
                           </div>
 
-                          {/* Type Toggle */}
-                          <div className="flex items-center">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() =>
-                                handleVariableChange(
-                                  index,
-                                  "type",
-                                  isSecret ? "default" : "secret"
-                                )
-                              }
-                              className={cn(
-                                "h-7 px-2 rounded-md text-[10px] font-medium w-full justify-start gap-1.5 hover:bg-transparent border",
-                                isSecret
-                                  ? "text-amber-600 bg-amber-500/10 border-amber-200/50 dark:border-amber-800/50 dark:text-amber-400"
-                                  : "text-muted-foreground bg-muted/50 border-border"
-                              )}
-                            >
-                              {isSecret ? (
-                                <Lock className="size-2.5" />
-                              ) : (
-                                <Unlock className="size-2.5" />
-                              )}
-                              {isSecret ? "Secret" : "Plain"}
-                            </Button>
-                          </div>
+                          {/* Type */}
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() =>
+                              handleVariableChange(
+                                index,
+                                "type",
+                                isSecret ? "default" : "secret"
+                              )
+                            }
+                            className={cn(
+                              "h-7 px-2 rounded-lg text-[10px] font-medium w-full justify-start gap-1.5 hover:bg-transparent border",
+                              isSecret
+                                ? "text-amber-600 bg-amber-500/10 border-amber-500/20 dark:text-amber-400"
+                                : "text-muted-foreground bg-muted/30 border-transparent"
+                            )}
+                          >
+                            {isSecret ? (
+                              <Lock className="size-3" />
+                            ) : (
+                              <Unlock className="size-3" />
+                            )}
+                            {isSecret ? "Secret" : "Plain"}
+                          </Button>
 
                           {/* Delete */}
                           <div className="flex justify-center">
@@ -682,98 +715,98 @@ const EnvironmentSwitcher = () => {
                               variant="ghost"
                               size="icon"
                               onClick={() => handleRemoveVariable(index)}
-                              className="h-7 w-7 rounded-md text-muted-foreground/50 hover:text-destructive hover:bg-destructive/10 transition-all"
+                              className="size-7 rounded-lg text-muted-foreground/30 hover:text-destructive hover:bg-destructive/10 transition-all opacity-0 group-hover:opacity-100"
                             >
                               <Trash2 className="size-3.5" />
                             </Button>
                           </div>
-                        </div>
+                        </motion.div>
                       );
                     }
                   )}
 
-                  <div className="pt-2 pb-8">
+                  <div className="pt-4">
                     <button
                       onClick={handleAddVariable}
-                      className="w-full h-10 flex items-center justify-center gap-2 text-xs font-medium text-muted-foreground/60 hover:text-emerald-600 border-2 border-dashed border-border/40 hover:border-emerald-500/30 hover:bg-emerald-50/10 rounded-lg transition-all group"
+                      className="w-full h-10 flex items-center justify-center gap-2 text-xs font-medium text-muted-foreground/60 hover:text-primary border border-dashed border-border/40 hover:border-primary/30 hover:bg-primary/5 rounded-xl transition-all duration-200 group"
                     >
-                      <div className="size-5 rounded-full bg-muted group-hover:bg-emerald-500/10 flex items-center justify-center transition-colors">
-                        <Plus className="size-3" />
-                      </div>
+                      <Plus className="size-4 transition-transform group-hover:scale-110" />
                       Add New Variable
                     </button>
                   </div>
                 </div>
               </ScrollArea>
             </div>
-          </>
+          </motion.div>
         ) : (
-          <div className="flex-1 flex flex-col items-center justify-center text-muted-foreground p-8 bg-muted/5">
-            <div className="size-20 rounded-3xl bg-gradient-to-br from-emerald-500/5 to-teal-500/5 border border-emerald-500/10 flex items-center justify-center mb-6 shadow-sm">
-              <Zap className="size-8 text-emerald-500/30" />
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="flex-1 flex flex-col items-center justify-center p-12"
+          >
+            <div className="size-20 rounded-2xl bg-primary/10 flex items-center justify-center mb-6">
+              <Zap className="size-10 text-primary/50" />
             </div>
-            <h3 className="text-lg font-semibold text-foreground mb-2">
+            <h3 className="text-lg font-semibold mb-2">
               No Environment Selected
             </h3>
-            <p className="text-sm max-w-[280px] text-center mb-6">
-              Select an environment from the sidebar to manage its variables or
-              create a new one.
+            <p className="text-sm text-muted-foreground mb-6 text-center max-w-sm">
+              Select an environment from the sidebar or create a new one to
+              manage your variables.
             </p>
             <Button
               onClick={() => setIsCreateDialogOpen(true)}
-              variant="outline"
-              className="gap-2"
+              className="gap-2 h-10 px-5 bg-primary hover:bg-primary/90 rounded-xl"
             >
-              <Plus className="size-4" />
-              Create Environment
+              <Plus className="size-4" /> Create Environment
             </Button>
-          </div>
+          </motion.div>
         )}
       </div>
 
       {/* Create Dialog */}
       <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-        <DialogContent className="max-w-md gap-0 p-0 overflow-hidden border-none shadow-2xl">
-          <div className="bg-gradient-to-br from-emerald-500/5 via-background to-background p-6">
-            <DialogHeader className="mb-6">
-              <div className="flex items-center gap-4 mb-4">
-                <div className="size-12 rounded-2xl bg-white shadow-sm border border-emerald-100 flex items-center justify-center">
-                  <Globe className="size-6 text-emerald-500" />
-                </div>
-                <div>
-                  <DialogTitle className="text-xl">New Environment</DialogTitle>
-                  <DialogDescription className="text-emerald-950/60">
-                    Configure a new isolated environment for your project.
-                  </DialogDescription>
-                </div>
+        <DialogContent className="max-w-[420px] gap-0 p-0 overflow-hidden border-border/40 shadow-2xl bg-background/95 backdrop-blur-xl rounded-2xl">
+          <div className="p-6 border-b border-border/40 bg-muted/5">
+            <div className="flex items-center gap-4">
+              <div className="size-12 rounded-xl bg-primary/10 flex items-center justify-center">
+                <Globe className="size-6 text-primary" />
               </div>
-            </DialogHeader>
-            <div className="space-y-4">
               <div>
-                <label className="text-xs font-semibold uppercase text-muted-foreground/70 mb-1.5 block">
-                  Environment Name
-                </label>
-                <Input
-                  placeholder="e.g. Production, Staging, Local..."
-                  value={newEnvName}
-                  onChange={(e) => setNewEnvName(e.target.value)}
-                  className="h-11 bg-white/50 border-border/60 focus-visible:ring-emerald-500/20 text-lg"
-                  autoFocus
-                />
+                <DialogTitle className="text-lg font-semibold">
+                  New Environment
+                </DialogTitle>
+                <DialogDescription className="text-sm mt-0.5">
+                  Create a new space for your variables
+                </DialogDescription>
               </div>
             </div>
           </div>
-          <DialogFooter className="p-4 bg-muted/20 border-t border-border/40 gap-3">
+          <div className="p-6 space-y-4">
+            <div className="space-y-2">
+              <label className="text-xs font-medium text-muted-foreground">
+                Environment Name
+              </label>
+              <Input
+                placeholder="e.g. Production, Staging, Development"
+                value={newEnvName}
+                onChange={(e) => setNewEnvName(e.target.value)}
+                className="h-10 bg-muted/30 border-border/40 focus-visible:ring-primary/20 rounded-lg"
+                autoFocus
+              />
+            </div>
+          </div>
+          <DialogFooter className="p-4 bg-muted/10 border-t border-border/40 gap-3">
             <Button
               variant="ghost"
               onClick={() => setIsCreateDialogOpen(false)}
-              className="hover:bg-transparent hover:text-foreground"
+              className="h-9 px-4 rounded-lg"
             >
               Cancel
             </Button>
             <Button
               onClick={handleCreate}
-              className="bg-emerald-600 hover:bg-emerald-700 text-white min-w-[120px] shadow-lg shadow-emerald-500/20"
+              className="h-9 px-5 bg-primary hover:bg-primary/90 rounded-lg"
             >
               Create Environment
             </Button>

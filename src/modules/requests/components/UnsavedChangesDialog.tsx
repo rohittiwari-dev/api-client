@@ -138,7 +138,7 @@ export function UnsavedChangesDialog({
                   {unsavedRequests.length > 1 ? "s" : ""}
                 </p>
               </div>
-              <ScrollArea className="max-h-[180px] rounded-xl border border-white/10 bg-muted/20 backdrop-blur-sm">
+              <ScrollArea className="max-h-[150px] overflow-y-auto overflow-x-hidden rounded-xl border border-white/10 bg-muted/20 backdrop-blur-sm">
                 <div className="p-2 space-y-1">
                   {unsavedRequests.map((request, index) => (
                     <motion.div

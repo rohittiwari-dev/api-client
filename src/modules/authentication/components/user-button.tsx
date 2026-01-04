@@ -11,7 +11,6 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
   DropdownMenuGroup,
@@ -56,10 +55,21 @@ const LogoutMenuItem = () => {
           },
         });
       }}
-      className="hover:!bg-accent/30 cursor-pointer text-red-500 focus:text-red-500"
+      className="p-1.5 cursor-pointer text-red-600 dark:text-red-400 focus:text-red-600 focus:bg-red-500/10 dark:focus:bg-red-500/10 mt-1"
     >
-      {loading ? <Spinner className="!text-primary-200/60" /> : <LogOut />}
-      Log out
+      <div className="flex items-center justify-center size-7 rounded-lg bg-red-500/10 text-red-600 dark:text-red-400 mr-2 group-hover:bg-red-500/20 transition-colors">
+        {loading ? (
+          <Spinner className="size-3.5" />
+        ) : (
+          <LogOut className="size-3.5" />
+        )}
+      </div>
+      <div className="flex flex-col">
+        <span className="text-sm font-medium">Log out</span>
+        <span className="text-[11px] text-muted-foreground">
+          End your session
+        </span>
+      </div>
     </DropdownMenuItem>
   );
 };
@@ -86,91 +96,132 @@ function UserButton({
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild className="px-1">
+      <DropdownMenuTrigger asChild className="outline-none">
         <Button
           size="lg"
-          variant={variant === "header" ? "outline" : "default"}
+          variant={variant === "header" ? "outline" : "ghost"}
           className={cn(
-            "data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground w-full cursor-pointer px-2 select-none",
+            "w-full cursor-pointer px-2 select-none gap-3 hover:bg-accent/50 transition-colors",
             variant === "header" &&
-              "!bg-secondary hover:bg-accent/90 h-fit w-fit rounded-full p-0.5"
+              "bg-secondary/50! hover:bg-accent/90 h-fit w-fit rounded-full p-1 pr-3 border-transparent"
           )}
         >
           <Avatar
             className={cn(
-              "h-[2rem] w-[2rem]",
-              variant === "sidebar" && "rounded-lg"
+              "h-9 w-9 border border-border/50",
+              variant === "sidebar" && "rounded-xl"
             )}
             fallbackClassName={cn(
-              "w-[2rem] h-[2rem]",
-              variant === "sidebar" && "rounded-lg"
+              "h-9 w-9",
+              variant === "sidebar" && "rounded-xl"
             )}
             href={image || ""}
             alt={name}
             initial={getInitialsFromName(name || "")}
           />
           {variant === "sidebar" && (
-            <>
-              <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-semibold">{name}</span>
-                <span className="truncate text-xs">{email}</span>
-              </div>
-            </>
+            <div className="grid flex-1 text-left leading-tight">
+              <span className="truncate font-semibold text-sm">{name}</span>
+              <span className="truncate text-xs text-muted-foreground">
+                {email}
+              </span>
+            </div>
+          )}
+          {variant === "header" && (
+            <span className="truncate font-semibold text-sm mr-1">{name}</span>
           )}
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent
-        className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg"
+        className="w-[260px] rounded-2xl p-1.5 border-border/50 bg-background/80 backdrop-blur-xl shadow-2xl"
         side={dropdownContentAlign}
         align="end"
-        sideOffset={4}
+        sideOffset={8}
       >
-        <DropdownMenuLabel className="p-0 font-normal">
-          <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
+        <div className="p-1.5 mb-1.5 rounded-xl bg-muted/40 border border-border/40">
+          <div className="flex items-center gap-3">
             <Avatar
-              className="h-8 w-8 rounded-lg"
-              fallbackClassName="rounded-lg"
+              className="h-9 w-9 rounded-xl border border-border/50 shadow-sm"
+              fallbackClassName="rounded-xl"
               href={image || ""}
               alt={name}
               initial={getInitialsFromName(name || "")}
             />
-            <div className="grid flex-1 text-left text-sm leading-tight">
-              <span className="truncate font-semibold">{name}</span>
-              <span className="truncate text-xs">{email}</span>
+            <div className="grid flex-1 text-left leading-tight">
+              <span className="truncate font-semibold text-foreground text-sm">
+                {name}
+              </span>
+              <span className="truncate text-[11px] text-muted-foreground">
+                {email}
+              </span>
             </div>
           </div>
-        </DropdownMenuLabel>
-        <DropdownMenuSeparator />
-        <DropdownMenuGroup>
+        </div>
+
+        <DropdownMenuGroup className="space-y-0.5">
           <DropdownMenuItem
-            className="hover:!bg-accent/30 cursor-pointer"
+            className="p-1.5 cursor-pointer focus:bg-accent/50 rounded-lg group"
             asChild
           >
-            <Link href={`/workspace/${workspaceSlug}/settings/profile`}>
-              <UserIcon className="size-4" />
-              Profile Settings
+            <Link
+              href={`/workspace/${workspaceSlug}/settings/profile`}
+              className="flex items-center w-full"
+            >
+              <div className="flex items-center justify-center size-7 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400 mr-2 group-hover:bg-blue-500/20 transition-colors">
+                <UserIcon className="size-3.5" />
+              </div>
+              <div className="flex flex-col">
+                <span className="text-sm font-medium">Profile</span>
+                <span className="text-[11px] text-muted-foreground">
+                  Manage your account
+                </span>
+              </div>
             </Link>
           </DropdownMenuItem>
+
           <DropdownMenuItem
-            className="hover:!bg-accent/30 cursor-pointer"
+            className="p-1.5 cursor-pointer focus:bg-accent/50 rounded-lg group"
             asChild
           >
-            <Link href={`/workspace/${workspaceSlug}/settings/workspace`}>
-              <Building2 className="size-4" />
-              Workspace Settings
+            <Link
+              href={`/workspace/${workspaceSlug}/settings/workspace`}
+              className="flex items-center w-full"
+            >
+              <div className="flex items-center justify-center size-7 rounded-lg bg-orange-500/10 text-orange-600 dark:text-orange-400 mr-2 group-hover:bg-orange-500/20 transition-colors">
+                <Building2 className="size-3.5" />
+              </div>
+              <div className="flex flex-col">
+                <span className="text-sm font-medium">Workspace</span>
+                <span className="text-[11px] text-muted-foreground">
+                  Preferences & settings
+                </span>
+              </div>
             </Link>
           </DropdownMenuItem>
+
           <DropdownMenuItem
-            className="hover:!bg-accent/30 cursor-pointer"
+            className="p-1.5 cursor-pointer focus:bg-accent/50 rounded-lg group"
             asChild
           >
-            <Link href={`/workspace/${workspaceSlug}/settings/team`}>
-              <Users className="size-4" />
-              Team Members
+            <Link
+              href={`/workspace/${workspaceSlug}/settings/team`}
+              className="flex items-center w-full"
+            >
+              <div className="flex items-center justify-center size-7 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 mr-2 group-hover:bg-emerald-500/20 transition-colors">
+                <Users className="size-3.5" />
+              </div>
+              <div className="flex flex-col">
+                <span className="text-sm font-medium">Team</span>
+                <span className="text-[11px] text-muted-foreground">
+                  Manage members
+                </span>
+              </div>
             </Link>
           </DropdownMenuItem>
         </DropdownMenuGroup>
-        <DropdownMenuSeparator />
+
+        <DropdownMenuSeparator className="my-1.5 bg-border/50" />
+
         <LogoutMenuItem />
       </DropdownMenuContent>
     </DropdownMenu>
