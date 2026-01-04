@@ -1,9 +1,10 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import { motion } from "motion/react";
 import { FileQuestion, ArrowLeft, Home } from "lucide-react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 const NotFound = () => {
   const router = useRouter();
@@ -51,23 +52,30 @@ const NotFound = () => {
           transition={{ duration: 0.5, delay: 0.4 }}
           className="flex flex-col gap-4 sm:flex-row"
         >
-          <Button
-            size="lg"
-            variant="outline"
+          <button
             onClick={() => router.back()}
-            className="group gap-2 border-border/50 bg-background/50 backdrop-blur-sm hover:bg-muted/50"
+            className={buttonVariants({
+              variant: "outline",
+              size: "lg",
+              className:
+                "group gap-2 border-border/50 bg-background/50 backdrop-blur-sm hover:bg-muted/50",
+            })}
           >
             <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
             Go Back
-          </Button>
-          <Button
-            size="lg"
-            onClick={() => router.push("/")}
-            className="gap-2 shadow-lg shadow-primary/20 transition-shadow hover:shadow-primary/30"
+          </button>
+          <Link
+            href={"/"}
+            className={buttonVariants({
+              variant: "outline",
+              size: "lg",
+              className:
+                "group gap-2 border-border/50 bg-background/50 backdrop-blur-sm hover:bg-muted/50",
+            })}
           >
             <Home className="h-4 w-4" />
             Return Home
-          </Button>
+          </Link>
         </motion.div>
       </div>
 

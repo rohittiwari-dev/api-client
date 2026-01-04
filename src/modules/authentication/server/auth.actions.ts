@@ -3,7 +3,6 @@
 import { headers } from "next/headers";
 import auth from "@/lib/auth";
 import db from "@/lib/db";
-import { createId } from "@paralleldrive/cuid2";
 
 export const currentUser = async () => {
   try {
@@ -29,7 +28,6 @@ export const currentUser = async () => {
         emailVerified: true,
       },
     });
-
     return { user, session: session.session };
   } catch (error) {
     console.error("Error fetching current user:", error);

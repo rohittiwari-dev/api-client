@@ -7,6 +7,7 @@ import {
 } from "@/modules/workspace/server/invitation.actions";
 import { Users, Building2, CheckCircle2, ArrowRight } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 
 export const dynamic = "force-dynamic";
 
@@ -59,26 +60,28 @@ export default async function WorkspaceInvitePage({ params }: PageProps) {
     "use server";
     const result = await joinWorkspaceByLink(id);
 
-    if (result.alreadyMember || result.success) {
-      redirect(`/workspace/${result.slug || workspace?.slug}`);
+    if (result.alreadyMember || result.data?.success) {
+      redirect(`/workspace/${result.data?.slug || workspace?.data?.slug}`);
     }
   }
 
   return (
     <div className="w-full bg-background/60 backdrop-blur-xl border border-border/50 rounded-2xl p-8 shadow-2xl">
       <div className="text-center mb-8">
-        <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-gradient-to-br from-primary/20 to-violet-600/20 border border-primary/30 mb-4">
-          {workspace.logo ? (
-            <img
-              src={workspace.logo}
-              alt={workspace.name}
+        <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-linear-to-br from-primary/20 to-violet-600/20 border border-primary/30 mb-4">
+          {workspace.data?.logo ? (
+            <Image
+              src={workspace.data?.logo}
+              alt={workspace.data?.name}
+              width={40}
+              height={40}
               className="w-12 h-12 rounded-xl object-cover"
             />
           ) : (
             <Building2 className="w-10 h-10 text-primary" />
           )}
         </div>
-        <h1 className="text-2xl font-bold mb-2">Join {workspace.name}</h1>
+        <h1 className="text-2xl font-bold mb-2">Join {workspace.data?.name}</h1>
         <p className="text-muted-foreground">
           You&apos;ve been invited to join this workspace
         </p>
@@ -92,10 +95,13 @@ export default async function WorkspaceInvitePage({ params }: PageProps) {
           </div>
           <div>
             <p className="text-sm font-medium">
-              {workspace._count.members} members
+              {workspace.data?._count.members} members
             </p>
             <p className="text-xs text-muted-foreground">
-              Created {new Date(workspace.createdAt).toLocaleDateString()}
+              Created{" "}
+              {(workspace.data?.createdAt &&
+                new Date(workspace.data?.createdAt).toLocaleDateString()) ||
+                "N/A"}
             </p>
           </div>
         </div>
