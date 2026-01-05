@@ -1,18 +1,18 @@
 # Self-Hosting Guide
 
-Complete guide to self-host ApiClient using Docker (recommended) or manually on a VPS.
+Complete guide to self-host Api Studio using Docker (recommended) or manually on a VPS.
 
 ---
 
 ## Prerequisites
 
-| Requirement | Docker Deploy | Manual Deploy |
-|-------------|---------------|---------------|
-| Docker & Docker Compose | ✅ Required | ❌ Not needed |
-| Node.js 18+ | ❌ Not needed | ✅ Required |
-| PostgreSQL 16+ | ✅ Included | ✅ Required |
-| Redis 7+ | ✅ Included | ✅ Required |
-| Cloudinary Account | ✅ Required | ✅ Required |
+| Requirement             | Docker Deploy | Manual Deploy |
+| ----------------------- | ------------- | ------------- |
+| Docker & Docker Compose | ✅ Required   | ❌ Not needed |
+| Node.js 18+             | ❌ Not needed | ✅ Required   |
+| PostgreSQL 16+          | ✅ Included   | ✅ Required   |
+| Redis 7+                | ✅ Included   | ✅ Required   |
+| Cloudinary Account      | ✅ Required   | ✅ Required   |
 
 ---
 
@@ -85,9 +85,10 @@ docker-compose -f docker-compose.full.yml up -d
 ```
 
 This starts:
+
 - **PostgreSQL 16** on port 5432
 - **Redis 7** on port 6379
-- **ApiClient** on port 3000
+- **Api Studio** on port 3000
 
 **4. Access the app:**
 
@@ -224,24 +225,26 @@ sudo systemctl reload nginx
 
 ## Troubleshooting
 
-| Issue | Solution |
-|-------|----------|
+| Issue                       | Solution                                       |
+| --------------------------- | ---------------------------------------------- |
 | Build fails with env errors | Ensure all required env vars are set in `.env` |
-| Cannot connect to database | Check `DATABASE_URL` format and credentials |
-| Port 3000 already in use | Change port mapping in docker-compose |
-| Container keeps restarting | Check logs: `docker-compose logs api-client` |
+| Cannot connect to database  | Check `DATABASE_URL` format and credentials    |
+| Port 3000 already in use    | Change port mapping in docker-compose          |
+| Container keeps restarting  | Check logs: `docker-compose logs api-client`   |
 
 ---
 
 ## Updating
 
 **Docker:**
+
 ```bash
 git pull
 docker-compose -f docker-compose.full.yml up -d --build
 ```
 
 **Manual:**
+
 ```bash
 git pull
 npm ci

@@ -306,6 +306,7 @@ const EnvironmentSwitcher = () => {
                       ? "bg-background/60 border-border/60 shadow-sm"
                       : "bg-transparent border-transparent hover:bg-background/40 hover:border-border/40"
                   )}
+                  onClick={() => selectEnvironment(env.id)}
                 >
                   <div className="flex items-center gap-3 min-w-0">
                     <div

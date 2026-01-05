@@ -101,7 +101,7 @@ export default function DocsPage() {
                   Self-Hosting Guide
                 </h1>
                 <p className="text-xl text-muted-foreground leading-relaxed">
-                  Deploy ApiClient on your own infrastructure with total
+                  Deploy Api Studio on your own infrastructure with total
                   control. Choose between Docker or a manual VPS setup.
                 </p>
               </div>

@@ -268,7 +268,7 @@ const AuthForm = ({
           >
             <Image
               src="/logo.png"
-              alt="ApiClient"
+              alt="Api Studio"
               fill
               className="object-contain"
             />

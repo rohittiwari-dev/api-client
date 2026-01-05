@@ -64,7 +64,7 @@ const Loading = () => {
             >
               <Image
                 src="/logo.png"
-                alt="ApiClient"
+                alt="Api Studio"
                 fill
                 className="object-contain"
                 priority
@@ -87,7 +87,7 @@ const Loading = () => {
             animate={{ opacity: [0.5, 1, 0.5] }}
             transition={{ duration: 2, repeat: Infinity }}
           >
-            ApiClient
+            Api Studio
           </motion.h2>
 
           <div className="relative w-32 h-1 bg-white/5 rounded-full overflow-hidden">

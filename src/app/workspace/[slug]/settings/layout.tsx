@@ -200,7 +200,7 @@ export default function SettingsLayout({ children }: SettingsLayoutProps) {
             <div className="pt-6 mt-auto border-t border-border/40 space-y-3">
               <LogoutButton />
               <p className="text-xs text-muted-foreground/60">
-                ApiClient v{APP_VERSION}
+                Api Studio v{APP_VERSION}
               </p>
             </div>
           </div>

@@ -43,7 +43,7 @@ const Header = ({
             <div className="relative flex items-center justify-center size-8 rounded-xl bg-gradient-to-br from-violet-500/10 via-indigo-500/10 to-transparent border border-white/10 shadow-sm group-hover:shadow-violet-500/10 group-hover:border-violet-500/20 transition-all duration-300">
               <Image
                 src="/logo.png"
-                alt="ApiClient"
+                alt="Api Studio"
                 width={100}
                 height={100}
                 priority
@@ -51,7 +51,7 @@ const Header = ({
               />
             </div>
             <span className="hidden sm:inline-block text-sm font-semibold tracking-wide bg-gradient-to-br from-foreground to-foreground/70 bg-clip-text text-transparent">
-              ApiClient
+              Api Studio
             </span>
           </a>
 
