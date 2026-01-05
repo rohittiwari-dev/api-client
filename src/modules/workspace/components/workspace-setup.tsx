@@ -25,13 +25,14 @@ import authClient from "@/lib/authClient";
 import { CreateWorkspaceSchema } from "@/lib/form-schemas/workspace";
 import { cn } from "@/lib/utils";
 import { useDebounce } from "@/hooks/use-debounce";
-import { redirect } from "next/navigation";
+import { redirect, useRouter } from "next/navigation";
 
 const WorkspaceSetup = ({
   type = "get-started-page",
 }: {
   type: "get-started-page" | "workspace-setup-modal";
 }) => {
+  const router = useRouter();
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [checkSlugSuccess, setCheckSlugSuccess] =
     React.useState<boolean>(false);
@@ -66,7 +67,7 @@ const WorkspaceSetup = ({
 
       toast.success("Workspace created successfully!");
       form.reset();
-      redirect(`/workspace/${result.data.slug}`);
+      router.push(`/workspace/${result.data.slug}`);
     } catch {
       toast.error("An unexpected error occurred. Please try again.");
       setIsSubmitting(false);
