@@ -7,7 +7,7 @@ export const APP_DESCRIPTION =
   "Api Studio is a free, open source API testing and development tool. The best Postman alternative for developers. Build, test, and debug REST APIs, GraphQL endpoints with ease. Better than Insomnia, API Dog, and Requestly.";
 
 // URLs
-export const APP_URL = "https://api-studio.dev"; // Update with your actual domain
+export const APP_URL = "https://apistudio.rohittiwari.me"; // Update with your actual domain
 export const APP_THUMBNAIL = "/thumbnail.png";
 
 // Author & Organization

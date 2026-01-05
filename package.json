@@ -2,6 +2,32 @@
   "name": "api-studio",
   "version": "1.1.0",
   "private": true,
+  "description": "A modern, feature-rich API client and testing studio for developers. Build, test, and debug APIs with an intuitive interface.",
+  "keywords": [
+    "api",
+    "api-client",
+    "api-testing",
+    "rest-api",
+    "http-client",
+    "developer-tools",
+    "postman-alternative",
+    "api-studio",
+    "graphql",
+    "web-development"
+  ],
+  "homepage": "https://github.com/rohittiwari-dev/api-client#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rohittiwari-dev/api-client.git"
+  },
+  "bugs": {
+    "url": "https://github.com/rohittiwari-dev/api-client/issues"
+  },
+  "author": {
+    "name": "Rohit Tiwari",
+    "url": "https://github.com/rohittiwari-dev"
+  },
+  "license": "MIT",
   "type": "module",
   "scripts": {
     "dev": "next dev",
