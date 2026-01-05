@@ -85,7 +85,6 @@
     "immer": "^11.1.3",
     "input-otp": "^1.4.2",
     "ioredis": "^5.8.2",
-    "lodash": "^4.17.21",
     "lucide-react": "^0.562.0",
     "motion": "^12.23.26",
     "next": "16.1.1",
@@ -108,7 +107,6 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.18",
-    "@types/lodash": "^4.17.21",
     "@types/node": "^25.0.3",
     "@types/pg": "^8.16.0",
     "@types/react": "^19.2.7",

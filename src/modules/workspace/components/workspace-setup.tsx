@@ -4,7 +4,6 @@ import React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { zodResolver } from "@hookform/resolvers/zod";
-import _ from "lodash";
 import {
   Briefcase,
   CheckCircle,
@@ -25,23 +24,17 @@ import { Label } from "@/components/ui/label";
 import authClient from "@/lib/authClient";
 import { CreateWorkspaceSchema } from "@/lib/form-schemas/workspace";
 import { cn } from "@/lib/utils";
+import { useDebounce } from "@/hooks/use-debounce";
+import { redirect } from "next/navigation";
 
 const WorkspaceSetup = ({
   type = "get-started-page",
 }: {
   type: "get-started-page" | "workspace-setup-modal";
 }) => {
-  const debouncedCheckSlug = React.useRef<_.DebouncedFunc<
-    () => Promise<void>
-  > | null>(null);
-
   const [isSubmitting, setIsSubmitting] = React.useState(false);
-  const [isCheckingSlug, setIsCheckingSlug] = React.useState(false);
-
-  const [checkSlugMessage, setCheckSlugMessage] = React.useState<{
-    status: "error" | "success";
-    message: string;
-  } | null>(null);
+  const [checkSlugSuccess, setCheckSlugSuccess] =
+    React.useState<boolean>(false);
 
   const form = useForm<z.infer<typeof CreateWorkspaceSchema>>({
     defaultValues: {
@@ -56,25 +49,10 @@ const WorkspaceSetup = ({
     setIsSubmitting(true);
 
     try {
-      if (checkSlugMessage?.status !== "success") {
-        setIsCheckingSlug(true);
-        const slugCheck = await authClient.organization.checkSlug({
-          slug: data.slug,
-        });
-        setIsCheckingSlug(false);
-
-        if (!slugCheck.data?.status) {
-          toast.error("Slug is already taken. Please choose a different one.");
-          setCheckSlugMessage({
-            status: "error",
-            message: "Slug is already taken",
-          });
-          setIsSubmitting(false);
-          return;
-        }
-      }
-
-      const result = await authClient.organization.create({ ...data });
+      const result = await authClient.organization.create({
+        ...data,
+        globalAuth: {},
+      });
 
       if (result.error) {
         toast.error("Failed to create Workspace: " + result.error.message);
@@ -88,59 +66,76 @@ const WorkspaceSetup = ({
 
       toast.success("Workspace created successfully!");
       form.reset();
-      window.location.href = `/workspace/${result.data.slug}`;
+      redirect(`/workspace/${result.data.slug}`);
     } catch {
       toast.error("An unexpected error occurred. Please try again.");
       setIsSubmitting(false);
     }
   });
 
-  const slug = form.watch("slug");
+  const {
+    callback: debouncedCheckSlug,
+    isPending: isCheckingSlug,
+    clear,
+  } = useDebounce(
+    async (slugToCheck: string) => {
+      try {
+        const response = await authClient.organization.checkSlug({
+          slug: slugToCheck,
+        });
+        if (response.data?.status) {
+          form.clearErrors("slug");
+          setCheckSlugSuccess(true);
+        } else {
+          setCheckSlugSuccess(false);
+          form.setError("slug", {
+            type: "manual",
+            message: "Slug is already taken",
+          });
+        }
+      } catch {
+        setCheckSlugSuccess(false);
+        form.setError("slug", {
+          type: "manual",
+          message: "Failed to check slug availability",
+        });
+      }
+    },
+    { delay: 1000 }
+  );
 
-  const checkSlug = async () => {
-    if (!slug || slug.length < 3) {
-      setCheckSlugMessage({
-        status: "error",
+  // Format slug value (lowercase, only alphanumeric and hyphens)
+  const formatSlug = (value: string) => {
+    return value.toLowerCase().replace(/[^a-z0-9-]/g, "-");
+  };
+
+  // Handle slug input change
+  const handleSlugChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (isCheckingSlug) {
+      clear();
+    }
+    form.clearErrors("slug");
+    if (!e.target.value || e.target.value.length < 3) {
+      form.setError("slug", {
+        type: "manual",
         message: "Slug must be at least 3 characters long",
       });
       return;
     }
-
-    setIsCheckingSlug(true);
-    try {
-      const response = await authClient.organization.checkSlug({
-        slug,
-      });
-      if (response.data?.status) {
-        setCheckSlugMessage({
-          status: "success",
-          message: "Slug is available",
-        });
-      } else {
-        setCheckSlugMessage({
-          status: "error",
-          message: "Slug is already taken",
-        });
-      }
-    } catch {
-      setCheckSlugMessage({
-        status: "error",
-        message: "Failed to check slug availability",
-      });
-    } finally {
-      setIsCheckingSlug(false);
-    }
+    const formatted = formatSlug(e.target.value);
+    form.setValue("slug", formatted);
+    setCheckSlugSuccess(false);
+    debouncedCheckSlug(formatted);
   };
 
-  const isFormValid =
-    form.formState.isValid && checkSlugMessage?.status === "success";
+  const isFormValid = form.formState.isValid && checkSlugSuccess;
 
   // Modal variant return
   if (type === "workspace-setup-modal") {
     return (
       <div className="flex flex-col gap-6">
         <div className="flex flex-col items-center gap-2 text-center">
-          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-violet-500 to-indigo-500 flex items-center justify-center">
+          <div className="w-12 h-12 rounded-xl bg-linear-to-br from-violet-500 to-indigo-500 flex items-center justify-center">
             <Rocket className="w-5 h-5 text-white" />
           </div>
           <h1 className="text-xl font-bold">New Workspace</h1>
@@ -149,11 +144,6 @@ const WorkspaceSetup = ({
           </p>
         </div>
         <form className={cn("flex flex-col gap-4")} onSubmit={onSubmit}>
-          {/* Form fields (reused logic for consisteny) */}
-          {/* ... (Modal specific simplified form if needed, or reuse the same structure below) ... */}
-          {/* For brevity, I'll reuse the main structure logic but wrapped differently if needed. 
-              Actually, the modal usually just needs the form part. Let's keep it DRY and use a shared render function or just conditional wrapper.
-          */}
           <div className="grid gap-3">
             <InputField
               id="organization-name"
@@ -167,59 +157,39 @@ const WorkspaceSetup = ({
             />
             <div className="space-y-1">
               <AddOnInput
-                leftIcon={<Slash className="w-3 h-3 rotate-[112deg]" />}
+                leftIcon={<Slash className="w-3 h-3 rotate-112" />}
                 placeholder="my-workspace"
                 disabled={isSubmitting}
                 error={form.formState.errors?.slug?.message}
                 id="slug"
-                {...form.register("slug")}
-                onChange={(e) => {
-                  const value = e.target.value
-                    .toLowerCase()
-                    .replace(/[^a-z0-9-]/g, "-");
-                  form.setValue("slug", value);
-                  setCheckSlugMessage(null);
-                  if (debouncedCheckSlug.current)
-                    debouncedCheckSlug.current.cancel();
-                  debouncedCheckSlug.current = _.debounce(checkSlug, 500);
-                  debouncedCheckSlug.current();
-                }}
+                {...form.register("slug", { onChange: handleSlugChange })}
               />
-              <AnimatePresence mode="wait">
-                {isCheckingSlug && (
-                  <motion.p
-                    key="checking"
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: "auto" }}
-                    exit={{ opacity: 0, height: 0 }}
-                    className="flex items-center gap-1.5 text-muted-foreground text-xs"
-                  >
-                    <Loader2 className="w-3 h-3 animate-spin" /> Checking
-                    availability...
-                  </motion.p>
-                )}
-                {!isCheckingSlug && checkSlugMessage && (
-                  <motion.p
+              {(checkSlugSuccess || isCheckingSlug) &&
+                !form.formState.errors?.slug?.message && (
+                  <motion.div
                     key="result"
                     initial={{ opacity: 0, height: 0 }}
                     animate={{ opacity: 1, height: "auto" }}
                     exit={{ opacity: 0, height: 0 }}
                     className={cn(
-                      "flex items-center gap-1.5 text-xs font-medium",
-                      checkSlugMessage.status === "error"
+                      "flex items-center gap-2 text-xs font-medium px-1",
+                      !checkSlugSuccess
                         ? "text-destructive"
                         : "text-emerald-500"
                     )}
                   >
-                    {checkSlugMessage.status === "error" ? (
-                      <XCircle className="w-3 h-3" />
+                    {isCheckingSlug ? (
+                      <span className="flex items-center gap-1.5">
+                        <Loader2 className="w-3 h-3 animate-spin" /> Checking
+                        availability...
+                      </span>
                     ) : (
-                      <CheckCircle className="w-3 h-3" />
+                      <span className="flex items-center gap-1.5">
+                        <CheckCircle className="w-3 h-3" /> Slug is available
+                      </span>
                     )}
-                    {checkSlugMessage.message}
-                  </motion.p>
+                  </motion.div>
                 )}
-              </AnimatePresence>
             </div>
             <Button
               type="submit"
@@ -247,7 +217,7 @@ const WorkspaceSetup = ({
           <div className="absolute top-[-20%] left-[20%] w-[600px] h-[600px] bg-primary/20 rounded-full blur-[120px]" />
           <div className="absolute bottom-[0%] right-[20%] w-[600px] h-[600px] bg-indigo-600/10 rounded-full blur-[140px]" />
         </div>
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] z-0" />
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-size-[24px_24px] mask-[radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] z-0" />
       </div>
 
       <motion.div
@@ -300,40 +270,17 @@ const WorkspaceSetup = ({
 
             <div className="space-y-2">
               <AddOnInput
-                leftIcon={<Slash className="w-3 h-3 rotate-[112deg]" />}
+                leftIcon={<Slash className="w-3 h-3 rotate-112" />}
                 placeholder="my-workspace"
                 disabled={isSubmitting}
                 error={form.formState.errors?.slug?.message}
                 id="slug"
-                {...form.register("slug")}
-                onChange={(e) => {
-                  const value = e.target.value
-                    .toLowerCase()
-                    .replace(/[^a-z0-9-]/g, "-");
-                  form.setValue("slug", value);
-                  setCheckSlugMessage(null);
-                  if (debouncedCheckSlug.current)
-                    debouncedCheckSlug.current.cancel();
-                  debouncedCheckSlug.current = _.debounce(checkSlug, 500);
-                  debouncedCheckSlug.current();
-                }}
+                {...form.register("slug", { onChange: handleSlugChange })}
               />
 
               {/* Slug Status */}
-              <AnimatePresence mode="wait">
-                {isCheckingSlug && (
-                  <motion.div
-                    key="checking"
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: "auto" }}
-                    exit={{ opacity: 0, height: 0 }}
-                    className="flex items-center gap-2 text-muted-foreground text-xs px-1"
-                  >
-                    <Loader2 className="w-3 h-3 animate-spin" /> Checking
-                    availability...
-                  </motion.div>
-                )}
-                {!isCheckingSlug && checkSlugMessage && (
+              {(checkSlugSuccess || isCheckingSlug) &&
+                !form.formState.errors?.slug?.message && (
                   <motion.div
                     key="result"
                     initial={{ opacity: 0, height: 0 }}
@@ -341,20 +288,23 @@ const WorkspaceSetup = ({
                     exit={{ opacity: 0, height: 0 }}
                     className={cn(
                       "flex items-center gap-2 text-xs font-medium px-1",
-                      checkSlugMessage.status === "error"
+                      !checkSlugSuccess
                         ? "text-destructive"
                         : "text-emerald-500"
                     )}
                   >
-                    {checkSlugMessage.status === "error" ? (
-                      <XCircle className="w-3 h-3" />
+                    {isCheckingSlug ? (
+                      <span className="flex items-center gap-1.5">
+                        <Loader2 className="w-3 h-3 animate-spin" /> Checking
+                        availability...
+                      </span>
                     ) : (
-                      <CheckCircle className="w-3 h-3" />
+                      <span className="flex items-center gap-1.5">
+                        <CheckCircle className="w-3 h-3" /> Slug is available
+                      </span>
                     )}
-                    {checkSlugMessage.message}
                   </motion.div>
                 )}
-              </AnimatePresence>
             </div>
 
             <Button

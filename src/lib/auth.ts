@@ -85,7 +85,7 @@ const auth = betterAuth({
           additionalFields: {
             globalAuth: {
               type: "json",
-              defaultValue: null,
+              defaultValue: {},
             },
           },
         },
