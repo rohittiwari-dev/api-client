@@ -79,7 +79,7 @@ function UserButton({
   variant = "sidebar",
   dropdownContentAlign = "bottom",
 }: {
-  data: { user: User | null; session: Session | null };
+  data?: { user: User | null; session: Session | null };
   variant?: "sidebar" | "header";
   dropdownContentAlign?: "bottom" | "right" | "top" | "left" | undefined;
 }) {
@@ -89,10 +89,10 @@ function UserButton({
   const workspaceSlug = activeWorkspace?.slug || "";
 
   useEffect(() => {
-    if (data) {
+    if (data && !stateData) {
       setAuthSession(data);
     }
-  }, [data, setAuthSession]);
+  }, [data, setAuthSession, stateData]);
 
   return (
     <DropdownMenu>

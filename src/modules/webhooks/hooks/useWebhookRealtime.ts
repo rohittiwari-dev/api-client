@@ -25,6 +25,7 @@ export function useWebhookRealtime({
 }: UseWebhookRealtimeOptions) {
   const eventSourceRef = useRef<EventSource | null>(null);
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const connectRef = useRef<(() => void) | null>(null);
   const queryClient = useQueryClient();
 
   const { addEvent, setConnected, activeWebhook } = useWebhookStore();
@@ -100,12 +101,16 @@ export function useWebhookRealtime({
       }
       reconnectTimeoutRef.current = setTimeout(() => {
         console.log("[Webhook SSE] Attempting to reconnect...");
-        connect();
+        connectRef.current?.();
       }, 5000);
     };
 
     eventSourceRef.current = eventSource;
   }, [workspaceId, enabled, handleMessage, setConnected]);
+
+  useEffect(() => {
+    connectRef.current = connect;
+  }, [connect]);
 
   const disconnect = useCallback(() => {
     if (reconnectTimeoutRef.current) {

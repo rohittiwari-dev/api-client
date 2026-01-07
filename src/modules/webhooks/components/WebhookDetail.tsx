@@ -95,7 +95,7 @@ const WebhookDetail: React.FC<WebhookDetailProps> = ({
   const handleClearEvents = async () => {
     if (!confirm("Clear all events for this webhook?")) return;
     try {
-      await clearEvents.mutateAsync({ hookId: webhook.id, workspaceId });
+      await clearEvents.mutateAsync(webhook.id);
       toast.success("Events cleared");
     } catch {
       toast.error("Failed to clear events");
@@ -251,12 +251,12 @@ const WebhookDetail: React.FC<WebhookDetailProps> = ({
                     {fullUrl} \<br />
                     &nbsp;&nbsp;-H{" "}
                     <span className="text-emerald-400">
-                      "Content-Type: application/json"
+                      &quot;Content-Type: application/json&quot;
                     </span>{" "}
                     \<br />
                     &nbsp;&nbsp;-d{" "}
                     <span className="text-amber-400">
-                      '{"{"}"hello": "world"{"}"}'
+                      &apos;{"{"}&quot;hello&quot;: &quot;world&quot;{"}"}&apos;
                     </span>
                   </pre>
                 </div>

@@ -54,7 +54,7 @@ const WebhookDetailPage = () => {
             <code className="bg-muted px-1 py-0.5 rounded text-xs">
               {hookId}
             </code>{" "}
-            could not be found. It may have been deleted or you don't have
+            could not be found. It may have been deleted or you don&apos;t have
             access.
           </p>
         </div>

@@ -284,7 +284,7 @@ const EventItem = ({
             </div>
 
             {/* Query Params */}
-            {event.searchParams &&
+            {!!event.searchParams &&
               Object.keys(event.searchParams).length > 0 && (
                 <div className="space-y-1.5">
                   <div className="flex items-center justify-between">
@@ -312,7 +312,7 @@ const EventItem = ({
               )}
 
             {/* Body */}
-            {event.body && (
+            {!!event.body && (
               <div className="space-y-1.5">
                 <div className="flex items-center justify-between">
                   <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
@@ -345,7 +345,9 @@ const EventItem = ({
                             ? event.body
                             : JSON.stringify(event.body, null, 2);
                         return (
-                          <span className="text-foreground/90">{content}</span>
+                          <span className="text-foreground/90">
+                            {String(content)}
+                          </span>
                         );
                       })()}
                     </pre>

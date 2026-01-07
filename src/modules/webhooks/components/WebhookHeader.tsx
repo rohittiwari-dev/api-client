@@ -192,10 +192,7 @@ const WebhookHeader: React.FC = () => {
           {/* User Profile */}
           {authData && (
             <div className="flex items-center">
-              <UserButton
-                data={{ user: authData.user!, session: authData.session! }}
-                variant="header"
-              />
+              <UserButton variant="header" />
             </div>
           )}
         </div>

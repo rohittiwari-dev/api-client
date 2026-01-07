@@ -248,12 +248,12 @@ const WebhooksPage = () => {
                   &nbsp;&nbsp;https://api-studio.com/api/webhook/WHK_... \<br />
                   &nbsp;&nbsp;-H{" "}
                   <span className="text-green-400">
-                    "Content-Type: application/json"
+                    &quot;Content-Type: application/json&quot;
                   </span>{" "}
                   \<br />
                   &nbsp;&nbsp;-d{" "}
                   <span className="text-blue-400">
-                    '{"{"} "event": "test" {"}"}'
+                    &apos;{"{"} &quot;event&quot;: &quot;test&quot; {"}"}&apos;
                   </span>
                 </p>
               </div>
