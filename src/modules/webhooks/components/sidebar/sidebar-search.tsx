@@ -16,23 +16,24 @@ const SidebarSearch: React.FC<SidebarSearchProps> = ({ value, onChange }) => {
   return (
     <div
       className={cn(
-        "mt-0 px-4 pb-2 transition-all duration-300",
+        "px-3 py-2 transition-all duration-200",
         state === "collapsed" && "opacity-0 h-0 overflow-hidden"
       )}
     >
-      <div className="relative group">
-        <div className="absolute inset-0 bg-linear-to-r from-violet-500/10 to-transparent rounded-xl opacity-0 group-focus-within:opacity-100 transition-opacity duration-500 pointer-events-none" />
+      <div className="relative group/search">
+        {/* Subtle glow on focus */}
+        <div className="absolute -inset-0.5 bg-violet-500/10 rounded-xl opacity-0 group-focus-within/search:opacity-100 blur-sm transition-opacity duration-300 pointer-events-none" />
 
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground/70 group-focus-within:text-violet-500 transition-colors duration-300" />
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground/50 group-focus-within/search:text-violet-400 transition-colors duration-200" />
 
-        <SidebarInput
-          placeholder="Filter endpoints..."
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          className="h-10 pl-10 bg-white/5 border-white/5 hover:bg-white/10 focus:bg-background/80 focus:border-violet-500/30 transition-all duration-300 rounded-xl text-sm placeholder:text-muted-foreground/50 shadow-inner ring-offset-0 focus:ring-0"
-        />
-
-        {/* Keyboard shortcut hint could go here */}
+          <SidebarInput
+            placeholder="Search webhooks..."
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+            className="h-9 pl-9 pr-3 bg-white/80 border-neutral-300/80 dark:bg-white/5 border  hover:border-border focus:border-violet-500/20 focus:bg-white/70 dark:focus:bg-white/5 text-sm placeholder:text-muted-foreground/40 rounded-lg transition-all duration-200 ring-0 focus:ring-0"
+          />
+        </div>
       </div>
     </div>
   );

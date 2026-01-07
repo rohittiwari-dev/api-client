@@ -12,6 +12,7 @@ import {
   Lightbulb,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useSidebar } from "@/components/ui/sidebar";
 
 const PRO_TIPS = [
   {
@@ -19,7 +20,7 @@ const PRO_TIPS = [
     text: (
       <>
         Append{" "}
-        <code className="bg-background/80 backdrop-blur px-1.5 py-0.5 rounded text-[10px] border border-border/50 dark:border-white/10 text-foreground font-mono shadow-sm">
+        <code className="bg-violet-500/10 backdrop-blur px-1.5 py-0.5 rounded text-[10px] border border-violet-500/20 text-violet-600 dark:text-violet-400 font-mono">
           ?events=true
         </code>{" "}
         to retrieve history.
@@ -55,18 +56,17 @@ const PRO_TIPS = [
 const ProTips = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [mounted, setMounted] = useState(false);
+  const { state } = useSidebar();
 
   useEffect(() => {
-    // Defer state update to next tick to avoid synchronous setState warning
     const timer = setTimeout(() => {
       setMounted(true);
-      // Randomize on mount
       setCurrentIndex(Math.floor(Math.random() * PRO_TIPS.length));
     }, 0);
     return () => clearTimeout(timer);
   }, []);
 
-  if (!mounted) return null;
+  if (!mounted || state === "collapsed") return null;
 
   const currentTip = PRO_TIPS[currentIndex];
   const TipIcon = currentTip.icon;
@@ -78,20 +78,28 @@ const ProTips = () => {
       transition={{ delay: 0.5, duration: 0.5 }}
       className="p-3 bg-linear-to-t from-background via-background/80 to-transparent"
     >
-      <div className="rounded-xl bg-linear-to-br from-violet-50/50 to-fuchsia-50/50 dark:from-violet-500/10 dark:via-fuchsia-500/5 dark:to-transparent border border-violet-200/50 dark:border-white/5 p-4 relative overflow-hidden group hover:border-violet-300/50 dark:hover:border-violet-500/20 transition-all duration-500 backdrop-blur-md shadow-sm dark:shadow-md dark:shadow-black/5">
-        {/* Abstract Background Shape */}
-        <div className="absolute -top-6 -right-6 size-24 bg-violet-500/5 dark:bg-violet-500/10 rounded-full blur-2xl group-hover:bg-violet-500/10 dark:group-hover:bg-violet-500/20 transition-colors duration-700" />
+      <div className="relative group/tip rounded-xl bg-linear-to-br from-violet-500/10 via-fuchsia-500/5 to-transparent dark:from-violet-500/10 dark:via-fuchsia-500/5 dark:to-transparent border border-violet-500/20 dark:border-violet-500/10 p-4 overflow-hidden backdrop-blur-xl shadow-md shadow-violet-500/5 transition-all duration-300 hover:border-violet-500/40 dark:hover:border-violet-500/20 hover:shadow-lg hover:shadow-violet-500/10">
+        {/* Glass shine - always visible */}
+        <div className="absolute inset-0 bg-linear-to-tr from-violet-500/10 via-transparent to-transparent opacity-50 dark:opacity-20 pointer-events-none" />
 
-        <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity duration-500">
-          <TipIcon className="size-12 -rotate-12 transform text-violet-600 dark:text-violet-500 blur-[1px]" />
+        {/* Glare effect on hover - subtle with violet tint */}
+        <div className="absolute inset-0 bg-linear-to-br from-violet-200/10 via-transparent to-transparent opacity-0 group-hover/tip:opacity-100 transition-opacity duration-500 pointer-events-none" />
+        <div className="absolute top-0 inset-x-0 h-px bg-linear-to-r from-transparent via-violet-300/25 to-transparent opacity-0 group-hover/tip:opacity-100 transition-opacity duration-500" />
+
+        {/* Abstract Background Shape */}
+        <div className="absolute -top-6 -right-6 size-24 bg-linear-to-br from-violet-500/10 to-fuchsia-500/10 rounded-full blur-2xl" />
+
+        {/* Floating icon */}
+        <div className="absolute top-0 right-0 p-3 opacity-10">
+          <TipIcon className="size-12 -rotate-12 transform text-violet-500 blur-[1px]" />
         </div>
 
         <div className="relative z-10 flex flex-col gap-2.5">
-          <div className="flex items-center gap-2 text-violet-600 dark:text-violet-400">
-            <div className="p-1 rounded bg-violet-100/50 dark:bg-violet-500/10 border border-violet-200/50 dark:border-violet-500/10">
-              <Lightbulb className="size-3 fill-violet-500/20" />
+          <div className="flex items-center gap-2">
+            <div className="p-1.5 rounded-lg bg-linear-to-br from-violet-600 to-indigo-600 shadow-md shadow-violet-500/30">
+              <Lightbulb className="size-3 text-white" />
             </div>
-            <span className="text-[10px] font-bold uppercase tracking-wider text-violet-600/90 dark:text-violet-300/90">
+            <span className="text-[10px] font-bold uppercase tracking-wider bg-linear-to-r from-violet-600 to-fuchsia-600 bg-clip-text text-transparent">
               Pro Tip
             </span>
           </div>

@@ -1,13 +1,7 @@
 "use client";
 
 import React from "react";
-import {
-  Copy,
-  Trash2,
-  MoreHorizontal,
-  Activity,
-  Webhook as WebhookIcon,
-} from "lucide-react";
+import { Copy, Trash2, MoreHorizontal, Clock, Activity } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -36,6 +30,22 @@ interface WebhookItemProps {
   onDelete: () => void;
 }
 
+// Format relative time
+const formatRelativeTime = (date: Date | string) => {
+  const now = new Date();
+  const then = new Date(date);
+  const diffMs = now.getTime() - then.getTime();
+  const diffMins = Math.floor(diffMs / 60000);
+  const diffHours = Math.floor(diffMs / 3600000);
+  const diffDays = Math.floor(diffMs / 86400000);
+
+  if (diffMins < 1) return "now";
+  if (diffMins < 60) return `${diffMins}m`;
+  if (diffHours < 24) return `${diffHours}h`;
+  if (diffDays < 7) return `${diffDays}d`;
+  return then.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+};
+
 const WebhookItem: React.FC<WebhookItemProps> = ({
   webhook,
   isActive,
@@ -47,64 +57,62 @@ const WebhookItem: React.FC<WebhookItemProps> = ({
   const { data: eventCount } = useWebhookEventCount(webhook.id);
 
   return (
-    <SidebarMenuItem>
+    <SidebarMenuItem className="group/item">
       <SidebarMenuButton
         isActive={isActive}
         onClick={onSelect}
         tooltip={isCollapsed ? webhook.name : undefined}
         className={cn(
-          "group/item h-auto py-3 px-3 rounded-xl transition-all duration-300 relative overflow-hidden ring-offset-0 outline-none",
+          "h-auto py-2.5 px-3 rounded-xl transition-all duration-200 relative overflow-hidden",
           isActive
-            ? "bg-linear-to-r from-violet-500/10 to-fuchsia-500/10 text-foreground shadow-sm border border-violet-500/10"
-            : "hover:bg-white/5 hover:text-foreground text-muted-foreground border border-transparent"
+            ? "bg-linear-to-r from-violet-500/15 via-violet-500/10 to-transparent border border-violet-500/30"
+            : "hover:bg-violet-500/5 border border-transparent hover:border-violet-500/10"
         )}
       >
-        {/* Active Indicator Glow - Left */}
+        {/* Subtle glare on hover */}
+        <div className="absolute inset-0 bg-linear-to-br from-violet-200/5 via-transparent to-transparent opacity-0 group-hover/item:opacity-100 transition-opacity duration-300 pointer-events-none" />
+
+        {/* Active indicator bar */}
         {isActive && !isCollapsed && (
-          <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-linear-to-b from-violet-500 to-fuchsia-500 shadow-[0_0_12px_rgba(139,92,246,0.8)]" />
+          <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[2px] h-6 bg-violet-500 rounded-r-full" />
         )}
 
-        {/* Icon Container */}
+        {/* Icon */}
         <div
           className={cn(
-            "relative flex size-9 shrink-0 items-center justify-center rounded-lg transition-all duration-300 z-10",
+            "relative flex size-8 shrink-0 items-center justify-center rounded-lg transition-all duration-200",
             isActive
-              ? "bg-linear-to-br from-violet-600 to-indigo-600 text-white shadow-md shadow-violet-500/25 scale-105"
-              : "bg-white/5 border border-white/5 group-hover/item:border-white/10 group-hover/item:bg-white/10 group-hover/item:scale-105 group-hover/item:shadow-sm"
+              ? "bg-violet-600 text-white shadow-sm shadow-violet-500/25"
+              : "bg-violet-500/10 text-violet-600 dark:text-violet-400"
           )}
         >
-          <Activity
-            className={cn(
-              "size-4 transition-transform duration-500",
-              isActive && "animate-pulse"
-            )}
-          />
+          <Activity className="size-3.5" />
         </div>
 
-        {/* Text Content */}
+        {/* Content */}
         {!isCollapsed && (
-          <div className="flex-1 min-w-0 flex flex-col gap-1 z-10 pl-2">
+          <div className="flex-1 min-w-0 flex flex-col gap-0.5 pl-2.5">
+            {/* Name row */}
             <div className="flex items-center justify-between gap-2">
               <span
                 className={cn(
-                  "font-medium truncate text-[13px] tracking-tight transition-colors",
+                  "truncate text-[13px]",
                   isActive
-                    ? "text-foreground font-semibold"
-                    : "text-muted-foreground group-hover/item:text-foreground"
+                    ? "font-semibold text-foreground"
+                    : "font-medium text-foreground/80 group-hover/item:text-foreground"
                 )}
               >
                 {webhook.name}
               </span>
 
-              {/* Badge */}
               {eventCount !== undefined && eventCount > 0 && (
                 <Badge
                   variant="secondary"
                   className={cn(
-                    "h-5 min-w-5 px-1.5 text-[9px] justify-center transition-all duration-300 border-0",
+                    "h-4.5 min-w-4.5 px-1.5 text-[9px] font-semibold shrink-0 rounded",
                     isActive
-                      ? "bg-linear-to-r from-violet-600 to-fuchsia-600 text-white shadow-lg shadow-violet-500/30"
-                      : "bg-white/10 text-muted-foreground group-hover/item:bg-white/20 group-hover/item:text-foreground border border-white/5"
+                      ? "bg-violet-600 text-white border-0"
+                      : "bg-violet-500/10 text-violet-600 dark:text-violet-400 border border-violet-500/20"
                   )}
                 >
                   {eventCount > 99 ? "99+" : eventCount}
@@ -112,82 +120,76 @@ const WebhookItem: React.FC<WebhookItemProps> = ({
               )}
             </div>
 
-            {webhook.description && (
-              <span className="text-[10px] text-muted-foreground/50 truncate group-hover/item:text-muted-foreground/80 transition-colors">
-                {webhook.description}
+            {/* Description + Time row */}
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] text-muted-foreground/60 truncate flex-1">
+                {webhook.description || `/${webhook.url.slice(0, 12)}...`}
               </span>
-            )}
+
+              <div className="flex items-center gap-0.5 text-[9px] text-muted-foreground/40 shrink-0">
+                <Clock className="size-2.5" />
+                <span>{formatRelativeTime(webhook.createdAt)}</span>
+              </div>
+            </div>
           </div>
         )}
       </SidebarMenuButton>
 
-      {/* Hover Actions (Floating) */}
+      {/* Hover Actions */}
       {!isCollapsed && (
-        <div
-          className={cn(
-            "absolute right-2 top-1/2 -translate-y-1/2 opacity-0 group-hover/item:opacity-100 transition-all duration-200 translate-x-2 group-hover/item:translate-x-0 z-20 pointer-events-none group-hover/item:pointer-events-auto"
-          )}
-        >
-          <div className="flex items-center bg-background/90 backdrop-blur-xl rounded-lg border border-white/10 p-1 shadow-xl gap-0.5">
+        <div className="absolute right-1.5 top-1/2 -translate-y-1/2 opacity-0 group-hover/item:opacity-100 transition-opacity duration-150 z-10">
+          <div className="flex items-center bg-background/95 backdrop-blur-sm border border-violet-500/10 rounded-lg p-0.5 shadow-md">
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="size-7 hover:bg-violet-500/20 hover:text-violet-400 rounded-md transition-colors"
+                  className="size-6 text-muted-foreground hover:text-violet-500 hover:bg-violet-500/10 rounded"
                   onClick={(e) => {
                     e.stopPropagation();
                     onCopy();
                   }}
                 >
-                  <Copy className="size-3.5" />
+                  <Copy className="size-3" />
                 </Button>
               </TooltipTrigger>
-              <TooltipContent
-                side="top"
-                className="text-[10px] bg-foreground text-background font-semibold"
-              >
+              <TooltipContent side="top" className="text-xs">
                 Copy URL
               </TooltipContent>
             </Tooltip>
-
-            <div className="w-px h-3.5 bg-white/10 mx-0.5" />
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="size-7 hover:bg-white/10 rounded-md transition-colors text-muted-foreground hover:text-foreground"
+                  className="size-6 text-muted-foreground hover:text-foreground rounded"
                   onClick={(e) => e.stopPropagation()}
                 >
-                  <MoreHorizontal className="size-3.5" />
+                  <MoreHorizontal className="size-3" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent
-                align="end"
-                className="w-40 bg-background/90 backdrop-blur-xl border-white/10 shadow-2xl p-1.5"
-              >
+              <DropdownMenuContent align="end" className="w-32">
                 <DropdownMenuItem
                   onClick={(e) => {
                     e.stopPropagation();
                     onCopy();
                   }}
-                  className="text-xs font-medium cursor-pointer focus:bg-violet-500/10 focus:text-violet-400 rounded-sm"
+                  className="text-xs"
                 >
-                  <Copy className="size-3.5 mr-2" />
+                  <Copy className="size-3 mr-2" />
                   Copy URL
                 </DropdownMenuItem>
-                <DropdownMenuSeparator className="bg-white/10 my-1" />
+                <DropdownMenuSeparator />
                 <DropdownMenuItem
-                  className="text-destructive focus:text-destructive focus:bg-destructive/10 text-xs font-medium cursor-pointer rounded-sm"
+                  className="text-destructive focus:text-destructive text-xs"
                   onClick={(e) => {
                     e.stopPropagation();
                     onDelete();
                   }}
                 >
-                  <Trash2 className="size-3.5 mr-2" />
-                  Delete Webhook
+                  <Trash2 className="size-3 mr-2" />
+                  Delete
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

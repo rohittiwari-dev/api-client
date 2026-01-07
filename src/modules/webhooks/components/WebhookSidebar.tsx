@@ -96,13 +96,13 @@ const WebhookSidebar: React.FC<WebhookSidebarProps> = ({ workspaceId }) => {
     <>
       <Sidebar
         collapsible="icon"
-        className="border-r border-white/5 bg-background/40 backdrop-blur-2xl transition-all duration-300 shadow-2xl"
+        className="border-r border-border bg-background"
       >
         <SidebarHeader onOpenCreate={() => setIsCreateOpen(true)} />
 
         <SidebarSearch value={searchQuery} onChange={setSearchQuery} />
 
-        <SidebarContent className="px-2 py-2 scroll-smooth">
+        <SidebarContent className="py-2 scroll-smooth">
           {/* List or Empty State */}
           {!isLoading && filteredWebhooks.length === 0 ? (
             <SidebarEmptyState
