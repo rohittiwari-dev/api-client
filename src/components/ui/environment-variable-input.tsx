@@ -9,7 +9,7 @@ import {
   HoverCardTrigger,
 } from "@/components/ui/hover-card";
 import { cn } from "@/lib/utils";
-import useEnvironmentStore from "@/modules/environment/store/environment.store";
+import useEnvironmentStore from "@/modules/apis/environment/store/environment.store";
 import { Check, Copy, Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
 

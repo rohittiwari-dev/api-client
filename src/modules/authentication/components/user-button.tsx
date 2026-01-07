@@ -19,7 +19,7 @@ import authClient from "@/lib/authClient";
 import { cn, getInitialsFromName } from "@/lib/utils";
 import Avatar from "@/modules/authentication/components/avatar";
 import { useAuthStore } from "@/modules/authentication/store";
-import useCookieStore from "@/modules/cookies/store/cookie.store";
+import useCookieStore from "@/modules/apis/cookies/store/cookie.store";
 import useWorkspaceState from "@/modules/workspace/store";
 
 const LogoutMenuItem = () => {

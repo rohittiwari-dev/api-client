@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import useEnvironmentStore from "@/modules/environment/store/environment.store";
+import useEnvironmentStore from "@/modules/apis/environment/store/environment.store";
 import { Eye, EyeOff, Copy, Check } from "lucide-react";
 import { toast } from "sonner";
 

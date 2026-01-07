@@ -1,0 +1,700 @@
+import React from "react";
+import { IconSend } from "@tabler/icons-react";
+import { CircleDot, Loader2, SaveIcon } from "lucide-react";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { InputGroup } from "@/components/ui/input-group";
+import { EnvironmentVariableInput } from "@/components/ui/environment-variable-input";
+import {
+  ResizableHandle,
+  ResizablePanel,
+  ResizablePanelGroup,
+} from "@/components/ui/resizable";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useLocalStorage } from "@/hooks/use-local-storage";
+import { cn, requestBgColorMap, requestTextColorMap } from "@/lib/utils";
+import {
+  substituteVariables,
+  substituteVariablesInObject,
+} from "@/lib/utils/substituteVariables";
+import ApiResponse from "@/modules/apis/response/components/api-response";
+import useResponseStore from "@/modules/apis/response/store/response.store";
+import useCookieStore from "@/modules/apis/cookies/store/cookie.store";
+import useEnvironmentStore from "@/modules/apis/environment/store/environment.store";
+import BodyComponent from "./api-request-components/body-component";
+import HeaderComponent from "./api-request-components/header-component";
+import ParameterComponent from "./api-request-components/parameter-component";
+import AuthComponent from "./api-request-components/auth-component";
+import { useUpsertRequest } from "../hooks/queries";
+import { BodyType, HttpMethod } from "@/generated/prisma/browser";
+import useRequestSyncStoreState from "../hooks/requestSyncStore";
+
+/**
+ * Parse Set-Cookie header string into cookie object
+ */
+function parseSetCookie(setCookieStr: string, defaultDomain: string) {
+  const parts = setCookieStr.split(";").map((p) => p?.trim());
+  const [keyVal, ...attributes] = parts;
+  const [key, ...valueParts] = keyVal.split("=");
+  const value = valueParts.join("="); // Handle values with = in them
+
+  const cookie: {
+    key: string;
+    value: string;
+    domain: string;
+    path: string;
+    expires?: string;
+    secure?: boolean;
+    httpOnly?: boolean;
+  } = {
+    key: key?.trim(),
+    value: value?.trim(),
+    domain: defaultDomain,
+    path: "/",
+  };
+
+  // Parse attributes
+  for (const attr of attributes) {
+    const [attrKey, attrVal] = attr.split("=");
+    const attrKeyLower = attrKey.toLowerCase()?.trim();
+
+    if (attrKeyLower === "path" && attrVal) {
+      cookie.path = attrVal?.trim();
+    } else if (attrKeyLower === "domain" && attrVal) {
+      cookie.domain = attrVal?.trim().replace(/^\./, "");
+    } else if (attrKeyLower === "expires" && attrVal) {
+      cookie.expires = attrVal?.trim();
+    } else if (attrKeyLower === "secure") {
+      cookie.secure = true;
+    } else if (attrKeyLower === "httponly") {
+      cookie.httpOnly = true;
+    }
+  }
+
+  return cookie;
+}
+
+const ApiRequestComponent = () => {
+  const { updateRequest, activeRequest, activeWorkspace } =
+    useRequestSyncStoreState();
+  const { setResponse, setLoading, setError, setActualRequest } =
+    useResponseStore();
+  const { getCookiesForDomain, addCookie } = useCookieStore();
+  const { getVariablesAsRecord } = useEnvironmentStore();
+  const [requestInfoTab, setRequestInfoTab] = useLocalStorage(
+    "api-client-request-active-data-tab",
+    "parameters"
+  );
+  const [isSaving, setIsSaving] = React.useState(false);
+  const [isSending, setIsSending] = React.useState(false);
+
+  // Upsert mutation with query invalidation
+  const upsertMutation = useUpsertRequest(activeWorkspace?.id || "", {
+    onSuccess: () => {
+      if (activeRequest?.id) {
+        updateRequest(activeRequest.id, { unsaved: false });
+      }
+      toast.success("Request saved successfully");
+      setIsSaving(false);
+    },
+    onError: (error) => {
+      console.error("Failed to save request", error);
+      toast.error("Failed to save request");
+      setIsSaving(false);
+    },
+  });
+
+  // Ctrl+S handler for saving
+  React.useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === "s") {
+        e.preventDefault();
+        handleSave();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [activeRequest]);
+
+  const handleSend = async () => {
+    if (!activeRequest?.url || !activeRequest.id || isSending) return;
+
+    setIsSending(true);
+    setLoading(activeRequest.id, true);
+    setError(activeRequest.id, "");
+
+    try {
+      const envVariables = getVariablesAsRecord();
+      let finalUrl = substituteVariables(activeRequest.url, envVariables);
+      try {
+        const url = new URL(finalUrl);
+        const activeParams =
+          activeRequest.parameters?.filter((p) => p.isActive && p.key) || [];
+
+        activeParams.forEach((p) => {
+          const key = substituteVariables(p.key, envVariables);
+          const value = substituteVariables(p.value, envVariables);
+          url.searchParams.append(key, value);
+        });
+
+        finalUrl = url.toString();
+      } catch (e) {}
+
+      const defaultHeaders: Record<string, string> = {
+        "User-Agent": "API-Client/1.0",
+        Accept: "*/*",
+        "Accept-Encoding": "gzip, deflate, br",
+        Connection: "keep-alive",
+      };
+
+      try {
+        const urlObj = new URL(finalUrl);
+        defaultHeaders["Host"] = urlObj.host;
+      } catch (e) {}
+
+      defaultHeaders["API-Client-Token"] = crypto.randomUUID();
+
+      const headers: Record<string, string> = { ...defaultHeaders };
+
+      activeRequest.headers?.forEach((h) => {
+        if (h.isActive && h.key) {
+          const key = substituteVariables(h.key, envVariables);
+          const value = substituteVariables(h.value, envVariables);
+          headers[key] = value;
+        }
+      });
+
+      let authConfig: { type: string; data: Record<string, unknown> } | null =
+        null;
+
+      if (
+        activeRequest.auth?.type &&
+        activeRequest.auth.type !== "NONE" &&
+        activeRequest.auth.type !== "INHERIT" &&
+        activeRequest.auth.data
+      ) {
+        // Substitute variables in auth data
+        const authData: Record<string, unknown> = {
+          ...(activeRequest.auth.data as Record<string, unknown>),
+        };
+        for (const key of Object.keys(authData)) {
+          if (typeof authData[key] === "string") {
+            authData[key] = substituteVariables(
+              authData[key] as string,
+              envVariables
+            );
+          }
+        }
+        authConfig = {
+          type: activeRequest.auth.type,
+          data: authData,
+        };
+      } else if (activeRequest.auth?.type === "INHERIT") {
+        authConfig = {
+          type: activeWorkspace?.globalAuth?.type || activeRequest.auth.type,
+          data: activeWorkspace?.globalAuth?.data as Record<string, unknown>,
+        };
+      }
+
+      // Prepare body based on bodyType
+      let body: any = undefined;
+      const method = activeRequest.method || "GET";
+
+      // Prepare body based on bodyType
+      const bodyType = activeRequest.bodyType;
+
+      switch (bodyType) {
+        case BodyType.JSON:
+          if (activeRequest.body?.json) {
+            const jsonBody = substituteVariablesInObject(
+              activeRequest.body.json,
+              envVariables
+            );
+            body = JSON.stringify(jsonBody);
+            if (!headers["Content-Type"]) {
+              headers["Content-Type"] = "application/json";
+            }
+          }
+          break;
+
+        case BodyType.RAW:
+          if (activeRequest.body?.raw) {
+            body = substituteVariables(activeRequest.body.raw, envVariables);
+          }
+          break;
+
+        case BodyType.FORM_DATA:
+          if (activeRequest.body?.formData) {
+            const formData: Array<{
+              key: string;
+              value: string;
+              type: string;
+              fileName?: string;
+            }> = [];
+
+            const readFileAsBase64 = (file: File): Promise<string> => {
+              return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result as string);
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+              });
+            };
+
+            const processFormData = async () => {
+              for (const f of activeRequest.body.formData) {
+                if (f.isActive && f.key) {
+                  const key = substituteVariables(f.key, envVariables);
+
+                  if (f.type === "FILE" && f.file) {
+                    try {
+                      const base64Details = await readFileAsBase64(f.file);
+                      formData.push({
+                        key,
+                        value: base64Details,
+                        type: "FILE",
+                        fileName: f.value, // Filename stored in value
+                      });
+                    } catch (e) {
+                      console.error("Failed to read file", e);
+                    }
+                  } else {
+                    const value = substituteVariables(f.value, envVariables);
+                    formData.push({
+                      key,
+                      value,
+                      type: "TEXT",
+                    });
+                  }
+                }
+              }
+            };
+
+            await processFormData();
+
+            body = JSON.stringify({ formData });
+            if (!headers["Content-Type"]) {
+              headers["Content-Type"] = "multipart/form-data";
+            }
+          }
+          break;
+
+        case BodyType.X_WWW_FORM_URLENCODED:
+          if (activeRequest.body?.urlEncoded) {
+            const params = new URLSearchParams();
+            activeRequest.body.urlEncoded
+              .filter((f) => f.isActive && f.key)
+              .forEach((f) => {
+                const key = substituteVariables(f.key, envVariables);
+                const value = substituteVariables(f.value, envVariables);
+                params.append(key, value);
+              });
+            body = params.toString();
+            if (!headers["Content-Type"]) {
+              headers["Content-Type"] = "application/x-www-form-urlencoded";
+            }
+          }
+          break;
+      }
+
+      if (body && !headers["Content-Length"]) {
+        try {
+          const textEncoder = new TextEncoder();
+          const length =
+            typeof body === "string" ? textEncoder.encode(body).length : 0; // Approximate for string
+          if (activeRequest.bodyType !== BodyType.FORM_DATA) {
+            headers["Content-Length"] = length.toString();
+          }
+        } catch (e) {}
+      }
+
+      let domain = "";
+      try {
+        domain = new URL(finalUrl).hostname;
+      } catch {
+        throw new Error("Invalid URL");
+      }
+      const requestCookies = getCookiesForDomain(domain);
+
+      const actualRequest = {
+        url: finalUrl,
+        method: method,
+        headers,
+        body,
+        cookies: requestCookies,
+        auth: authConfig,
+      };
+      setActualRequest(activeRequest.id, actualRequest);
+
+      const res = await fetch("/api/proxy", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(actualRequest),
+      });
+
+      const data = await res.json();
+
+      if (data.error) {
+        setError(activeRequest.id, data.error);
+      } else {
+        setResponse(activeRequest.id, {
+          status: data.status,
+          statusText: data.statusText,
+          headers: data.headers,
+          body: data.body,
+          time: data.time,
+          size: data.size,
+          setCookie: data.setCookie,
+          loading: false,
+          error: null,
+        });
+
+        const setCookieData = data.setCookie || data.headers?.["set-cookie"];
+
+        if (setCookieData) {
+          const cookieStrings = Array.isArray(setCookieData)
+            ? setCookieData
+            : [setCookieData];
+
+          for (const cookieStr of cookieStrings) {
+            try {
+              const cookie = parseSetCookie(cookieStr, domain);
+              if (cookie.key && cookie.value) {
+                addCookie(cookie);
+              }
+            } catch (e) {
+              console.warn("Failed to parse Set-Cookie:", cookieStr);
+            }
+          }
+        }
+
+        // Update Actual Request with real headers sent by Proxy (if available)
+        if (data.requestHeaders) {
+          const updatedActualRequest = {
+            ...actualRequest,
+            headers: data.requestHeaders as Record<string, string>,
+          };
+          setActualRequest(activeRequest.id, updatedActualRequest);
+        }
+      }
+    } catch (err: any) {
+      setError(activeRequest.id, err.message || "Failed to send request");
+    } finally {
+      setLoading(activeRequest.id, false);
+      setIsSending(false);
+    }
+  };
+
+  const handleSave = () => {
+    if (!activeRequest?.id || isSaving || upsertMutation.isPending) return;
+    setIsSaving(true);
+
+    upsertMutation.mutate({
+      requestId: activeRequest.id,
+      name: activeRequest.name,
+      url: activeRequest.url || "",
+      workspaceId: activeRequest.workspaceId,
+      collectionId: activeRequest.collectionId,
+      type: "API",
+      method: activeRequest.method,
+      headers: activeRequest.headers,
+      parameters: activeRequest.parameters,
+      body: activeRequest.body,
+      bodyType: activeRequest.bodyType,
+      auth: activeRequest.auth,
+      savedMessages: activeRequest.savedMessages ?? [],
+    });
+  };
+
+  const isUnsaved = activeRequest?.unsaved ?? false;
+
+  const { responses } = useResponseStore();
+  const currentResponse = activeRequest?.id
+    ? responses[activeRequest.id]
+    : null;
+  const isLoading = currentResponse?.loading || false;
+
+  return (
+    <div className="flex h-full w-full flex-col bg-transparent">
+      {/* Request Bar */}
+      <div className="group/req-bar flex w-full items-center gap-2 px-4 py-3 bg-muted/20 border-b border-border/40 backdrop-blur-md">
+        {/* Method Selector */}
+        <Select
+          value={activeRequest?.method || "GET"}
+          onValueChange={(value) => {
+            const updatedRequest = {
+              ...activeRequest,
+              method: value as HttpMethod,
+              unsaved: true,
+            };
+            if (activeRequest?.id) {
+              updateRequest(activeRequest?.id, updatedRequest);
+            }
+          }}
+        >
+          <SelectTrigger
+            className={cn(
+              "w-[85px] h-[34px]",
+              "rounded-md border text-xs font-bold shadow-sm transition-all duration-200",
+              "focus:ring-2 focus:ring-primary/20",
+              // Dynamic colors based on method
+              requestTextColorMap[
+                (activeRequest?.method ||
+                  "GET") as keyof typeof requestTextColorMap
+              ],
+              "bg-background/50 hover:bg-background/80 border-border/60",
+              "data-[state=open]:border-primary/50"
+            )}
+          >
+            <div className="flex items-center justify-between w-full">
+              <span className="truncate">{activeRequest?.method || "GET"}</span>
+            </div>
+          </SelectTrigger>
+          <SelectContent
+            align="start"
+            className="rounded-lg p-1 shadow-xl shadow-black/10 bg-popover/95 backdrop-blur-xl border border-border/50"
+          >
+            {["GET", "POST", "PUT", "DELETE", "PATCH", "HEAD", "OPTIONS"].map(
+              (method) => {
+                const textColor =
+                  requestTextColorMap[method as HttpMethod] ||
+                  "text-foreground";
+                return (
+                  <SelectItem
+                    key={method}
+                    value={method}
+                    className={cn(
+                      "cursor-pointer rounded-md text-xs font-bold px-3 py-2 transition-colors focus:bg-accent focus:text-accent-foreground",
+                      textColor
+                    )}
+                  >
+                    {method}
+                  </SelectItem>
+                );
+              }
+            )}
+          </SelectContent>
+        </Select>
+
+        {/* URL Input */}
+        <InputGroup className="flex-1">
+          <EnvironmentVariableInput
+            id="url"
+            placeholder="Enter request URL..."
+            value={activeRequest?.url || ""}
+            onChange={(value) => {
+              const updatedRequest = {
+                ...activeRequest,
+                url: value,
+                unsaved: true,
+              };
+              if (activeRequest?.id) {
+                updateRequest(activeRequest?.id, updatedRequest);
+              }
+            }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                handleSend();
+              }
+            }}
+            className={cn(
+              "flex-1 h-[34px] rounded-md",
+              "bg-background/40 hover:bg-background/60 focus:bg-background/80",
+              "border-border/40 focus:border-primary/30",
+              "text-sm placeholder:text-muted-foreground/50",
+              "transition-all duration-200",
+              "focus-visible:ring-2 focus-visible:ring-primary/10"
+            )}
+          />
+        </InputGroup>
+
+        {/* Loading Indicator */}
+        {isLoading && (
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/20">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
+            </span>
+            <span className="text-[10px] font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider">
+              Sending
+            </span>
+          </div>
+        )}
+
+        {/* Actions */}
+        <div className="flex items-center gap-2">
+          <Button
+            className={cn(
+              "h-[34px] px-4 rounded-md font-semibold text-xs",
+              "bg-primary hover:bg-primary/90 text-primary-foreground",
+              "shadow-lg shadow-primary/20 hover:shadow-primary/30",
+              "transition-all duration-200 active:scale-[0.98]",
+              "border border-primary/50"
+            )}
+            onClick={handleSend}
+            disabled={isSending || !activeRequest?.url}
+          >
+            {isSending ? (
+              <Loader2 className="size-3.5 animate-spin mr-1.5" />
+            ) : (
+              <IconSend className="size-3.5 mr-1.5" />
+            )}
+            {isSending ? "Sending..." : "Send"}
+          </Button>
+
+          <Button
+            variant="ghost"
+            size="icon"
+            className={cn(
+              "h-[34px] w-[34px] rounded-md",
+              "text-muted-foreground hover:text-foreground",
+              "hover:bg-muted/50",
+              "transition-all duration-200",
+              isUnsaved &&
+                "text-orange-500 hover:text-orange-600 bg-orange-500/10 hover:bg-orange-500/20"
+            )}
+            onClick={handleSave}
+            disabled={isSaving}
+            title={isUnsaved ? "Unsaved changes" : "Save request"}
+          >
+            {isSaving ? (
+              <Loader2 className="size-4 animate-spin" />
+            ) : isUnsaved ? (
+              <div className="relative">
+                <SaveIcon className="size-4" />
+                <span className="absolute -top-1 -right-1 size-2 bg-orange-500 rounded-full border-2 border-background" />
+              </div>
+            ) : (
+              <SaveIcon className="size-4" />
+            )}
+          </Button>
+        </div>
+      </div>
+
+      {/* Main Tabs Section */}
+      <Tabs
+        value={requestInfoTab}
+        className="flex flex-1 min-h-0 flex-col w-full overflow-hidden"
+        onValueChange={(val) => {
+          setRequestInfoTab(val);
+        }}
+      >
+        <div className="px-4 py-2 border-b border-border/30 bg-muted/5">
+          <TabsList className="h-8 gap-0 p-1 rounded-lg bg-muted/40 border border-border/20 inline-flex w-auto">
+            {[
+              {
+                value: "parameters",
+                label: "Params",
+                count: activeRequest?.parameters?.filter((p) => p.isActive)
+                  ?.length,
+              },
+              {
+                value: "headers",
+                label: "Headers",
+                count: activeRequest?.headers?.filter((h) => h.isActive)
+                  ?.length,
+              },
+              { value: "body", label: "Body" },
+              { value: "auth", label: "Auth" },
+            ].map((tab) => (
+              <TabsTrigger
+                key={tab.value}
+                value={tab.value}
+                className={cn(
+                  "h-[26px] px-3 rounded-md text-[11px] font-medium transition-all duration-200",
+                  "data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm",
+                  "data-[state=inactive]:text-muted-foreground data-[state=inactive]:hover:bg-muted/50",
+                  "focus-visible:ring-0 focus-visible:ring-offset-0"
+                )}
+              >
+                {tab.label}
+                {tab.count !== undefined && tab.count > 0 && (
+                  <span
+                    className={cn(
+                      "ml-1.5 min-w-[14px] h-[14px] flex items-center justify-center text-[9px] rounded-full font-bold",
+                      "bg-primary/10 text-primary border border-primary/20"
+                    )}
+                  >
+                    {tab.count}
+                  </span>
+                )}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+        </div>
+
+        <ResizablePanelGroup
+          orientation="vertical"
+          className="flex-1 min-h-0 w-full"
+        >
+          <ResizablePanel
+            defaultSize={"70%"}
+            minSize={"10%"}
+            maxSize={"90%"}
+            className="flex flex-col min-h-0 relative z-0 overflow-hidden! bg-background/30"
+          >
+            <TabsContent
+              value="parameters"
+              className="w-full flex-1 min-h-0 overflow-y-auto data-[state=active]:flex data-[state=active]:flex-col"
+            >
+              <div className="flex-1 p-4">
+                <ParameterComponent />
+              </div>
+            </TabsContent>
+            <TabsContent
+              value="headers"
+              className="w-full flex-1 min-h-0 overflow-y-auto data-[state=active]:flex data-[state=active]:flex-col"
+            >
+              <div className="flex-1 p-4">
+                <HeaderComponent />
+              </div>
+            </TabsContent>
+            <TabsContent
+              value="body"
+              className="w-full flex-1 min-h-0 overflow-y-auto data-[state=active]:flex data-[state=active]:flex-col"
+            >
+              <div className="flex-1 p-4">
+                <BodyComponent />
+              </div>
+            </TabsContent>
+            <TabsContent
+              value="auth"
+              className="w-full flex-1 min-h-0 overflow-y-auto data-[state=active]:flex data-[state=active]:flex-col"
+            >
+              <div className="flex-1 p-4">
+                <AuthComponent />
+              </div>
+            </TabsContent>
+          </ResizablePanel>
+
+          <ResizableHandle
+            withHandle
+            className="bg-border/40 hover:bg-primary/40 transition-colors h-1"
+          />
+
+          <ResizablePanel
+            defaultSize={"30%"}
+            minSize={"4%"}
+            maxSize={"90%"}
+            className="flex flex-col overflow-y-auto! bg-background/50 border-t border-border/10"
+          >
+            <div className="h-full w-full p-4">
+              <ApiResponse />
+            </div>
+          </ResizablePanel>
+        </ResizablePanelGroup>
+      </Tabs>
+    </div>
+  );
+};
+
+export default ApiRequestComponent;

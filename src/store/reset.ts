@@ -1,7 +1,7 @@
 import { useAuthStore } from "@/modules/authentication/store";
-import useSidebarStore from "@/modules/layout/store/sidebar.store";
-import useRequestSyncStoreState from "@/modules/requests/hooks/requestSyncStore";
-import useCookieStore from "@/modules/requests/store/cookie.store";
+import useSidebarStore from "@/modules/apis/layout/store/sidebar.store";
+import useRequestSyncStoreState from "@/modules/apis/requests/hooks/requestSyncStore";
+import useCookieStore from "@/modules/apis/requests/store/cookie.store";
 import useWorkspaceState from "@/modules/workspace/store";
 
 const useResetStore = () => {

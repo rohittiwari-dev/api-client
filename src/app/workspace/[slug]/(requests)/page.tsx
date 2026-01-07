@@ -3,11 +3,11 @@
 import React, { useEffect } from "react";
 import Image from "next/image";
 import { Tabs } from "@/components/ui/tabs";
-import TabBar from "@/modules/requests/components/tab-bar";
-import TabContent from "@/modules/requests/components/tab-content";
+import TabBar from "@/modules/apis/requests/components/tab-bar";
+import TabContent from "@/modules/apis/requests/components/tab-content";
 import { useWorkspaceSwitcher } from "@/modules/workspace/hooks/use-workspace-switcher";
 import useWorkspaceState from "@/modules/workspace/store";
-import useRequestSyncStoreState from "@/modules/requests/hooks/requestSyncStore";
+import useRequestSyncStoreState from "@/modules/apis/requests/hooks/requestSyncStore";
 import WorkspaceEmptyState from "@/modules/workspace/components/workspace-empty-state";
 
 const Page = () => {

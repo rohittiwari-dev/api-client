@@ -13,10 +13,10 @@ import {
 import { cn } from "@/lib/utils";
 import useEnvironmentStore, {
   EnvironmentState,
-} from "@/modules/environment/store/environment.store";
-import { getEnvironmentsByWorkspace } from "@/modules/environment/actions";
+} from "@/modules/apis/environment/store/environment.store";
+import { getEnvironmentsByWorkspace } from "@/modules/apis/environment/actions";
 import useWorkspaceState from "@/modules/workspace/store";
-import useRightPanelStore from "@/modules/layout/store/right-panel.store";
+import useRightPanelStore from "@/modules/apis/layout/store/right-panel.store";
 import { toast } from "sonner";
 
 const EnvironmentDropdown = () => {

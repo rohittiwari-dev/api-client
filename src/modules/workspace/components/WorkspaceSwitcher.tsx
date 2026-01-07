@@ -19,8 +19,8 @@ import useResetStore from "@/store/reset";
 import { useWorkspaceSwitcher } from "../hooks/use-workspace-switcher";
 import auth from "@/lib/auth";
 import authClient from "@/lib/authClient";
-import { useUnsavedChangesGuard } from "@/modules/requests/hooks/useUnsavedChangesGuard";
-import UnsavedChangesDialog from "@/modules/requests/components/UnsavedChangesDialog";
+import { useUnsavedChangesGuard } from "@/modules/apis/requests/hooks/useUnsavedChangesGuard";
+import UnsavedChangesDialog from "@/modules/apis/requests/components/UnsavedChangesDialog";
 
 const WorkspaceSwitcher = () => {
   const { resetCollectionsRequestsAndCookies } = useResetStore();

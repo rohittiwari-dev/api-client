@@ -1,8 +1,8 @@
 import { create } from "zustand";
 import { devtools, persist } from "zustand/middleware";
-import { RequestStateInterface } from "@/modules/requests/types/request.types";
-import { SidebarItemInterface } from "@/modules/layout/store/sidebar.store";
-import { RequestsStoreState } from "@/modules/requests/store/request.store";
+import { RequestStateInterface } from "@/modules/apis/requests/types/request.types";
+import { SidebarItemInterface } from "@/modules/apis/layout/store/sidebar.store";
+import { RequestsStoreState } from "@/modules/apis/requests/store/request.store";
 
 /**
  * Snapshot of a workspace's UI state

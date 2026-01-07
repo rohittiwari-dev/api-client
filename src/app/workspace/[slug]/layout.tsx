@@ -5,7 +5,7 @@ import { Organization } from "@/generated/prisma/client";
 import auth from "@/lib/auth";
 import { currentUser } from "@/modules/authentication/server/auth.actions";
 import WorkspaceProvider from "@/modules/workspace/store/WorkspaceProvider";
-import { getAllRequests } from "@/modules/requests/server/request";
+import { getAllRequests } from "@/modules/apis/requests/server/request";
 
 // Force dynamic rendering since we use headers()
 export const dynamic = "force-dynamic";

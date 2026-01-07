@@ -41,13 +41,13 @@ import { cn } from "@/lib/utils";
 import useEnvironmentStore, {
   EnvironmentState,
   EnvironmentVariable,
-} from "@/modules/environment/store/environment.store";
+} from "@/modules/apis/environment/store/environment.store";
 import {
   createEnvironmentAction,
   deleteEnvironmentAction,
   getEnvironmentsByWorkspace,
   updateEnvironmentAction,
-} from "@/modules/environment/actions";
+} from "@/modules/apis/environment/actions";
 import useWorkspaceState from "@/modules/workspace/store";
 import { toast } from "sonner";
 import { Checkbox } from "@/components/ui/checkbox";

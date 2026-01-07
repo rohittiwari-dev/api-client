@@ -38,8 +38,8 @@ import {
 import { toast } from "sonner";
 import useWorkspaceState from "@/modules/workspace/store";
 import { useRouter } from "next/navigation";
-import { useUnsavedChangesGuard } from "@/modules/requests/hooks/useUnsavedChangesGuard";
-import UnsavedChangesDialog from "@/modules/requests/components/UnsavedChangesDialog";
+import { useUnsavedChangesGuard } from "@/modules/apis/requests/hooks/useUnsavedChangesGuard";
+import UnsavedChangesDialog from "@/modules/apis/requests/components/UnsavedChangesDialog";
 import WorkspaceSetup from "@/modules/workspace/components/workspace-setup";
 import authClient from "@/lib/authClient";
 import { InputField } from "@/components/app-ui/inputs";

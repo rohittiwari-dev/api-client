@@ -7,7 +7,7 @@ import {
   TDigestAuth,
   TOauth1Auth,
   TOauth2Auth,
-} from "@/modules/requests/types/request.types";
+} from "@/modules/apis/requests/types/request.types";
 
 export type GlobalAuthState = {
   type:

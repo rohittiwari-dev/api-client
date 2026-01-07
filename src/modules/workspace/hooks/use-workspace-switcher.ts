@@ -1,10 +1,10 @@
 import { useCallback } from "react";
 import useWorkspaceStateCache from "../store/workspace-state-cache";
-import useSidebarStore from "@/modules/layout/store/sidebar.store";
-import useEnvironmentStore from "@/modules/environment/store/environment.store";
+import useSidebarStore from "@/modules/apis/layout/store/sidebar.store";
+import useEnvironmentStore from "@/modules/apis/environment/store/environment.store";
 import useWorkspaceState from "../store";
-import useRequestSyncStoreState from "@/modules/requests/hooks/requestSyncStore";
-import { RequestStateInterface } from "@/modules/requests/types/request.types";
+import useRequestSyncStoreState from "@/modules/apis/requests/hooks/requestSyncStore";
+import { RequestStateInterface } from "@/modules/apis/requests/types/request.types";
 import { Organization } from "@/generated/prisma/browser";
 
 /**

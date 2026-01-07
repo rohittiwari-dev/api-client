@@ -5,10 +5,10 @@ import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { Organization } from "@/generated/prisma/client";
 import auth from "@/lib/auth";
 import { currentUser } from "@/modules/authentication/server/auth.actions";
-import Header from "@/modules/layout/components/header";
-import { AppSidebar } from "@/modules/layout/components/sidebar/AppSidebar";
-import RightSidebar from "@/modules/layout/components/sidebar/right-sidebar";
-import { getRequestSideBarTree } from "@/modules/layout/server/sidebar.actions";
+import Header from "@/modules/apis/layout/components/header";
+import { AppSidebar } from "@/modules/apis/layout/components/sidebar/AppSidebar";
+import RightSidebar from "@/modules/apis/layout/components/sidebar/right-sidebar";
+import { getRequestSideBarTree } from "@/modules/apis/layout/server/sidebar.actions";
 
 // Force dynamic rendering since we use headers()
 export const dynamic = "force-dynamic";

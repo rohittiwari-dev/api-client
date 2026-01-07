@@ -3,11 +3,11 @@
 import React, { useEffect } from "react";
 import { Organization, Request } from "@/generated/prisma/browser";
 import useWorkspaceState from ".";
-import useCookieStore from "@/modules/cookies/store/cookie.store";
+import useCookieStore from "@/modules/apis/cookies/store/cookie.store";
 import authClient from "@/lib/authClient";
-import { useFetchAllRequests } from "@/modules/requests/hooks/queries";
-import { RequestStateInterface } from "@/modules/requests/types/request.types";
-import useRequestSyncStoreState from "@/modules/requests/hooks/requestSyncStore";
+import { useFetchAllRequests } from "@/modules/apis/requests/hooks/queries";
+import { RequestStateInterface } from "@/modules/apis/requests/types/request.types";
+import useRequestSyncStoreState from "@/modules/apis/requests/hooks/requestSyncStore";
 import { useWorkspaceSwitcher } from "../hooks/use-workspace-switcher";
 
 const WorkspaceProvider = ({
