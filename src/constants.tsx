@@ -1,4 +1,4 @@
-export const APP_VERSION = "1.1.0";
+export const APP_VERSION = "1.1.1";
 
 // App Identity
 export const APP_NAME = "Api Studio";

@@ -9,6 +9,11 @@ import {
   useRef,
 } from "react";
 
+interface BeforeInstallPromptEvent extends Event {
+  prompt: () => Promise<void>;
+  userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
+}
+
 // Excluded routes that should not be accessible in PWA
 const PWA_EXCLUDED_ROUTES = ["/", "/docs"];
 
@@ -31,11 +36,15 @@ function checkIsStandalone(): boolean {
 interface PWAContextType {
   isPWA: boolean;
   isExcludedRoute: (path: string) => boolean;
+  deferredPrompt: BeforeInstallPromptEvent | null;
+  promptToInstall: () => Promise<void>;
 }
 
 const PWAContext = createContext<PWAContextType>({
   isPWA: false,
   isExcludedRoute: () => false,
+  deferredPrompt: null,
+  promptToInstall: async () => {},
 });
 
 export const usePWA = () => useContext(PWAContext);
@@ -47,6 +56,8 @@ export function ServiceWorkerRegistration({
 }) {
   // Use state because we need to react to display-mode changes
   const [isPWA, setIsPWA] = useState(() => checkIsStandalone());
+  const [deferredPrompt, setDeferredPrompt] =
+    useState<BeforeInstallPromptEvent | null>(null);
   const hasRedirected = useRef(false);
 
   // Get redirect URL based on auth state
@@ -74,10 +85,34 @@ export function ServiceWorkerRegistration({
     // Add listener for display mode changes
     mediaQuery.addEventListener("change", handleDisplayModeChange);
 
+    // Handle install prompt (must be captured early)
+    const handleInstallPrompt = (e: Event) => {
+      // Prevent the mini-infobar from appearing on mobile
+      e.preventDefault();
+      // Stash the event so it can be triggered later.
+      setDeferredPrompt(e as BeforeInstallPromptEvent);
+      console.log("Captured beforeinstallprompt event");
+    };
+
+    window.addEventListener("beforeinstallprompt", handleInstallPrompt);
+
     return () => {
       mediaQuery.removeEventListener("change", handleDisplayModeChange);
+      window.removeEventListener("beforeinstallprompt", handleInstallPrompt);
     };
   }, [getRedirectUrl]);
+
+  const promptToInstall = useCallback(async () => {
+    if (!deferredPrompt) {
+      console.log("No deferred prompt available");
+      return;
+    }
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    if (outcome === "accepted") {
+      setDeferredPrompt(null);
+    }
+  }, [deferredPrompt]);
 
   // Handle PWA mode setup and route protection
   useEffect(() => {
@@ -155,7 +190,9 @@ export function ServiceWorkerRegistration({
   }
 
   return (
-    <PWAContext.Provider value={{ isPWA, isExcludedRoute }}>
+    <PWAContext.Provider
+      value={{ isPWA, isExcludedRoute, deferredPrompt, promptToInstall }}
+    >
       {children}
     </PWAContext.Provider>
   );

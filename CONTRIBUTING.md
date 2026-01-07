@@ -1,139 +1,90 @@
-# Contributing to Api Studio
+# 🤝 Contributing to Api Studio
 
-Thank you for your interest in contributing to Api Studio! This document provides guidelines and information for contributors.
+<div align="center">
 
-## 📋 Table of Contents
+![Open Source](https://img.shields.io/badge/Open%20Source-Love-red?style=flat-square)
+![Contributions Welcome](https://img.shields.io/badge/contributions-welcome-brightgreen?style=flat-square)
+![License](https://img.shields.io/badge/license-AGPL--3.0-blue?style=flat-square)
 
-- [Code of Conduct](#code-of-conduct)
-- [Getting Started](#getting-started)
-- [Development Setup](#development-setup)
-- [Making Changes](#making-changes)
-- [Pull Request Process](#pull-request-process)
-- [Coding Standards](#coding-standards)
-- [Commit Messages](#commit-messages)
+**Thank you for your interest in contributing!**
+We are building the best developer-first API testing ecosystem, and we'd love your help.
+
+[Code of Conduct](#-code-of-conduct) • [Development Setup](#-development-setup) • [Pull Request Process](#-pull-request-process) • [Architecture](#-architecture)
+
+</div>
+
+---
 
 ## 📜 Code of Conduct
 
 By participating in this project, you agree to maintain a respectful and inclusive environment. We expect all contributors to:
 
-- Be respectful and inclusive
-- Accept constructive criticism gracefully
-- Focus on what's best for the community
-- Show empathy towards others
+- Be respectful and inclusive of people of all backgrounds.
+- Accept constructive criticism gracefully.
+- Focus on what's best for the community.
+- Show empathy towards other community members.
 
-## 🚀 Getting Started
+---
+
+## 💻 Development Setup
 
 ### Prerequisites
 
-- Node.js 18+ or Bun
-- PostgreSQL database
-- Git
+- **Node.js 18+** or **Bun** (Recommended)
+- **PostgreSQL** Database
+- **Git**
 
-### Fork and Clone
+### ⚡ Quick Start
 
-1. Fork the repository on GitHub
-2. Clone your fork locally:
+1. **Fork & Clone**
+
    ```bash
    git clone https://github.com/YOUR_USERNAME/api-client.git
    cd api-client
    ```
-3. Add upstream remote:
-   ```bash
-   git remote add upstream https://github.com/rohittiwari-dev/api-client.git
-   ```
 
-## 💻 Development Setup
-
-1. **Install dependencies**
+2. **Install Dependencies**
 
    ```bash
    bun install
    ```
 
-2. **Set up environment**
+3. **Configure Environment**
 
    ```bash
    cp .env.example .env
    # Edit .env with your local database credentials
    ```
 
-3. **Initialize database**
+4. **Initialize Database**
 
    ```bash
    bun run db:push
    ```
 
-4. **Start development server**
+5. **Start Dev Server**
    ```bash
    bun run dev
    ```
+   Visit [http://localhost:3000](http://localhost:3000)
 
-## ✏️ Making Changes
+---
 
-### Branch Naming
+## 🏗️ Architecture
 
-Use descriptive branch names:
+Understanding the project structure will help you navigate the codebase.
 
-- `feature/add-oauth2-support`
-- `fix/cookie-parsing-bug`
-- `docs/update-readme`
-- `refactor/auth-component`
+| Directory           | Description                                  |
+| :------------------ | :------------------------------------------- |
+| `src/app`           | Next.js App Router pages and layouts         |
+| `src/modules`       | Feature-based modules (Auth, Requests, etc.) |
+| `src/components/ui` | Reusable UI components (shadcn/ui)           |
+| `src/lib`           | Utility functions and shared helpers         |
+| `src/store`         | Global state management (Zustand)            |
 
-### Creating a Branch
+### Module Structure
 
-```bash
-git checkout main
-git pull upstream main
-git checkout -b feature/your-feature-name
-```
-
-## 🔄 Pull Request Process
-
-1. **Update your branch** with the latest upstream changes:
-
-   ```bash
-   git fetch upstream
-   git rebase upstream/main
-   ```
-
-2. **Test your changes** thoroughly
-
-3. **Push your branch**:
-
-   ```bash
-   git push origin feature/your-feature-name
-   ```
-
-4. **Create a Pull Request** on GitHub with:
-
-   - Clear title describing the change
-   - Description of what and why
-   - Screenshots for UI changes
-   - Link to related issues
-
-5. **Address review feedback** promptly
-
-## 📝 Coding Standards
-
-### TypeScript
-
-- Use TypeScript for all new code
-- Define proper types (avoid `any`)
-- Use interfaces for object shapes
-
-### React
-
-- Use functional components with hooks
-- Keep components small and focused
-- Use proper prop types
-
-### Styling
-
-- Use Tailwind CSS classes
-- Follow existing patterns in the codebase
-- Keep responsive design in mind
-
-### File Structure
+Each feature in `src/modules` follows a strict structure:
 
 ```
 src/modules/feature-name/
@@ -144,61 +95,71 @@ src/modules/feature-name/
 └── utils/          # Utility functions
 ```
 
-## 💬 Commit Messages
+---
 
-Follow conventional commits format:
+## 🔄 Pull Request Process
 
-```
-type(scope): description
+1. **Create a Branch**
+   Use descriptive names: `feature/add-oauth2`, `fix/login-bug`.
 
-[optional body]
+   ```bash
+   git checkout -b feature/your-feature
+   ```
 
-[optional footer]
-```
+2. **Make Changes**
 
-### Types
+   - Use **TypeScript** for all new code.
+   - Follow the **Prettier** and **ESLint** configuration.
+   - Ensure components are responsive and accessible.
 
-- `feat`: New feature
-- `fix`: Bug fix
-- `docs`: Documentation
-- `style`: Formatting (no code change)
-- `refactor`: Code restructuring
-- `test`: Adding tests
-- `chore`: Maintenance
+3. **Commit Messages**
+   We follow [Conventional Commits](https://www.conventionalcommits.org/).
 
-### Examples
+   ```bash
+   feat(auth): add google oauth provider
+   fix(ui): resolve button misalignment on mobile
+   docs(readme): update installation steps
+   ```
 
-```
-feat(auth): add OAuth 2.0 PKCE support
-
-fix(cookies): handle SameSite=None attribute
-
-docs(readme): add self-hosting instructions
-```
-
-## 🐛 Reporting Bugs
-
-When reporting bugs, please include:
-
-1. Steps to reproduce
-2. Expected behavior
-3. Actual behavior
-4. Screenshots if applicable
-5. Browser and OS information
-
-## 💡 Feature Requests
-
-For feature requests:
-
-1. Check if it already exists as an issue
-2. Describe the use case
-3. Explain why it would benefit users
-
-## ❓ Questions?
-
-- Open a [GitHub Discussion](https://github.com/rohittiwari-dev/api-client/discussions)
-- Check existing issues and discussions
+4. **Submit PR**
+   - Push to your fork: `git push origin feature/your-feature`
+   - Open a PR against the `main` branch.
+   - Fill out the PR template completely.
 
 ---
 
-Thank you for contributing! 🎉
+## 🛠️ Coding Standards
+
+### TypeScript
+
+- **Strict Typing**: Avoid `any` whenever possible. Use `unknown` or specific types.
+- **Interfaces**: Use `interface` for object shapes and component props.
+
+### React / Next.js
+
+- **Server Components**: Use Server Components by default. Add `"use client"` only when interactivity is needed.
+- **Hooks**: separate logic into custom hooks under `modules/*/hooks`.
+
+### Styling
+
+- **Tailwind CSS**: Use utility classes for styling.
+- **Variables**: Use CSS variables for colors to support theming (Dark/Light mode).
+
+---
+
+## 🐛 Reporting Bugs
+
+Found a bug? Please open an issue with:
+
+1. **Steps to reproduce**
+2. **Expected behavior** vs **Actual behavior**
+3. **Screenshots** (if visual)
+4. **Browser/OS version**
+
+---
+
+## ❓ Questions?
+
+Join the discussion on [GitHub Discussions](https://github.com/rohittiwari-dev/api-client/discussions).
+
+**Happy Coding! 🚀**

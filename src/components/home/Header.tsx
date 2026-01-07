@@ -41,15 +41,7 @@ export default function Header() {
       }}
       className="fixed top-0 left-0 right-0 z-50 pt-4 px-4"
     >
-      <motion.div
-        className="max-w-7xl mx-auto rounded-full border border-transparent transition-all duration-300"
-        style={{
-          backgroundColor: "rgba(255, 255, 255, 0.05)",
-          backdropFilter: "blur(16px)",
-          borderColor: "rgba(255, 255, 255, 0.1)",
-          boxShadow: "0 4px 30px rgba(0, 0, 0, 0.1)",
-        }}
-      >
+      <motion.div className="max-w-7xl mx-auto rounded-full border border-white/10 bg-white/5 backdrop-blur-md shadow-lg transition-all duration-300">
         <div className="px-6 py-2.5">
           <div className="flex items-center justify-between">
             {/* Logo */}
@@ -66,7 +58,7 @@ export default function Header() {
                   className="object-contain"
                 />
               </motion.div>
-              <span className="text-lg font-bold tracking-tight">
+              <span className="text-lg font-bold tracking-tight bg-linear-to-r from-violet-600 to-indigo-600 dark:from-violet-400 dark:to-indigo-400 bg-clip-text text-transparent">
                 Api Studio
               </span>
             </Link>
@@ -98,6 +90,7 @@ export default function Header() {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 className="p-2 text-muted-foreground hover:text-foreground transition-colors"
+                aria-label="GitHub"
               >
                 <Github className="w-5 h-5" />
               </motion.a>
@@ -143,6 +136,7 @@ export default function Header() {
                 whileTap={{ scale: 0.95 }}
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                 className="p-2 rounded-full hover:bg-muted/50 transition-colors"
+                aria-label="Menu"
               >
                 {mobileMenuOpen ? (
                   <X className="w-5 h-5" />
