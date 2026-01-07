@@ -23,7 +23,7 @@ export default function CTA() {
     <section className="py-24 relative overflow-hidden bg-background">
       {/* Background */}
       <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-primary/5 to-transparent" />
+        <div className="absolute inset-0 bg-linear-to-b from-transparent via-primary/5 to-transparent" />
         <motion.div
           className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] bg-primary/10 rounded-full blur-[120px]"
           animate={{
@@ -45,7 +45,7 @@ export default function CTA() {
         >
           <div className="relative rounded-3xl bg-card border border-border p-8 md:p-12 overflow-hidden shadow-sm hover:shadow-lg transition-all duration-500">
             {/* Animated gradient border */}
-            <div className="absolute inset-0 rounded-3xl bg-gradient-to-r from-violet-500/10 via-purple-500/10 to-pink-500/10 opacity-0 hover:opacity-100 transition-opacity duration-500" />
+            <div className="absolute inset-0 rounded-3xl bg-linear-to-r from-violet-500/10 via-purple-500/10 to-pink-500/10 opacity-0 hover:opacity-100 transition-opacity duration-500" />
 
             <div className="relative z-10 text-center">
               {/* Badge */}
@@ -64,7 +64,7 @@ export default function CTA() {
               <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-6 text-foreground">
                 Ready to{" "}
                 <motion.span
-                  className="bg-gradient-to-r from-violet-600 via-purple-600 to-pink-600 dark:from-violet-400 dark:via-purple-400 dark:to-pink-400 bg-clip-text text-transparent bg-[length:200%_auto]"
+                  className="bg-linear-to-r from-violet-600 via-purple-600 to-pink-600 dark:from-violet-400 dark:via-purple-400 dark:to-pink-400 bg-clip-text text-transparent bg-size-[200%_auto]"
                   animate={{ backgroundPosition: ["0%", "100%", "0%"] }}
                   transition={{ duration: 5, repeat: Infinity }}
                 >
@@ -131,7 +131,7 @@ export default function CTA() {
                 >
                   {/* Shimmer */}
                   <motion.div
-                    className="absolute inset-0 bg-gradient-to-r from-transparent via-white/25 to-transparent"
+                    className="absolute inset-0 bg-linear-to-r from-transparent via-white/25 to-transparent"
                     animate={{ x: ["-200%", "200%"] }}
                     transition={{
                       duration: 2,

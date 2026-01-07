@@ -330,7 +330,7 @@ const WebSocketMessageComposer: React.FC<WebSocketMessageComposerProps> = ({
                 disabled || !value?.trim() || (format === "json" && !!jsonError)
               }
               size="sm"
-              className="h-7 px-4 text-[11px] font-semibold gap-1.5 rounded-md bg-gradient-to-r from-violet-600 to-indigo-600 text-white hover:from-violet-500 hover:to-indigo-500 shadow-md shadow-violet-500/20 border border-violet-500/20 transition-all duration-200"
+              className="h-7 px-4 text-[11px] font-semibold gap-1.5 rounded-md bg-linear-to-r from-violet-600 to-indigo-600 text-white hover:from-violet-500 hover:to-indigo-500 shadow-md shadow-violet-500/20 border border-violet-500/20 transition-all duration-200"
             >
               <IconSend className="size-3.5" />
               Send
@@ -436,7 +436,7 @@ const WebSocketMessageComposer: React.FC<WebSocketMessageComposerProps> = ({
               disabled={!saveName?.trim()}
               className={cn(
                 "rounded-lg h-8 text-xs font-medium gap-1.5 transition-all duration-200",
-                "bg-gradient-to-r from-violet-600 to-indigo-600 text-white hover:from-violet-500 hover:to-indigo-500",
+                "bg-linear-to-r from-violet-600 to-indigo-600 text-white hover:from-violet-500 hover:to-indigo-500",
                 "shadow-md shadow-violet-500/20 border border-violet-500/20"
               )}
             >

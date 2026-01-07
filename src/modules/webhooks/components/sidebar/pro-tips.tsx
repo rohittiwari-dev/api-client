@@ -78,7 +78,7 @@ const ProTips = () => {
       transition={{ delay: 0.5, duration: 0.5 }}
       className="p-3 bg-linear-to-t from-background via-background/80 to-transparent"
     >
-      <div className="rounded-xl bg-gradient-to-br from-violet-50/50 to-fuchsia-50/50 dark:from-violet-500/10 dark:via-fuchsia-500/5 dark:to-transparent border border-violet-200/50 dark:border-white/5 p-4 relative overflow-hidden group hover:border-violet-300/50 dark:hover:border-violet-500/20 transition-all duration-500 backdrop-blur-md shadow-sm dark:shadow-md dark:shadow-black/5">
+      <div className="rounded-xl bg-linear-to-br from-violet-50/50 to-fuchsia-50/50 dark:from-violet-500/10 dark:via-fuchsia-500/5 dark:to-transparent border border-violet-200/50 dark:border-white/5 p-4 relative overflow-hidden group hover:border-violet-300/50 dark:hover:border-violet-500/20 transition-all duration-500 backdrop-blur-md shadow-sm dark:shadow-md dark:shadow-black/5">
         {/* Abstract Background Shape */}
         <div className="absolute -top-6 -right-6 size-24 bg-violet-500/5 dark:bg-violet-500/10 rounded-full blur-2xl group-hover:bg-violet-500/10 dark:group-hover:bg-violet-500/20 transition-colors duration-700" />
 

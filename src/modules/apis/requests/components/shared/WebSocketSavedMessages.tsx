@@ -376,7 +376,7 @@ const WebSocketSavedMessages: React.FC<WebSocketSavedMessagesProps> = ({
         <div className="p-3 space-y-2">
           {filteredMessages.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12 text-muted-foreground gap-3">
-              <div className="size-14 rounded-lg bg-gradient-to-br from-muted/50 to-muted/20 flex items-center justify-center">
+              <div className="size-14 rounded-lg bg-linear-to-br from-muted/50 to-muted/20 flex items-center justify-center">
                 <IconMessage className="size-8 text-muted-foreground/40" />
               </div>
               <div className="text-center">
@@ -517,7 +517,7 @@ const WebSocketSavedMessages: React.FC<WebSocketSavedMessagesProps> = ({
                       </pre>
 
                       {/* Mask for long content */}
-                      <div className="absolute inset-x-0 bottom-0 h-6 bg-gradient-to-t from-muted/30 group-hover:from-muted/50 to-transparent pointer-events-none" />
+                      <div className="absolute inset-x-0 bottom-0 h-6 bg-linear-to-t from-muted/30 group-hover:from-muted/50 to-transparent pointer-events-none" />
 
                       {/* "Use" Overlay on Hover */}
                       <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-background/5 backdrop-blur-[1px]">
@@ -596,7 +596,7 @@ const WebSocketSavedMessages: React.FC<WebSocketSavedMessagesProps> = ({
                   value={newMsgName}
                   onChange={(e) => setNewMsgName(e.target.value)}
                   placeholder="e.g., Subscribe to updates"
-                  className="h-10 !bg-input text-sm rounded-lg border-border/50  focus-visible:ring-primary/20 transition-all shadow-sm"
+                  className="h-10 bg-input! text-sm rounded-lg border-border/50  focus-visible:ring-primary/20 transition-all shadow-sm"
                 />
               </div>
 

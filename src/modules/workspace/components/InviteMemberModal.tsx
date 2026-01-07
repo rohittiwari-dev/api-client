@@ -69,7 +69,7 @@ export default function InviteMemberModal({
       <DialogContent className="sm:max-w-[420px] p-0 overflow-hidden">
         {/* Header with gradient accent */}
         <div className="relative px-6 pt-6 pb-4">
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent" />
+          <div className="absolute inset-0 bg-linear-to-br from-primary/5 via-transparent to-transparent" />
           <DialogHeader className="relative">
             <div className="flex items-center gap-3 mb-2">
               <div className="p-2.5 rounded-xl bg-primary/10 border border-primary/20">

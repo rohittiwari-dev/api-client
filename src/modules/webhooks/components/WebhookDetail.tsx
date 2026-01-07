@@ -166,7 +166,7 @@ const WebhookDetail: React.FC<WebhookDetailProps> = ({
 
           {/* URL Bar */}
           <div className="relative group">
-            <div className="absolute inset-0 bg-gradient-to-r from-violet-500/20 via-fuchsia-500/20 to-transparent rounded-lg blur-sm opacity-50 group-hover:opacity-100 transition-opacity" />
+            <div className="absolute inset-0 bg-linear-to-r from-violet-500/20 via-fuchsia-500/20 to-transparent rounded-lg blur-sm opacity-50 group-hover:opacity-100 transition-opacity" />
             <div className="relative flex items-center gap-2 bg-background border border-border rounded-lg p-1 pr-2 shadow-sm">
               <div className="flex items-center justify-center size-8 rounded bg-muted/50 border border-white/5 font-mono text-xs text-muted-foreground font-bold shrink-0">
                 URL

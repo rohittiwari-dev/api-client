@@ -311,7 +311,7 @@ const WebhookCard: React.FC<WebhookCardProps> = ({
 
       <div className="space-y-4">
         <div className="flex items-start justify-between">
-          <div className="flex size-10 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500/10 to-indigo-500/10 border border-violet-500/10 group-hover:scale-105 transition-transform duration-300">
+          <div className="flex size-10 items-center justify-center rounded-xl bg-linear-to-br from-violet-500/10 to-indigo-500/10 border border-violet-500/10 group-hover:scale-105 transition-transform duration-300">
             <WebhookIcon className="size-5 text-violet-500" />
           </div>
           <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300">

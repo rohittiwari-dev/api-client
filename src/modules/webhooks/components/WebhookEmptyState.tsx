@@ -21,21 +21,21 @@ const WebhookEmptyState: React.FC<WebhookEmptyStateProps> = ({
 
         {/* Icon composition */}
         <div className="relative mx-auto mb-8 size-24">
-          <div className="absolute inset-0 bg-gradient-to-br from-violet-500/20 to-fuchsia-500/20 rounded-3xl rotate-6 backdrop-blur-sm border border-white/5" />
+          <div className="absolute inset-0 bg-linear-to-br from-violet-500/20 to-fuchsia-500/20 rounded-3xl rotate-6 backdrop-blur-sm border border-white/5" />
           <div className="absolute inset-0 bg-background rounded-3xl -rotate-3 border border-border shadow-xl flex items-center justify-center">
             <Webhook className="size-10 text-violet-500" />
           </div>
 
           {/* Floating badges */}
-          <div className="absolute -top-4 -right-4 bg-background border border-border p-2 rounded-xl shadow-lg animate-bounce duration-[3000ms]">
+          <div className="absolute -top-4 -right-4 bg-background border border-border p-2 rounded-xl shadow-lg animate-bounce duration-3000">
             <Zap className="size-4 text-amber-500" />
           </div>
-          <div className="absolute -bottom-2 -left-4 bg-background border border-border p-2 rounded-xl shadow-lg animate-bounce duration-[4000ms] delay-500">
+          <div className="absolute -bottom-2 -left-4 bg-background border border-border p-2 rounded-xl shadow-lg animate-bounce duration-4000 delay-500">
             <Activity className="size-4 text-emerald-500" />
           </div>
         </div>
 
-        <h2 className="text-2xl font-bold tracking-tight mb-2 bg-gradient-to-br from-foreground to-foreground/70 bg-clip-text text-transparent">
+        <h2 className="text-2xl font-bold tracking-tight mb-2 bg-linear-to-br from-foreground to-foreground/70 bg-clip-text text-transparent">
           Webhook Integration
         </h2>
         <p className="text-muted-foreground mb-8 text-sm leading-relaxed max-w-xs mx-auto">
@@ -47,7 +47,7 @@ const WebhookEmptyState: React.FC<WebhookEmptyStateProps> = ({
           <Button
             size="lg"
             onClick={onCreateClick}
-            className="group relative overflow-hidden bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 border-0 shadow-lg shadow-violet-500/25 transition-all duration-300 hover:shadow-violet-500/40 hover:-translate-y-0.5"
+            className="group relative overflow-hidden bg-linear-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 border-0 shadow-lg shadow-violet-500/25 transition-all duration-300 hover:shadow-violet-500/40 hover:-translate-y-0.5"
           >
             <span className="relative z-10 flex items-center gap-2">
               <Plus className="size-4" />
