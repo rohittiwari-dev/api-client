@@ -8,6 +8,7 @@ import {
   SidebarContent,
   SidebarFooter as ShadcnSidebarFooter,
   useSidebar,
+  SidebarRail,
 } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
 
@@ -95,7 +96,7 @@ const WebhookSidebar: React.FC<WebhookSidebarProps> = ({ workspaceId }) => {
   return (
     <>
       <Sidebar
-        collapsible="icon"
+        collapsible="offcanvas"
         style={{
           background: "transparent !important",
         }}
@@ -136,6 +137,7 @@ const WebhookSidebar: React.FC<WebhookSidebarProps> = ({ workspaceId }) => {
         >
           <ProTips />
         </ShadcnSidebarFooter>
+        <SidebarRail className="hover:after:bg-violet-500/50 after:w-[2px]" />
       </Sidebar>
 
       <CreateWebhookDialog

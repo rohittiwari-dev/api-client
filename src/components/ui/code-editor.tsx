@@ -1,21 +1,21 @@
-'use client';
-import * as React from 'react';
-import { useInView, type UseInViewOptions } from 'motion/react';
-import { useTheme } from 'next-themes';
-import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
-import { Copy, Check } from 'lucide-react';
+"use client";
+import * as React from "react";
+import { useInView, type UseInViewOptions } from "motion/react";
+import { useTheme } from "next-themes";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Copy, Check } from "lucide-react";
 type CopyButtonProps = {
   content: string;
-  size?: 'sm' | 'default' | 'lg';
-  variant?: 'default' | 'ghost' | 'outline';
+  size?: "sm" | "default" | "lg";
+  variant?: "default" | "ghost" | "outline";
   className?: string;
   onCopy?: (content: string) => void;
 };
 function CopyButton({
   content,
-  size = 'default',
-  variant = 'default',
+  size = "default",
+  variant = "default",
   className,
   onCopy,
 }: CopyButtonProps) {
@@ -27,7 +27,7 @@ function CopyButton({
       onCopy?.(content);
       setTimeout(() => setCopied(false), 2000);
     } catch (err) {
-      console.error('Failed to copy text: ', err);
+      console.error("Failed to copy text: ", err);
     }
   };
   return (
@@ -35,17 +35,13 @@ function CopyButton({
       size={size}
       variant={variant}
       onClick={handleCopy}
-      className={cn('h-8 w-8 p-0', className)}
+      className={cn("h-8 w-8 p-0", className)}
     >
-      {copied ? (
-        <Check className="h-3 w-3" />
-      ) : (
-        <Copy className="h-3 w-3" />
-      )}
+      {copied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
     </Button>
   );
 }
-type CodeEditorProps = Omit<React.ComponentProps<'div'>, 'onCopy'> & {
+type CodeEditorProps = Omit<React.ComponentProps<"div">, "onCopy"> & {
   children: string;
   lang: string;
   themes?: {
@@ -59,7 +55,7 @@ type CodeEditorProps = Omit<React.ComponentProps<'div'>, 'onCopy'> & {
   icon?: React.ReactNode;
   cursor?: boolean;
   inView?: boolean;
-  inViewMargin?: UseInViewOptions['margin'];
+  inViewMargin?: UseInViewOptions["margin"];
   inViewOnce?: boolean;
   copyButton?: boolean;
   writing?: boolean;
@@ -72,8 +68,8 @@ function CodeEditor({
   children: code,
   lang,
   themes = {
-    light: 'github-light',
-    dark: 'github-dark',
+    light: "github-light",
+    dark: "github-dark",
   },
   duration = 5,
   delay = 0,
@@ -83,7 +79,7 @@ function CodeEditor({
   icon,
   cursor = false,
   inView = false,
-  inViewMargin = '0px',
+  inViewMargin = "0px",
   inViewOnce = true,
   copyButton = false,
   writing = true,
@@ -95,8 +91,8 @@ function CodeEditor({
 }: CodeEditorProps) {
   const { resolvedTheme } = useTheme();
   const editorRef = React.useRef<HTMLDivElement>(null);
-  const [visibleCode, setVisibleCode] = React.useState('');
-  const [highlightedCode, setHighlightedCode] = React.useState('');
+  const [visibleCode, setVisibleCode] = React.useState("");
+  const [highlightedCode, setHighlightedCode] = React.useState("");
   const [isDone, setIsDone] = React.useState(false);
   const inViewResult = useInView(editorRef, {
     once: inViewOnce,
@@ -107,14 +103,14 @@ function CodeEditor({
     if (!visibleCode.length || !isInView) return;
     const loadHighlightedCode = async () => {
       try {
-        const { codeToHtml } = await import('shiki');
+        const { codeToHtml } = await import("shiki");
         const highlighted = await codeToHtml(visibleCode, {
           lang,
           themes: {
             light: themes.light,
             dark: themes.dark,
           },
-          defaultColor: resolvedTheme === 'dark' ? 'dark' : 'light',
+          defaultColor: resolvedTheme === "dark" ? "dark" : "light",
         });
         setHighlightedCode(highlighted);
       } catch (e) {
@@ -154,7 +150,7 @@ function CodeEditor({
           });
           editorRef.current?.scrollTo({
             top: editorRef.current?.scrollHeight,
-            behavior: 'smooth',
+            behavior: "smooth",
           });
         } else {
           clearInterval(intervalId);
@@ -172,8 +168,8 @@ function CodeEditor({
     <div
       data-slot="code-editor"
       className={cn(
-        'relative bg-muted/50 w-[600px] h-[400px] border border-border overflow-hidden flex flex-col rounded-xl',
-        className,
+        "relative bg-muted/50 w-full h-[400px] border border-border overflow-hidden flex flex-col rounded-xl",
+        className
       )}
       {...props}
     >
@@ -189,19 +185,19 @@ function CodeEditor({
           {title && (
             <div
               className={cn(
-                'flex flex-row items-center gap-2',
+                "flex flex-row items-center gap-2",
                 dots &&
-                'absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2',
+                  "absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
               )}
             >
               {icon ? (
                 <div
                   className="text-muted-foreground [&_svg]:size-3.5"
                   dangerouslySetInnerHTML={
-                    typeof icon === 'string' ? { __html: icon } : undefined
+                    typeof icon === "string" ? { __html: icon } : undefined
                   }
                 >
-                  {typeof icon !== 'string' ? icon : null}
+                  {typeof icon !== "string" ? icon : null}
                 </div>
               ) : null}
               <figcaption className="flex-1 truncate text-muted-foreground text-[13px]">
@@ -225,7 +221,7 @@ function CodeEditor({
             content={code}
             size="sm"
             variant="ghost"
-            className="absolute right-2 top-2 z-[2] backdrop-blur-md bg-transparent hover:bg-black/5 dark:hover:bg-white/10"
+            className="absolute right-2 top-2 z-2 backdrop-blur-md bg-transparent hover:bg-black/5 dark:hover:bg-white/10"
             onCopy={onCopy}
           />
         )
@@ -233,17 +229,19 @@ function CodeEditor({
       <div
         ref={editorRef}
         className={cn(
-          'w-full text-sm font-mono relative overflow-auto flex-1 select-text',
-          header ? 'h-[calc(100%-2.75rem)]' : 'h-full',
-          contentClassName ? contentClassName : 'p-4'
+          "w-full text-sm font-mono relative overflow-auto flex-1 select-text",
+          header ? "h-[calc(100%-2.75rem)]" : "h-full",
+          contentClassName ? contentClassName : "p-4"
         )}
       >
         <div
           className={cn(
-            '[&>pre,_&_code]:!bg-transparent [&>pre,_&_code]:[background:transparent_!important] [&>pre,_&_code]:border-none [&_code]:!text-[13px]',
+            "[&>pre,&_code]:bg-transparent! [&>pre,&_code]:[background:transparent_!important] [&>pre,&_code]:border-none [&_code]:text-[13px]!",
+            "[&>pre]:whitespace-pre-wrap [&>pre]:break-all [&>pre]:max-w-full [&>pre]:overflow-hidden",
+            "[&_.line]:break-all [&_.line]:whitespace-pre-wrap",
             cursor &&
-            !isDone &&
-            "[&_.line:last-of-type::after]:content-['|'] [&_.line:last-of-type::after]:animate-pulse [&_.line:last-of-type::after]:inline-block [&_.line:last-of-type::after]:w-[1ch] [&_.line:last-of-type::after]:-translate-px",
+              !isDone &&
+              "[&_.line:last-of-type::after]:content-['|'] [&_.line:last-of-type::after]:animate-pulse [&_.line:last-of-type::after]:inline-block [&_.line:last-of-type::after]:w-[1ch] [&_.line:last-of-type::after]:-translate-px"
           )}
           dangerouslySetInnerHTML={{ __html: highlightedCode }}
         />

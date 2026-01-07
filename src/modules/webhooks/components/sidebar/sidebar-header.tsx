@@ -24,7 +24,7 @@ const SidebarHeader: React.FC<SidebarHeaderProps> = ({ onOpenCreate }) => {
   const { isConnected } = useWebhookStore();
 
   return (
-    <ShadcnSidebarHeader className="border-b border-border/50 pb-4 pt-4 px-4">
+    <ShadcnSidebarHeader className="border-b border-border/50 pb-2 pt-3.5 px-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2.5 overflow-hidden">
           {/* Icon matching reference - violet bg with lightning */}

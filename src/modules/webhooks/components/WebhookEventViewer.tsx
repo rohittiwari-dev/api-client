@@ -7,15 +7,16 @@ import {
   ChevronDown,
   ChevronRight,
   Clock,
-  Download,
   Trash2,
   Copy,
-  Code,
   FileJson,
   Filter,
   ArrowDownToLine,
   Pause,
   Play,
+  Globe,
+  Check,
+  Download,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -30,13 +31,16 @@ import {
 import { toast } from "sonner";
 import { useWebhookEvents, useClearWebhookEvents } from "../hooks/queries";
 import type { WebhookEvent } from "../types/webhook.types";
+import { CodeEditor } from "@/components/ui/code-editor";
 
 interface WebhookEventViewerProps {
   webhookId: string;
+  webhookName?: string;
 }
 
 const WebhookEventViewer: React.FC<WebhookEventViewerProps> = ({
   webhookId,
+  webhookName = "webhook",
 }) => {
   const [filter, setFilter] = useState("");
   const [autoScroll, setAutoScroll] = useState(true);
@@ -67,6 +71,35 @@ const WebhookEventViewer: React.FC<WebhookEventViewerProps> = ({
     toast.success(`${label} copied to clipboard`);
   };
 
+  const handleDownload = () => {
+    if (events.length === 0) {
+      toast.error("No events to download");
+      return;
+    }
+
+    const data = {
+      webhookId,
+      exportedAt: new Date().toISOString(),
+      totalEvents: events.length,
+      events,
+    };
+
+    const blob = new Blob([JSON.stringify(data, null, 2)], {
+      type: "application/json",
+    });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${webhookName.replace(/\s+/g, "-").toLowerCase()}-events-${
+      new Date().toISOString().split("T")[0]
+    }.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    toast.success(`Downloaded ${events.length} events`);
+  };
+
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center h-64 gap-3">
@@ -78,50 +111,56 @@ const WebhookEventViewer: React.FC<WebhookEventViewerProps> = ({
 
   if (events.length === 0) {
     return (
-      <div className="flex flex-1 flex-col items-center justify-center border border-dashed border-border rounded-xl p-10 m-4 bg-muted/20">
-        <div className="size-12 rounded-full bg-muted flex items-center justify-center mb-4">
-          <Clock className="size-6 text-muted-foreground/50" />
+      <div className="flex flex-1 flex-col items-center justify-center rounded-2xl border border-white/5 dark:border-white/5 p-12 m-4 bg-linear-to-br from-violet-500/5 via-fuchsia-500/5 to-transparent backdrop-blur-sm">
+        <div className="size-16 rounded-2xl bg-violet-500/10 border border-violet-500/20 flex items-center justify-center mb-5">
+          <Clock className="size-7 text-violet-500" />
         </div>
-        <h3 className="text-sm font-semibold">Waiting for events</h3>
-        <p className="text-xs text-muted-foreground mt-1 max-w-xs text-center">
+        <h3 className="text-lg font-semibold">Waiting for events</h3>
+        <p className="text-sm text-muted-foreground mt-2 max-w-sm text-center">
           Send a request to your webhook URL to see it appear here in realtime.
         </p>
+        <div className="mt-6 flex items-center gap-2 px-4 py-2 rounded-full bg-background/50 border border-white/5 dark:border-white/5">
+          <span className="size-2 rounded-full bg-emerald-500 animate-pulse" />
+          <span className="text-xs text-muted-foreground">
+            Listening for incoming requests...
+          </span>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col h-full bg-background border border-border/50 rounded-xl overflow-hidden shadow-sm">
+    <div className="flex flex-col w-full h-full rounded-2xl border border-white/5 dark:border-white/5 bg-background/40 backdrop-blur-sm overflow-hidden shadow-lg">
       {/* Toolbar */}
-      <div className="flex items-center gap-2 p-3 border-b border-border/50 bg-muted/20">
+      <div className="flex items-center gap-3 p-4 border-b border-white/5 dark:border-white/5 bg-linear-to-r from-violet-500/5 via-transparent to-transparent">
         <div className="relative flex-1">
-          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
           <Input
-            placeholder="Filter events..."
+            placeholder="Filter events by method, body, or headers..."
             value={filter}
             onChange={(e) => setFilter(e.target.value)}
-            className="h-8 pl-8 bg-background border-border/50 text-xs focus-visible:ring-violet-500/30"
+            className="h-9 pl-9 bg-background/50 border-white/10 dark:border-white/10 text-sm focus-visible:ring-violet-500/30 rounded-lg"
           />
         </div>
 
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1.5">
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
                 variant="ghost"
                 size="icon"
                 className={cn(
-                  "size-8",
+                  "size-9 rounded-lg transition-all",
                   autoScroll
-                    ? "text-violet-500 bg-violet-500/10"
-                    : "text-muted-foreground"
+                    ? "text-violet-500 bg-violet-500/10 border border-violet-500/20"
+                    : "text-muted-foreground border border-transparent hover:border-white/10"
                 )}
                 onClick={() => setAutoScroll(!autoScroll)}
               >
                 {autoScroll ? (
-                  <Pause className="size-3.5" />
+                  <Pause className="size-4" />
                 ) : (
-                  <Play className="size-3.5" />
+                  <Play className="size-4" />
                 )}
               </Button>
             </TooltipTrigger>
@@ -135,30 +174,51 @@ const WebhookEventViewer: React.FC<WebhookEventViewerProps> = ({
               <Button
                 variant="ghost"
                 size="icon"
-                className="size-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                className="size-9 rounded-lg text-muted-foreground border border-transparent hover:text-foreground hover:bg-white/5 hover:border-white/10"
+                onClick={handleDownload}
+                disabled={events.length === 0}
+              >
+                <Download className="size-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Download all events</TooltipContent>
+          </Tooltip>
+
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="size-9 rounded-lg text-muted-foreground border border-transparent hover:text-destructive hover:bg-destructive/10 hover:border-destructive/20"
                 onClick={() => clearEvents.mutate(webhookId)}
                 disabled={events.length === 0}
               >
-                <Trash2 className="size-3.5" />
+                <Trash2 className="size-4" />
               </Button>
             </TooltipTrigger>
-            <TooltipContent>Clear log</TooltipContent>
+            <TooltipContent>Clear all events</TooltipContent>
           </Tooltip>
         </div>
       </div>
 
       {/* Events List */}
-      <ScrollArea className="flex-1 bg-muted/5">
+      <ScrollArea className="flex-1 overflow-x-hidden w-full overflow-y-auto ">
         <div className="flex flex-col">
           {filteredEvents.length === 0 ? (
-            <div className="py-12 text-center text-xs text-muted-foreground">
-              No events match your filter
+            <div className="py-16 text-center">
+              <div className="size-12 rounded-xl bg-muted/30 flex items-center justify-center mx-auto mb-4">
+                <Search className="size-5 text-muted-foreground/50" />
+              </div>
+              <p className="text-sm text-muted-foreground">
+                No events match your filter
+              </p>
             </div>
           ) : (
             filteredEvents.map((event) => (
               <EventItem
                 key={event.id}
                 event={event}
+                webhookName={webhookName}
                 isExpanded={expandedEvents.includes(event.id)}
                 onToggle={() => toggleExpand(event.id)}
                 onCopy={copyToClipboard}
@@ -169,11 +229,16 @@ const WebhookEventViewer: React.FC<WebhookEventViewerProps> = ({
       </ScrollArea>
 
       {/* Footer Status */}
-      <div className="border-t border-border/50 bg-muted/20 px-3 py-1.5 flex items-center justify-between text-[10px] text-muted-foreground">
-        <span>{filteredEvents.length} events</span>
-        <span className="flex items-center gap-1.5">
-          <span className="size-1.5 rounded-full bg-emerald-500 animate-pulse" />
-          Listening for new events...
+      <div className="border-t border-white/5 dark:border-white/5 bg-background/50 px-4 py-2.5 flex items-center justify-between">
+        <span className="text-xs text-muted-foreground font-medium">
+          {filteredEvents.length} event{filteredEvents.length !== 1 ? "s" : ""}
+        </span>
+        <span className="flex items-center gap-2 text-xs text-muted-foreground">
+          <span className="size-2 rounded-full bg-emerald-500 animate-pulse" />
+          <span className="font-medium">Live</span>
+          <span className="text-muted-foreground/70">
+            • Listening for events
+          </span>
         </span>
       </div>
     </div>
@@ -186,9 +251,11 @@ const EventItem = ({
   isExpanded,
   onToggle,
   onCopy,
+  webhookName,
 }: {
   event: WebhookEvent;
   isExpanded: boolean;
+  webhookName: string;
   onToggle: () => void;
   onCopy: (text: string, label: string) => void;
 }) => {
@@ -204,156 +271,216 @@ const EventItem = ({
     methodColors[event.method.toUpperCase()] ||
     "text-zinc-500 bg-zinc-500/10 border-zinc-500/20";
 
+  // Extract origin from headers
+  const origin: string =
+    event.headers?.origin ||
+    event.headers?.referer ||
+    event.headers?.host ||
+    "Direct Request";
+
+  // Format headers as YAML-like string for CodeEditor
+  const headersString = Object.entries(event.headers || {})
+    .map(([key, value]) => `${key}: ${value}`)
+    .join("\n");
+
+  // Format query params as YAML-like string
+  const queryString = event.searchParams
+    ? Object.entries(event.searchParams)
+        .map(([key, value]) => `${key}: ${value}`)
+        .join("\n")
+    : "";
+
+  // Format body
+  const bodyString: string =
+    typeof event.body === "string"
+      ? event.body
+      : JSON.stringify(event.body, null, 2) ?? "";
+
+  const handleDownload = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const data = {
+      ...event,
+      exportedAt: new Date().toISOString(),
+    };
+
+    const blob = new Blob([JSON.stringify(data, null, 2)], {
+      type: "application/json",
+    });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${webhookName
+      .replace(/\s+/g, "-")
+      .toLowerCase()}-event-${event.id.slice(0, 8)}-${
+      new Date().toISOString().split("T")[0]
+    }.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    toast.success("Event downloaded");
+  };
+
   return (
-    <div className="border-b border-border/40 last:border-0 bg-background hover:bg-muted/30 transition-colors">
+    <div
+      className={cn(
+        "border-b border-white/5 dark:border-white/5 last:border-0 flex-1 min-w-0 overflow-hidden transition-all",
+        isExpanded ? "bg-violet-500/2" : "bg-transparent hover:bg-muted/5"
+      )}
+    >
+      {/* Collapsed Row - Compact */}
       <div
-        className="flex items-center gap-3 p-3 cursor-pointer select-none group"
+        className="flex items-center gap-2 px-3 pr-8 py-2.5 cursor-pointer select-none group"
         onClick={onToggle}
       >
-        <div className="flex items-center justify-center size-5 text-muted-foreground/50 group-hover:text-foreground transition-colors">
+        <div
+          className={cn(
+            "flex items-center justify-center size-5 rounded transition-all shrink-0",
+            isExpanded
+              ? "text-violet-500"
+              : "text-muted-foreground/40 group-hover:text-foreground"
+          )}
+        >
           {isExpanded ? (
-            <ChevronDown className="size-4" />
+            <ChevronDown className="size-3.5" />
           ) : (
-            <ChevronRight className="size-4" />
+            <ChevronRight className="size-3.5" />
           )}
         </div>
 
         <Badge
           variant="secondary"
           className={cn(
-            "h-5 px-1.5 font-mono text-[10px] border shadow-none",
+            "h-5 px-1.5 font-mono text-[10px] font-bold border shadow-none rounded shrink-0",
             methodColor
           )}
         >
           {event.method}
         </Badge>
 
-        <div className="flex-1 min-w-0 flex items-center gap-2">
-          <span className="text-xs font-mono text-muted-foreground truncate opacity-70">
-            {event.id.slice(0, 8)}...
-          </span>
+        {/* Origin URL */}
+        <div className="flex-1 min-w-0 flex items-center gap-1.5">
+          <Globe className="size-3 text-muted-foreground/40 shrink-0" />
+          <span className="text-xs text-foreground/80 truncate">{origin}</span>
         </div>
 
-        <div className="flex items-center gap-4 text-xs">
-          <div className="hidden sm:flex items-center gap-1.5 text-muted-foreground/70">
-            <ArrowDownToLine className="size-3" />
-            <span>{event.size}B</span>
-          </div>
-          <div className="flex items-center gap-1.5 text-muted-foreground">
-            <Clock className="size-3" />
-            <span>{format(new Date(event.createdAt), "HH:mm:ss")}</span>
-          </div>
+        {/* Meta Info - Compact */}
+        <div className="flex items-center gap-2 text-[10px] shrink-0">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="size-6 rounded text-muted-foreground/40 hover:text-foreground hover:bg-muted/10"
+            onClick={handleDownload}
+            title="Download Event JSON"
+          >
+            <Download className="size-3" />
+          </Button>
+          <span className="hidden sm:inline text-muted-foreground/60 font-mono">
+            {event.size}B
+          </span>
+          <span className="text-muted-foreground/60 font-mono">
+            {format(new Date(event.createdAt), "HH:mm:ss")}
+          </span>
         </div>
       </div>
 
+      {/* Expanded Details - Modern & Compact */}
       {isExpanded && (
-        <div className="px-3 pb-3 pt-0 animate-in slide-in-from-top-2 duration-200">
-          <div className="ml-8 border-l border-border/50 pl-4 space-y-4">
-            {/* Headers */}
-            <div className="space-y-1.5">
-              <div className="flex items-center justify-between">
-                <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
-                  <Filter className="size-3" /> Headers
+        <div className="pb-3 px-3 animate-in fade-in duration-150 overflow-hidden">
+          <div className="ml-5 space-y-2 min-w-0">
+            {/* Quick Info Bar */}
+            <div className="flex flex-wrap items-center gap-2 py-2 text-[10px]">
+              <div className="flex items-center gap-1 px-2 py-1 rounded bg-muted/30">
+                <span className="text-muted-foreground">ID:</span>
+                <span className="font-mono text-foreground/80">
+                  {event.id.slice(0, 12)}...
                 </span>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="size-5 h-5 w-5"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onCopy(JSON.stringify(event.headers, null, 2), "Headers");
-                  }}
-                >
-                  <Copy className="size-3" />
-                </Button>
               </div>
-              <div className="rounded-md border border-border bg-muted/30 p-2 overflow-x-auto">
-                <div className="grid grid-cols-[auto,1fr] gap-x-4 gap-y-1 text-xs font-mono">
-                  {Object.entries(event.headers || {}).map(([key, value]) => (
-                    <React.Fragment key={key}>
-                      <span className="text-muted-foreground text-right">
-                        {key}:
-                      </span>
-                      <span className="text-foreground break-all">
-                        {String(value)}
-                      </span>
-                    </React.Fragment>
-                  ))}
+              {event.ip && (
+                <div className="flex items-center gap-1 px-2 py-1 rounded bg-muted/30">
+                  <span className="text-muted-foreground">IP:</span>
+                  <span className="font-mono text-foreground/80">
+                    {event.ip}
+                  </span>
                 </div>
+              )}
+              {event.contentType && (
+                <div className="flex items-center gap-1 px-2 py-1 rounded bg-muted/30">
+                  <span className="text-muted-foreground">Type:</span>
+                  <span className="font-mono text-foreground/80">
+                    {event.contentType}
+                  </span>
+                </div>
+              )}
+              <div className="flex items-center gap-1 px-2 py-1 rounded bg-muted/30">
+                <span className="text-muted-foreground">Time:</span>
+                <span className="font-mono text-foreground/80">
+                  {format(new Date(event.createdAt), "MMM d, HH:mm:ss")}
+                </span>
               </div>
             </div>
 
-            {/* Query Params */}
-            {!!event.searchParams &&
-              Object.keys(event.searchParams).length > 0 && (
-                <div className="space-y-1.5">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
-                      <Search className="size-3" /> Query Params
-                    </span>
-                  </div>
-                  <div className="rounded-md border border-border bg-muted/30 p-2 overflow-x-auto">
-                    <div className="grid grid-cols-[auto,1fr] gap-x-4 gap-y-1 text-xs font-mono">
-                      {Object.entries(event.searchParams).map(
-                        ([key, value]) => (
-                          <React.Fragment key={key}>
-                            <span className="text-muted-foreground text-right">
-                              {key}:
-                            </span>
-                            <span className="text-foreground break-all">
-                              {String(value)}
-                            </span>
-                          </React.Fragment>
-                        )
-                      )}
-                    </div>
-                  </div>
-                </div>
-              )}
+            {/* Headers - CodeEditor */}
+            {!!event.headers && headersString && (
+              <CodeEditor
+                lang="yaml"
+                header={true}
+                dots={false}
+                title={`Headers (${Object.keys(event.headers || {}).length})`}
+                icon={<Filter className="size-3 text-blue-500" />}
+                copyButton={true}
+                writing={false}
+                onCopy={() =>
+                  onCopy(JSON.stringify(event.headers, null, 2), "Headers")
+                }
+                className="w-full! max-w-full h-auto max-h-32 border-white/10 bg-muted/30 dark:bg-zinc-900/50 rounded-lg overflow-hidden"
+                contentClassName="p-3"
+              >
+                {headersString}
+              </CodeEditor>
+            )}
 
-            {/* Body */}
-            {!!event.body && (
-              <div className="space-y-1.5">
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
-                    <FileJson className="size-3" /> Body
-                  </span>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="size-5 h-5 w-5"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onCopy(
-                        typeof event.body === "string"
-                          ? event.body
-                          : JSON.stringify(event.body, null, 2),
-                        "Body"
-                      );
-                    }}
-                  >
-                    <Copy className="size-3" />
-                  </Button>
-                </div>
-                <div className="rounded-md border border-border bg-muted/30 p-0 overflow-hidden">
-                  <div className="max-h-[300px] overflow-auto custom-scrollbar p-3">
-                    <pre className="text-xs font-mono leading-relaxed">
-                      {/* Extremely basic JSON highlighting */}
-                      {(() => {
-                        const content =
-                          typeof event.body === "string"
-                            ? event.body
-                            : JSON.stringify(event.body, null, 2);
-                        return (
-                          <span className="text-foreground/90">
-                            {String(content)}
-                          </span>
-                        );
-                      })()}
-                    </pre>
-                  </div>
-                </div>
-              </div>
+            {/* Query Params - CodeEditor */}
+            {!!queryString && (
+              <CodeEditor
+                lang="yaml"
+                header={true}
+                dots={false}
+                title={`Query Params (${
+                  Object.keys(event.searchParams || {}).length
+                })`}
+                icon={<Search className="size-3 text-amber-500" />}
+                copyButton={true}
+                writing={false}
+                onCopy={() =>
+                  onCopy(
+                    JSON.stringify(event.searchParams, null, 2),
+                    "Query Params"
+                  )
+                }
+                className="w-full! max-w-full h-auto max-h-32 border-white/10 bg-muted/30 dark:bg-zinc-900/50 rounded-lg overflow-hidden"
+                contentClassName="p-3"
+              >
+                {queryString}
+              </CodeEditor>
+            )}
+
+            {/* Body - CodeEditor */}
+            {event.body !== undefined && event.body !== null && (
+              <CodeEditor
+                lang="json"
+                header={true}
+                dots={false}
+                title={`Body (${event.size} bytes)`}
+                icon={<FileJson className="size-3 text-emerald-500" />}
+                copyButton={true}
+                writing={false}
+                onCopy={() => onCopy(bodyString, "Body")}
+                className="w-full! max-w-full h-auto max-h-32 border-white/10 bg-muted/30 dark:bg-zinc-900/50 rounded-lg overflow-hidden"
+                contentClassName="p-3"
+              >
+                {bodyString}
+              </CodeEditor>
             )}
           </div>
         </div>
