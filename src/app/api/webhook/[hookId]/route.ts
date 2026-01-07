@@ -134,7 +134,8 @@ function generateEventId(): string {
  * Store webhook event in Redis (cache) and PostgreSQL (persistence)
  */
 async function storeWebhookEvent(
-  event: WebhookEventData
+  event: WebhookEventData,
+  webhook?: any
 ): Promise<string | null> {
   const listKey = `webhook:${event.hookId}:events`;
   const eventKey = `webhook:${event.hookId}:event:${event.id}`;
@@ -145,12 +146,14 @@ async function storeWebhookEvent(
   await redis.ltrim(listKey, 0, MAX_EVENTS_PER_HOOK - 1);
   await redis.expire(listKey, EVENT_TTL_SECONDS);
 
-  // Find webhook by URL and store in database
-  const webhook = await db.webhook.findUnique({
-    where: { url: event.hookId },
-  });
+  // Find webhook by URL if not provided
+  const dbWebhook =
+    webhook ||
+    (await db.webhook.findUnique({
+      where: { url: event.hookId },
+    }));
 
-  if (!webhook) {
+  if (!dbWebhook) {
     // Webhook not registered, still accept the event in Redis only
     return null;
   }
@@ -158,7 +161,7 @@ async function storeWebhookEvent(
   // Store in PostgreSQL for persistence
   const dbEvent = await db.webhookEvent.create({
     data: {
-      webhookId: webhook.id,
+      webhookId: dbWebhook.id,
       method: event.method,
       headers: event.headers,
       body: event.body as object,
@@ -174,11 +177,11 @@ async function storeWebhookEvent(
   // Publish realtime event via Redis pub/sub
   const realtimeEvent: WebhookRealtimeEvent = {
     type: "NEW_EVENT",
-    workspaceId: webhook.workspaceId,
-    webhookId: webhook.id,
+    workspaceId: dbWebhook.workspaceId,
+    webhookId: dbWebhook.id,
     data: {
       id: dbEvent.id,
-      webhookId: webhook.id,
+      webhookId: dbWebhook.id,
       method: event.method,
       headers: event.headers,
       body: event.body,
@@ -193,7 +196,7 @@ async function storeWebhookEvent(
   };
 
   await publisher.publish(
-    `${WEBHOOK_CHANNEL_PREFIX}${webhook.workspaceId}`,
+    `${WEBHOOK_CHANNEL_PREFIX}${dbWebhook.workspaceId}`,
     JSON.stringify(realtimeEvent)
   );
 
@@ -274,8 +277,33 @@ async function handleWebhook(
       size: bodyRaw?.length || 0,
     };
 
-    // Store the event
-    const dbEventId = await storeWebhookEvent(event);
+    // Fetch webhook to check for custom response config
+    const webhook = (await db.webhook.findUnique({
+      where: { url: hookId },
+    })) as any;
+
+    // Store the event (pass webhook to avoid re-fetch)
+    const dbEventId = await storeWebhookEvent(event, webhook);
+
+    // Check for custom response configuration
+    if (webhook?.responseConfig) {
+      const config = webhook.responseConfig as any;
+      const status = config.status || 200;
+      const body = config.body || "";
+      const contentType = config.contentType || "text/plain";
+      const headers = config.headers || {};
+
+      const response = new NextResponse(body, {
+        status,
+        headers: {
+          "Content-Type": contentType,
+          "X-Webhook-Event-Id": dbEventId || event.id,
+          "X-Webhook-Hook-Id": hookId,
+          ...headers,
+        },
+      });
+      return addCorsHeaders(response);
+    }
 
     // Return success response with CORS headers
     const response = NextResponse.json(

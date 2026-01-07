@@ -1586,6 +1586,7 @@ export const WebhookScalarFieldEnum = {
   name: 'name',
   description: 'description',
   url: 'url',
+  responseConfig: 'responseConfig',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   userId: 'userId',

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Copy,
   Check,
@@ -10,6 +10,7 @@ import {
   RefreshCw,
   Terminal,
   Download,
+  Loader2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -32,29 +33,57 @@ import {
   useClearWebhookEvents,
   useWebhookEvents,
 } from "../hooks/queries";
-import { useRouter } from "next/navigation";
+import { redirect, useRouter } from "next/navigation";
 import WebhookEventViewer from "./WebhookEventViewer";
+import WebhookResponseSheet from "./WebhookResponseSheet";
 import {
   ResizableHandle,
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface WebhookDetailProps {
   webhookId: string;
   workspaceId: string;
+  workspaceSlug: string;
+  onSuccessfullyDeleted?: () => void;
 }
 
 const WebhookDetail: React.FC<WebhookDetailProps> = ({
   webhookId,
   workspaceId,
+  onSuccessfullyDeleted,
 }) => {
-  const router = useRouter();
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [showClearDialog, setShowClearDialog] = useState(false);
   const { data: webhook, isLoading } = useWebhook(webhookId);
   const { data: events = [] } = useWebhookEvents(webhookId);
-  const deleteWebhook = useDeleteWebhook();
-  const clearEvents = useClearWebhookEvents();
+  const {
+    mutateAsync: deleteWebhookMutateAsync,
+    isSuccess: deleteWebhookIsSuccess,
+    isPending: deleteWebhookIsPending,
+  } = useDeleteWebhook();
+  const {
+    mutateAsync: clearEventsMutateAsync,
+    isPending: clearEventsIsPending,
+  } = useClearWebhookEvents();
   const [isCopied, setIsCopied] = useState(false);
+
+  useEffect(() => {
+    if (deleteWebhookIsSuccess) {
+      onSuccessfullyDeleted?.();
+    }
+  }, [deleteWebhookIsSuccess, onSuccessfullyDeleted]);
 
   if (isLoading) {
     return (
@@ -81,29 +110,22 @@ const WebhookDetail: React.FC<WebhookDetailProps> = ({
     setTimeout(() => setIsCopied(false), 2000);
   };
 
-  const handleDelete = async () => {
-    if (
-      !confirm(
-        "Are you sure you want to delete this webhook? This action cannot be undone."
-      )
-    ) {
-      return;
-    }
-
+  const handleDelete = async (e: React.MouseEvent) => {
+    e.preventDefault();
     try {
-      await deleteWebhook.mutateAsync({ id: webhook.id, workspaceId });
+      await deleteWebhookMutateAsync({ id: webhook.id, workspaceId });
       toast.success("Webhook deleted");
-      router.push(`/workspace/${workspaceId}/webhooks`);
     } catch {
       toast.error("Failed to delete webhook");
     }
   };
 
-  const handleClearEvents = async () => {
-    if (!confirm("Clear all events for this webhook?")) return;
+  const handleClearEvents = async (e: React.MouseEvent) => {
+    e.preventDefault();
     try {
-      await clearEvents.mutateAsync(webhook.id);
+      await clearEventsMutateAsync(webhook.id);
       toast.success("Events cleared");
+      setShowClearDialog(false);
     } catch {
       toast.error("Failed to clear events");
     }
@@ -182,6 +204,10 @@ const WebhookDetail: React.FC<WebhookDetailProps> = ({
             </div>
 
             <div className="flex items-center gap-2">
+              <WebhookResponseSheet
+                webhook={webhook}
+                key={webhook.id + (webhook.responseConfig ? "-configured" : "")}
+              />
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button
@@ -219,7 +245,7 @@ const WebhookDetail: React.FC<WebhookDetailProps> = ({
                     Download Events
                   </DropdownMenuItem>
                   <DropdownMenuItem
-                    onClick={handleClearEvents}
+                    onSelect={() => setShowClearDialog(true)}
                     className="cursor-pointer"
                   >
                     <RefreshCw className="size-4 mr-2" />
@@ -227,13 +253,74 @@ const WebhookDetail: React.FC<WebhookDetailProps> = ({
                   </DropdownMenuItem>
                   <DropdownMenuItem
                     className="text-destructive focus:text-destructive cursor-pointer"
-                    onClick={handleDelete}
+                    onSelect={() => setShowDeleteDialog(true)}
                   >
                     <Trash2 className="size-4 mr-2" />
                     Delete Webhook
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
+
+              <AlertDialog
+                open={showClearDialog}
+                onOpenChange={setShowClearDialog}
+              >
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Clear all events?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      This will permanently remove all recorded events for this
+                      webhook. This action cannot be undone.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel disabled={clearEventsIsPending}>
+                      Cancel
+                    </AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={handleClearEvents}
+                      disabled={clearEventsIsPending}
+                    >
+                      {clearEventsIsPending && (
+                        <Loader2 className="mr-2 size-4 animate-spin" />
+                      )}
+                      Clear Events
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+
+              <AlertDialog
+                open={showDeleteDialog}
+                onOpenChange={setShowDeleteDialog}
+              >
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Delete Webhook?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Are you sure you want to delete this webhook? This action
+                      cannot be undone and will stop all future event logging.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel disabled={deleteWebhookIsPending}>
+                      Cancel
+                    </AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={handleDelete}
+                      disabled={deleteWebhookIsPending}
+                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                    >
+                      {deleteWebhookIsPending ? (
+                        <Loader2 className="mr-2 size-4 animate-spin" />
+                      ) : (
+                        <Trash2 className="mr-2 size-4" />
+                      )}
+                      Delete
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             </div>
           </div>
 

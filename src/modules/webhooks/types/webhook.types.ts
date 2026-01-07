@@ -9,6 +9,12 @@ export interface Webhook {
   updatedAt: Date;
   userId: string;
   workspaceId: string;
+  responseConfig?: {
+    status: number;
+    body: string;
+    contentType: string;
+    headers: Record<string, string>;
+  } | null;
 }
 
 export interface WebhookEvent {
@@ -36,6 +42,12 @@ export interface CreateWebhookInput {
 export interface UpdateWebhookInput {
   name?: string;
   description?: string;
+  responseConfig?: {
+    status: number;
+    body: string;
+    contentType: string;
+    headers: Record<string, string>;
+  } | null;
 }
 
 // Realtime event types

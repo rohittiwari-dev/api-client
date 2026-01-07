@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useEffect } from "react";
-import { useParams } from "next/navigation";
+import React, { useEffect, useState } from "react";
+import { redirect, useParams } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import useWebhookStore from "@/modules/webhooks/store/webhook.store";
 import { useWebhooks } from "@/modules/webhooks/hooks/queries";
@@ -11,6 +11,7 @@ import useWorkspaceState from "@/modules/workspace/store";
 const WebhookDetailPage = () => {
   const params = useParams();
   const hookId = params.hookid as string; // This is the 'url' slug
+  const [successfullyDeleted, setSuccessfullyDeleted] = useState(false);
 
   const { activeWorkspace } = useWorkspaceState();
   const { setActiveWebhook } = useWebhookStore();
@@ -29,6 +30,18 @@ const WebhookDetailPage = () => {
     }
   }, [matchedWebhook, setActiveWebhook]);
 
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      if (successfullyDeleted) {
+        setSuccessfullyDeleted(false);
+        redirect(`/workspace/${params.slug}/webhooks`);
+      }
+    }, 2000);
+    return () => {
+      clearTimeout(timeout);
+    };
+  }, [successfullyDeleted, setActiveWebhook, params.slug]);
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-full">
@@ -42,13 +55,31 @@ const WebhookDetailPage = () => {
     );
   }
 
+  /* 
+     If we are in the process of deleting (optimistic UI), 
+     we show a redirecting state instead of checking !matchedWebhook.
+     This prevents the "Not Found" flash.
+  */
+  if (successfullyDeleted) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <div className="flex flex-col items-center gap-3">
+          <Loader2 className="size-8 animate-spin text-primary" />
+          <p className="text-sm text-muted-foreground animate-pulse">
+            Redirecting...
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   if (!matchedWebhook) {
     return (
       <div className="h-full flex items-center justify-center bg-background/50 p-6">
         <div className="w-full max-w-5xl flex flex-col lg:flex-row gap-6">
           {/* Left Column: Main Card */}
           <div className="flex-1 relative overflow-hidden rounded-2xl bg-linear-to-br from-red-500/5 via-orange-500/5 to-transparent border border-white/5 dark:border-white/5 p-6">
-            {/* Background Icon */}
+            {/* ... Rest of Not Found UI ... */}
             <div className="absolute top-0 right-0 p-6 opacity-5 pointer-events-none">
               <svg
                 className="size-48 -rotate-12"
@@ -199,6 +230,8 @@ const WebhookDetailPage = () => {
     <WebhookDetail
       webhookId={matchedWebhook.id}
       workspaceId={activeWorkspace?.id || ""}
+      workspaceSlug={activeWorkspace?.slug || ""}
+      onSuccessfullyDeleted={() => setSuccessfullyDeleted(true)}
     />
   );
 };

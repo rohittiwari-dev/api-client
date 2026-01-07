@@ -275,6 +275,7 @@ model Webhook {
   name        String
   description String?
   url         String         @unique // Generated unique URL slug
+  responseConfig Json?       // Custom response configuration
   createdAt   DateTime       @default(now())
   updatedAt   DateTime       @updatedAt
 

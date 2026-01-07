@@ -106,6 +106,7 @@ export async function updateWebhook(
     data: {
       name: data.name,
       description: data.description,
+      responseConfig: data.responseConfig as any,
     },
   });
 
