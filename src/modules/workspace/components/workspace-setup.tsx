@@ -30,8 +30,10 @@ import WorkspaceUserButton from "../../authentication/components/mini-user-butto
 
 const WorkspaceSetup = ({
   type = "get-started-page",
+  session,
 }: {
   type: "get-started-page" | "workspace-setup-modal";
+  session?: any;
 }) => {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = React.useState(false);
@@ -333,7 +335,7 @@ const WorkspaceSetup = ({
       {/* Theme Switcher absolute position */}
       <div className="absolute top-4 right-4 z-20 flex items-center gap-2">
         <ThemeSwitcher variant="multiple" />
-        <WorkspaceUserButton />
+        <WorkspaceUserButton session={session} />
       </div>
     </div>
   );

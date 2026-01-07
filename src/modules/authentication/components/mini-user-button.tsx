@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
-import { LogOut, Mail, User as UserIcon } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { LogOut, Mail, User as UserIcon, X } from "lucide-react";
+import { AnimatePresence, motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -9,6 +10,7 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
+  DropdownMenuGroup,
 } from "@/components/ui/dropdown-menu";
 import {
   Sheet,
@@ -27,20 +29,35 @@ import { redirect } from "next/navigation";
 import Spinner from "@/components/app-ui/spinner";
 import { useUserInvitationsQuery } from "@/modules/workspace/hooks/use-invitaions-query";
 
-export default function WorkspaceUserButton() {
-  const { data } = useAuthStore();
-  const { setAuthSession } = useAuthStore();
+import { Session, User } from "better-auth";
+
+export default function WorkspaceUserButton({
+  session,
+}: {
+  session?: {
+    user: User;
+    session: Session;
+  } | null;
+}) {
+  const { data, setAuthSession } = useAuthStore();
   const { clearCookies } = useCookieStore();
   const [sheetOpen, setSheetOpen] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
+  useEffect(() => {
+    if (session && !data) {
+      setAuthSession(session);
+    }
+  }, [session, data, setAuthSession]);
+
   // Fetch invitations to show badge/count if needed, or just to know
   const { data: invitations } = useUserInvitationsQuery();
-  const pendingCount = invitations?.length || 0;
+  const pendingCount =
+    invitations?.filter((i) => i.status === "pending")?.length || 0;
 
   const user = data?.user;
   const name = user?.name || "";
-  const image = user?.image || "";
+  const image = user?.image || undefined;
 
   const handleLogout = async () => {
     setIsLoggingOut(true);
@@ -66,8 +83,62 @@ export default function WorkspaceUserButton() {
     });
   };
 
+  const [showNotification, setShowNotification] = useState(false);
+  const [prevCount, setPrevCount] = useState(0);
+
+  if (pendingCount !== prevCount) {
+    setPrevCount(pendingCount);
+    if (pendingCount > prevCount) {
+      setShowNotification(true);
+    }
+  }
+
   return (
-    <>
+    <div className="relative">
+      <AnimatePresence>
+        {pendingCount > 0 && showNotification && (
+          <motion.div
+            initial={{ opacity: 0, y: 15, scale: 0.8, rotate: -5 }}
+            animate={{ opacity: 1, y: 0, scale: 1, rotate: 0 }}
+            exit={{ opacity: 0, y: 10, scale: 0.8 }}
+            transition={{ type: "spring", stiffness: 400, damping: 25 }}
+            className="absolute top-12 right-0 z-50 w-64 origin-top-right"
+          >
+            <div className="relative bg-linear-to-br from-indigo-500/80 via-purple-600/80 to-pink-500/80 dark:from-indigo-500/40 dark:via-purple-600/40 dark:to-pink-500/40 rounded-2xl shadow-xl shadow-purple-500/20 p-4 pt-3 text-white  border border-white/10 ring-1 ring-black/5">
+              {/* Arrow */}
+
+              <div className="relative z-10 flex items-start gap-3">
+                <div className="shrink-0 size-9 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center mt-0.5 ring-1 ring-white/30 shadow-inner">
+                  <Mail className="size-5 text-white drop-shadow-sm" />
+                </div>
+                <div className="flex-1">
+                  <p className="text-xs font-bold text-white/95 mb-0.5 tracking-wide uppercase">
+                    Hey there! 👋
+                  </p>
+                  <p className="text-[11px] text-white/90 leading-tight font-medium">
+                    You have{" "}
+                    <span className="bg-white/20 px-1 rounded text-white font-bold">
+                      {pendingCount}
+                    </span>{" "}
+                    pending invitation{pendingCount !== 1 ? "s" : ""} waiting
+                    for you!
+                  </p>
+                </div>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowNotification(false);
+                  }}
+                  className="text-white/60 hover:text-white hover:bg-white/20 rounded-full p-0.5 transition-all"
+                >
+                  <X className="size-3.5" />
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <DropdownMenu>
         <DropdownMenuTrigger asChild className="outline-none">
           <Button
@@ -87,41 +158,72 @@ export default function WorkspaceUserButton() {
             )}
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-56" forceMount>
-          <div className="flex items-center justify-start gap-2 p-2">
-            <div className="flex flex-col space-y-1 leading-none">
-              {name && <p className="font-medium">{name}</p>}
-              {user?.email && (
-                <p className="w-[200px] truncate text-xs text-muted-foreground">
-                  {user.email}
-                </p>
-              )}
+        <DropdownMenuContent
+          className="w-[260px] rounded-2xl p-1.5 border-border/50 bg-background/80 backdrop-blur-xl shadow-2xl"
+          align="end"
+          sideOffset={8}
+        >
+          <div className="p-1.5 mb-1.5 rounded-xl bg-muted/40 border border-border/40">
+            <div className="flex items-center gap-3">
+              <Avatar
+                className="h-9 w-9 rounded-xl border border-border/50 shadow-sm"
+                fallbackClassName="rounded-xl"
+                href={image}
+                alt={name}
+                initial={getInitialsFromName(name)}
+              />
+              <div className="grid flex-1 text-left leading-tight">
+                <span className="truncate font-semibold text-foreground text-sm">
+                  {name}
+                </span>
+                <span className="truncate text-[11px] text-muted-foreground">
+                  {user?.email}
+                </span>
+              </div>
             </div>
           </div>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem
-            onClick={() => setSheetOpen(true)}
-            className="cursor-pointer gap-2"
-          >
-            <Mail className="h-4 w-4" />
-            <span>Invitations</span>
-            {pendingCount > 0 && (
-              <span className="ml-auto text-xs bg-red-500/10 text-red-500 px-1.5 py-0.5 rounded-full">
-                {pendingCount}
-              </span>
-            )}
-          </DropdownMenuItem>
-          <DropdownMenuSeparator />
+
+          <DropdownMenuGroup className="space-y-0.5">
+            <DropdownMenuItem
+              onClick={() => setSheetOpen(true)}
+              className="p-1.5 cursor-pointer focus:bg-accent/50 rounded-lg group"
+            >
+              <div className="flex items-center justify-center size-7 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400 mr-2 group-hover:bg-blue-500/20 transition-colors">
+                <Mail className="size-3.5" />
+              </div>
+              <div className="flex flex-col flex-1">
+                <span className="text-sm font-medium">Invitations</span>
+                <span className="text-[11px] text-muted-foreground">
+                  Manage invites
+                </span>
+              </div>
+              {pendingCount > 0 && (
+                <span className="ml-auto text-xs bg-red-500/10 text-red-500 px-1.5 py-0.5 rounded-full">
+                  {pendingCount}
+                </span>
+              )}
+            </DropdownMenuItem>
+          </DropdownMenuGroup>
+
+          <DropdownMenuSeparator className="my-1.5 bg-border/50" />
+
           <DropdownMenuItem
             onClick={handleLogout}
-            className="text-red-600 focus:text-red-600 focus:bg-red-100 dark:focus:bg-red-900/10 cursor-pointer gap-2"
+            className="p-1.5 cursor-pointer text-red-600 dark:text-red-400 focus:text-red-600 focus:bg-red-500/10 dark:focus:bg-red-500/10 mt-1 rounded-lg group"
           >
-            {isLoggingOut ? (
-              <Spinner className="h-4 w-4" />
-            ) : (
-              <LogOut className="h-4 w-4" />
-            )}
-            <span>Log out</span>
+            <div className="flex items-center justify-center size-7 rounded-lg bg-red-500/10 text-red-600 dark:text-red-400 mr-2 group-hover:bg-red-500/20 transition-colors">
+              {isLoggingOut ? (
+                <Spinner className="size-3.5" />
+              ) : (
+                <LogOut className="size-3.5" />
+              )}
+            </div>
+            <div className="flex flex-col">
+              <span className="text-sm font-medium">Log out</span>
+              <span className="text-[11px] text-muted-foreground">
+                End your session
+              </span>
+            </div>
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
@@ -149,6 +251,6 @@ export default function WorkspaceUserButton() {
           </div>
         </SheetContent>
       </Sheet>
-    </>
+    </div>
   );
 }

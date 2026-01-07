@@ -42,7 +42,7 @@ const GettingStartedPage = async () => {
   }
 
   // No organizations - show the setup form
-  return <WorkspaceSetup type={"get-started-page"} />;
+  return <WorkspaceSetup type={"get-started-page"} session={session} />;
 };
 
 export default GettingStartedPage;
