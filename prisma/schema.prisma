@@ -149,6 +149,7 @@ model Organization {
   Collection  Collection[]
   Environment Environment[]
   requests    Request[]
+  webhooks    Webhook[]
   globalAuth  Json?
 
   @@unique([slug])
@@ -268,3 +269,45 @@ model Environment {
   @@index([workspaceId])
   @@index([userId])
 }
+
+model Webhook {
+  id          String         @id @default(cuid())
+  name        String
+  description String?
+  url         String         @unique // Generated unique URL slug
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  userId      String
+  workspaceId String
+  workspace   Organization   @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  events      WebhookEvent[]
+
+  @@index([workspaceId])
+  @@index([userId])
+  @@map("webhooks")
+}
+
+model WebhookEvent {
+  id          String   @id @default(cuid())
+  webhookId   String
+  webhook     Webhook  @relation(fields: [webhookId], references: [id], onDelete: Cascade)
+
+  method      String
+  headers     Json
+  body        Json?
+  bodyRaw     String?
+  searchParams Json?
+  ip          String?
+  userAgent   String?
+  contentType String?
+  size        Int      @default(0)
+
+  createdAt   DateTime @default(now())
+
+  @@index([webhookId])
+  @@index([createdAt])
+  @@map("webhook_events")
+}
+

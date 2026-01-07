@@ -2,7 +2,14 @@
 
 import { create } from "zustand";
 
-type PanelType = "request" | "environment" | "code" | "cookies" | "auth" | null;
+type PanelType =
+  | "request"
+  | "environment"
+  | "code"
+  | "cookies"
+  | "auth"
+  | "webhooks"
+  | null;
 
 interface RightPanelStore {
   activePanel: PanelType;

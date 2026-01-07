@@ -72,3 +72,13 @@ export type Request = Prisma.RequestModel
  * 
  */
 export type Environment = Prisma.EnvironmentModel
+/**
+ * Model Webhook
+ * 
+ */
+export type Webhook = Prisma.WebhookModel
+/**
+ * Model WebhookEvent
+ * 
+ */
+export type WebhookEvent = Prisma.WebhookEventModel

@@ -61,7 +61,9 @@ export const ModelName = {
   Invitation: 'Invitation',
   Collection: 'Collection',
   Request: 'Request',
-  Environment: 'Environment'
+  Environment: 'Environment',
+  Webhook: 'Webhook',
+  WebhookEvent: 'WebhookEvent'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -244,6 +246,38 @@ export const EnvironmentScalarFieldEnum = {
 export type EnvironmentScalarFieldEnum = (typeof EnvironmentScalarFieldEnum)[keyof typeof EnvironmentScalarFieldEnum]
 
 
+export const WebhookScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  description: 'description',
+  url: 'url',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  userId: 'userId',
+  workspaceId: 'workspaceId'
+} as const
+
+export type WebhookScalarFieldEnum = (typeof WebhookScalarFieldEnum)[keyof typeof WebhookScalarFieldEnum]
+
+
+export const WebhookEventScalarFieldEnum = {
+  id: 'id',
+  webhookId: 'webhookId',
+  method: 'method',
+  headers: 'headers',
+  body: 'body',
+  bodyRaw: 'bodyRaw',
+  searchParams: 'searchParams',
+  ip: 'ip',
+  userAgent: 'userAgent',
+  contentType: 'contentType',
+  size: 'size',
+  createdAt: 'createdAt'
+} as const
+
+export type WebhookEventScalarFieldEnum = (typeof WebhookEventScalarFieldEnum)[keyof typeof WebhookEventScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -258,6 +292,13 @@ export const NullableJsonNullValueInput = {
 } as const
 
 export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
+
+
+export const JsonNullValueInput = {
+  JsonNull: 'JsonNull'
+} as const
+
+export type JsonNullValueInput = (typeof JsonNullValueInput)[keyof typeof JsonNullValueInput]
 
 
 export const QueryMode = {

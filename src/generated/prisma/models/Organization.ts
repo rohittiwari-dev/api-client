@@ -207,6 +207,7 @@ export type OrganizationWhereInput = {
   Collection?: Prisma.CollectionListRelationFilter
   Environment?: Prisma.EnvironmentListRelationFilter
   requests?: Prisma.RequestListRelationFilter
+  webhooks?: Prisma.WebhookListRelationFilter
 }
 
 export type OrganizationOrderByWithRelationInput = {
@@ -223,6 +224,7 @@ export type OrganizationOrderByWithRelationInput = {
   Collection?: Prisma.CollectionOrderByRelationAggregateInput
   Environment?: Prisma.EnvironmentOrderByRelationAggregateInput
   requests?: Prisma.RequestOrderByRelationAggregateInput
+  webhooks?: Prisma.WebhookOrderByRelationAggregateInput
 }
 
 export type OrganizationWhereUniqueInput = Prisma.AtLeast<{
@@ -242,6 +244,7 @@ export type OrganizationWhereUniqueInput = Prisma.AtLeast<{
   Collection?: Prisma.CollectionListRelationFilter
   Environment?: Prisma.EnvironmentListRelationFilter
   requests?: Prisma.RequestListRelationFilter
+  webhooks?: Prisma.WebhookListRelationFilter
 }, "id" | "slug">
 
 export type OrganizationOrderByWithAggregationInput = {
@@ -286,6 +289,7 @@ export type OrganizationCreateInput = {
   Collection?: Prisma.CollectionCreateNestedManyWithoutWorkspaceInput
   Environment?: Prisma.EnvironmentCreateNestedManyWithoutWorkspaceInput
   requests?: Prisma.RequestCreateNestedManyWithoutWorkspaceInput
+  webhooks?: Prisma.WebhookCreateNestedManyWithoutWorkspaceInput
 }
 
 export type OrganizationUncheckedCreateInput = {
@@ -302,6 +306,7 @@ export type OrganizationUncheckedCreateInput = {
   Collection?: Prisma.CollectionUncheckedCreateNestedManyWithoutWorkspaceInput
   Environment?: Prisma.EnvironmentUncheckedCreateNestedManyWithoutWorkspaceInput
   requests?: Prisma.RequestUncheckedCreateNestedManyWithoutWorkspaceInput
+  webhooks?: Prisma.WebhookUncheckedCreateNestedManyWithoutWorkspaceInput
 }
 
 export type OrganizationUpdateInput = {
@@ -318,6 +323,7 @@ export type OrganizationUpdateInput = {
   Collection?: Prisma.CollectionUpdateManyWithoutWorkspaceNestedInput
   Environment?: Prisma.EnvironmentUpdateManyWithoutWorkspaceNestedInput
   requests?: Prisma.RequestUpdateManyWithoutWorkspaceNestedInput
+  webhooks?: Prisma.WebhookUpdateManyWithoutWorkspaceNestedInput
 }
 
 export type OrganizationUncheckedUpdateInput = {
@@ -334,6 +340,7 @@ export type OrganizationUncheckedUpdateInput = {
   Collection?: Prisma.CollectionUncheckedUpdateManyWithoutWorkspaceNestedInput
   Environment?: Prisma.EnvironmentUncheckedUpdateManyWithoutWorkspaceNestedInput
   requests?: Prisma.RequestUncheckedUpdateManyWithoutWorkspaceNestedInput
+  webhooks?: Prisma.WebhookUncheckedUpdateManyWithoutWorkspaceNestedInput
 }
 
 export type OrganizationCreateManyInput = {
@@ -482,6 +489,20 @@ export type OrganizationUpdateOneWithoutEnvironmentNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.OrganizationUpdateToOneWithWhereWithoutEnvironmentInput, Prisma.OrganizationUpdateWithoutEnvironmentInput>, Prisma.OrganizationUncheckedUpdateWithoutEnvironmentInput>
 }
 
+export type OrganizationCreateNestedOneWithoutWebhooksInput = {
+  create?: Prisma.XOR<Prisma.OrganizationCreateWithoutWebhooksInput, Prisma.OrganizationUncheckedCreateWithoutWebhooksInput>
+  connectOrCreate?: Prisma.OrganizationCreateOrConnectWithoutWebhooksInput
+  connect?: Prisma.OrganizationWhereUniqueInput
+}
+
+export type OrganizationUpdateOneRequiredWithoutWebhooksNestedInput = {
+  create?: Prisma.XOR<Prisma.OrganizationCreateWithoutWebhooksInput, Prisma.OrganizationUncheckedCreateWithoutWebhooksInput>
+  connectOrCreate?: Prisma.OrganizationCreateOrConnectWithoutWebhooksInput
+  upsert?: Prisma.OrganizationUpsertWithoutWebhooksInput
+  connect?: Prisma.OrganizationWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.OrganizationUpdateToOneWithWhereWithoutWebhooksInput, Prisma.OrganizationUpdateWithoutWebhooksInput>, Prisma.OrganizationUncheckedUpdateWithoutWebhooksInput>
+}
+
 export type OrganizationCreateWithoutMembersInput = {
   id?: string
   name: string
@@ -495,6 +516,7 @@ export type OrganizationCreateWithoutMembersInput = {
   Collection?: Prisma.CollectionCreateNestedManyWithoutWorkspaceInput
   Environment?: Prisma.EnvironmentCreateNestedManyWithoutWorkspaceInput
   requests?: Prisma.RequestCreateNestedManyWithoutWorkspaceInput
+  webhooks?: Prisma.WebhookCreateNestedManyWithoutWorkspaceInput
 }
 
 export type OrganizationUncheckedCreateWithoutMembersInput = {
@@ -510,6 +532,7 @@ export type OrganizationUncheckedCreateWithoutMembersInput = {
   Collection?: Prisma.CollectionUncheckedCreateNestedManyWithoutWorkspaceInput
   Environment?: Prisma.EnvironmentUncheckedCreateNestedManyWithoutWorkspaceInput
   requests?: Prisma.RequestUncheckedCreateNestedManyWithoutWorkspaceInput
+  webhooks?: Prisma.WebhookUncheckedCreateNestedManyWithoutWorkspaceInput
 }
 
 export type OrganizationCreateOrConnectWithoutMembersInput = {
@@ -541,6 +564,7 @@ export type OrganizationUpdateWithoutMembersInput = {
   Collection?: Prisma.CollectionUpdateManyWithoutWorkspaceNestedInput
   Environment?: Prisma.EnvironmentUpdateManyWithoutWorkspaceNestedInput
   requests?: Prisma.RequestUpdateManyWithoutWorkspaceNestedInput
+  webhooks?: Prisma.WebhookUpdateManyWithoutWorkspaceNestedInput
 }
 
 export type OrganizationUncheckedUpdateWithoutMembersInput = {
@@ -556,6 +580,7 @@ export type OrganizationUncheckedUpdateWithoutMembersInput = {
   Collection?: Prisma.CollectionUncheckedUpdateManyWithoutWorkspaceNestedInput
   Environment?: Prisma.EnvironmentUncheckedUpdateManyWithoutWorkspaceNestedInput
   requests?: Prisma.RequestUncheckedUpdateManyWithoutWorkspaceNestedInput
+  webhooks?: Prisma.WebhookUncheckedUpdateManyWithoutWorkspaceNestedInput
 }
 
 export type OrganizationCreateWithoutInvitationsInput = {
@@ -571,6 +596,7 @@ export type OrganizationCreateWithoutInvitationsInput = {
   Collection?: Prisma.CollectionCreateNestedManyWithoutWorkspaceInput
   Environment?: Prisma.EnvironmentCreateNestedManyWithoutWorkspaceInput
   requests?: Prisma.RequestCreateNestedManyWithoutWorkspaceInput
+  webhooks?: Prisma.WebhookCreateNestedManyWithoutWorkspaceInput
 }
 
 export type OrganizationUncheckedCreateWithoutInvitationsInput = {
@@ -586,6 +612,7 @@ export type OrganizationUncheckedCreateWithoutInvitationsInput = {
   Collection?: Prisma.CollectionUncheckedCreateNestedManyWithoutWorkspaceInput
   Environment?: Prisma.EnvironmentUncheckedCreateNestedManyWithoutWorkspaceInput
   requests?: Prisma.RequestUncheckedCreateNestedManyWithoutWorkspaceInput
+  webhooks?: Prisma.WebhookUncheckedCreateNestedManyWithoutWorkspaceInput
 }
 
 export type OrganizationCreateOrConnectWithoutInvitationsInput = {
@@ -617,6 +644,7 @@ export type OrganizationUpdateWithoutInvitationsInput = {
   Collection?: Prisma.CollectionUpdateManyWithoutWorkspaceNestedInput
   Environment?: Prisma.EnvironmentUpdateManyWithoutWorkspaceNestedInput
   requests?: Prisma.RequestUpdateManyWithoutWorkspaceNestedInput
+  webhooks?: Prisma.WebhookUpdateManyWithoutWorkspaceNestedInput
 }
 
 export type OrganizationUncheckedUpdateWithoutInvitationsInput = {
@@ -632,6 +660,7 @@ export type OrganizationUncheckedUpdateWithoutInvitationsInput = {
   Collection?: Prisma.CollectionUncheckedUpdateManyWithoutWorkspaceNestedInput
   Environment?: Prisma.EnvironmentUncheckedUpdateManyWithoutWorkspaceNestedInput
   requests?: Prisma.RequestUncheckedUpdateManyWithoutWorkspaceNestedInput
+  webhooks?: Prisma.WebhookUncheckedUpdateManyWithoutWorkspaceNestedInput
 }
 
 export type OrganizationCreateWithoutCollectionInput = {
@@ -647,6 +676,7 @@ export type OrganizationCreateWithoutCollectionInput = {
   invitations?: Prisma.InvitationCreateNestedManyWithoutOrganizationInput
   Environment?: Prisma.EnvironmentCreateNestedManyWithoutWorkspaceInput
   requests?: Prisma.RequestCreateNestedManyWithoutWorkspaceInput
+  webhooks?: Prisma.WebhookCreateNestedManyWithoutWorkspaceInput
 }
 
 export type OrganizationUncheckedCreateWithoutCollectionInput = {
@@ -662,6 +692,7 @@ export type OrganizationUncheckedCreateWithoutCollectionInput = {
   invitations?: Prisma.InvitationUncheckedCreateNestedManyWithoutOrganizationInput
   Environment?: Prisma.EnvironmentUncheckedCreateNestedManyWithoutWorkspaceInput
   requests?: Prisma.RequestUncheckedCreateNestedManyWithoutWorkspaceInput
+  webhooks?: Prisma.WebhookUncheckedCreateNestedManyWithoutWorkspaceInput
 }
 
 export type OrganizationCreateOrConnectWithoutCollectionInput = {
@@ -693,6 +724,7 @@ export type OrganizationUpdateWithoutCollectionInput = {
   invitations?: Prisma.InvitationUpdateManyWithoutOrganizationNestedInput
   Environment?: Prisma.EnvironmentUpdateManyWithoutWorkspaceNestedInput
   requests?: Prisma.RequestUpdateManyWithoutWorkspaceNestedInput
+  webhooks?: Prisma.WebhookUpdateManyWithoutWorkspaceNestedInput
 }
 
 export type OrganizationUncheckedUpdateWithoutCollectionInput = {
@@ -708,6 +740,7 @@ export type OrganizationUncheckedUpdateWithoutCollectionInput = {
   invitations?: Prisma.InvitationUncheckedUpdateManyWithoutOrganizationNestedInput
   Environment?: Prisma.EnvironmentUncheckedUpdateManyWithoutWorkspaceNestedInput
   requests?: Prisma.RequestUncheckedUpdateManyWithoutWorkspaceNestedInput
+  webhooks?: Prisma.WebhookUncheckedUpdateManyWithoutWorkspaceNestedInput
 }
 
 export type OrganizationCreateWithoutRequestsInput = {
@@ -723,6 +756,7 @@ export type OrganizationCreateWithoutRequestsInput = {
   invitations?: Prisma.InvitationCreateNestedManyWithoutOrganizationInput
   Collection?: Prisma.CollectionCreateNestedManyWithoutWorkspaceInput
   Environment?: Prisma.EnvironmentCreateNestedManyWithoutWorkspaceInput
+  webhooks?: Prisma.WebhookCreateNestedManyWithoutWorkspaceInput
 }
 
 export type OrganizationUncheckedCreateWithoutRequestsInput = {
@@ -738,6 +772,7 @@ export type OrganizationUncheckedCreateWithoutRequestsInput = {
   invitations?: Prisma.InvitationUncheckedCreateNestedManyWithoutOrganizationInput
   Collection?: Prisma.CollectionUncheckedCreateNestedManyWithoutWorkspaceInput
   Environment?: Prisma.EnvironmentUncheckedCreateNestedManyWithoutWorkspaceInput
+  webhooks?: Prisma.WebhookUncheckedCreateNestedManyWithoutWorkspaceInput
 }
 
 export type OrganizationCreateOrConnectWithoutRequestsInput = {
@@ -769,6 +804,7 @@ export type OrganizationUpdateWithoutRequestsInput = {
   invitations?: Prisma.InvitationUpdateManyWithoutOrganizationNestedInput
   Collection?: Prisma.CollectionUpdateManyWithoutWorkspaceNestedInput
   Environment?: Prisma.EnvironmentUpdateManyWithoutWorkspaceNestedInput
+  webhooks?: Prisma.WebhookUpdateManyWithoutWorkspaceNestedInput
 }
 
 export type OrganizationUncheckedUpdateWithoutRequestsInput = {
@@ -784,6 +820,7 @@ export type OrganizationUncheckedUpdateWithoutRequestsInput = {
   invitations?: Prisma.InvitationUncheckedUpdateManyWithoutOrganizationNestedInput
   Collection?: Prisma.CollectionUncheckedUpdateManyWithoutWorkspaceNestedInput
   Environment?: Prisma.EnvironmentUncheckedUpdateManyWithoutWorkspaceNestedInput
+  webhooks?: Prisma.WebhookUncheckedUpdateManyWithoutWorkspaceNestedInput
 }
 
 export type OrganizationCreateWithoutEnvironmentInput = {
@@ -799,6 +836,7 @@ export type OrganizationCreateWithoutEnvironmentInput = {
   invitations?: Prisma.InvitationCreateNestedManyWithoutOrganizationInput
   Collection?: Prisma.CollectionCreateNestedManyWithoutWorkspaceInput
   requests?: Prisma.RequestCreateNestedManyWithoutWorkspaceInput
+  webhooks?: Prisma.WebhookCreateNestedManyWithoutWorkspaceInput
 }
 
 export type OrganizationUncheckedCreateWithoutEnvironmentInput = {
@@ -814,6 +852,7 @@ export type OrganizationUncheckedCreateWithoutEnvironmentInput = {
   invitations?: Prisma.InvitationUncheckedCreateNestedManyWithoutOrganizationInput
   Collection?: Prisma.CollectionUncheckedCreateNestedManyWithoutWorkspaceInput
   requests?: Prisma.RequestUncheckedCreateNestedManyWithoutWorkspaceInput
+  webhooks?: Prisma.WebhookUncheckedCreateNestedManyWithoutWorkspaceInput
 }
 
 export type OrganizationCreateOrConnectWithoutEnvironmentInput = {
@@ -845,6 +884,7 @@ export type OrganizationUpdateWithoutEnvironmentInput = {
   invitations?: Prisma.InvitationUpdateManyWithoutOrganizationNestedInput
   Collection?: Prisma.CollectionUpdateManyWithoutWorkspaceNestedInput
   requests?: Prisma.RequestUpdateManyWithoutWorkspaceNestedInput
+  webhooks?: Prisma.WebhookUpdateManyWithoutWorkspaceNestedInput
 }
 
 export type OrganizationUncheckedUpdateWithoutEnvironmentInput = {
@@ -860,6 +900,87 @@ export type OrganizationUncheckedUpdateWithoutEnvironmentInput = {
   invitations?: Prisma.InvitationUncheckedUpdateManyWithoutOrganizationNestedInput
   Collection?: Prisma.CollectionUncheckedUpdateManyWithoutWorkspaceNestedInput
   requests?: Prisma.RequestUncheckedUpdateManyWithoutWorkspaceNestedInput
+  webhooks?: Prisma.WebhookUncheckedUpdateManyWithoutWorkspaceNestedInput
+}
+
+export type OrganizationCreateWithoutWebhooksInput = {
+  id?: string
+  name: string
+  slug?: string | null
+  description?: string | null
+  logo?: string | null
+  createdAt: Date | string
+  metadata?: string | null
+  globalAuth?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  members?: Prisma.MemberCreateNestedManyWithoutOrganizationInput
+  invitations?: Prisma.InvitationCreateNestedManyWithoutOrganizationInput
+  Collection?: Prisma.CollectionCreateNestedManyWithoutWorkspaceInput
+  Environment?: Prisma.EnvironmentCreateNestedManyWithoutWorkspaceInput
+  requests?: Prisma.RequestCreateNestedManyWithoutWorkspaceInput
+}
+
+export type OrganizationUncheckedCreateWithoutWebhooksInput = {
+  id?: string
+  name: string
+  slug?: string | null
+  description?: string | null
+  logo?: string | null
+  createdAt: Date | string
+  metadata?: string | null
+  globalAuth?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  members?: Prisma.MemberUncheckedCreateNestedManyWithoutOrganizationInput
+  invitations?: Prisma.InvitationUncheckedCreateNestedManyWithoutOrganizationInput
+  Collection?: Prisma.CollectionUncheckedCreateNestedManyWithoutWorkspaceInput
+  Environment?: Prisma.EnvironmentUncheckedCreateNestedManyWithoutWorkspaceInput
+  requests?: Prisma.RequestUncheckedCreateNestedManyWithoutWorkspaceInput
+}
+
+export type OrganizationCreateOrConnectWithoutWebhooksInput = {
+  where: Prisma.OrganizationWhereUniqueInput
+  create: Prisma.XOR<Prisma.OrganizationCreateWithoutWebhooksInput, Prisma.OrganizationUncheckedCreateWithoutWebhooksInput>
+}
+
+export type OrganizationUpsertWithoutWebhooksInput = {
+  update: Prisma.XOR<Prisma.OrganizationUpdateWithoutWebhooksInput, Prisma.OrganizationUncheckedUpdateWithoutWebhooksInput>
+  create: Prisma.XOR<Prisma.OrganizationCreateWithoutWebhooksInput, Prisma.OrganizationUncheckedCreateWithoutWebhooksInput>
+  where?: Prisma.OrganizationWhereInput
+}
+
+export type OrganizationUpdateToOneWithWhereWithoutWebhooksInput = {
+  where?: Prisma.OrganizationWhereInput
+  data: Prisma.XOR<Prisma.OrganizationUpdateWithoutWebhooksInput, Prisma.OrganizationUncheckedUpdateWithoutWebhooksInput>
+}
+
+export type OrganizationUpdateWithoutWebhooksInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  logo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  metadata?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  globalAuth?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  members?: Prisma.MemberUpdateManyWithoutOrganizationNestedInput
+  invitations?: Prisma.InvitationUpdateManyWithoutOrganizationNestedInput
+  Collection?: Prisma.CollectionUpdateManyWithoutWorkspaceNestedInput
+  Environment?: Prisma.EnvironmentUpdateManyWithoutWorkspaceNestedInput
+  requests?: Prisma.RequestUpdateManyWithoutWorkspaceNestedInput
+}
+
+export type OrganizationUncheckedUpdateWithoutWebhooksInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  logo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  metadata?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  globalAuth?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  members?: Prisma.MemberUncheckedUpdateManyWithoutOrganizationNestedInput
+  invitations?: Prisma.InvitationUncheckedUpdateManyWithoutOrganizationNestedInput
+  Collection?: Prisma.CollectionUncheckedUpdateManyWithoutWorkspaceNestedInput
+  Environment?: Prisma.EnvironmentUncheckedUpdateManyWithoutWorkspaceNestedInput
+  requests?: Prisma.RequestUncheckedUpdateManyWithoutWorkspaceNestedInput
 }
 
 
@@ -873,6 +994,7 @@ export type OrganizationCountOutputType = {
   Collection: number
   Environment: number
   requests: number
+  webhooks: number
 }
 
 export type OrganizationCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -881,6 +1003,7 @@ export type OrganizationCountOutputTypeSelect<ExtArgs extends runtime.Types.Exte
   Collection?: boolean | OrganizationCountOutputTypeCountCollectionArgs
   Environment?: boolean | OrganizationCountOutputTypeCountEnvironmentArgs
   requests?: boolean | OrganizationCountOutputTypeCountRequestsArgs
+  webhooks?: boolean | OrganizationCountOutputTypeCountWebhooksArgs
 }
 
 /**
@@ -928,6 +1051,13 @@ export type OrganizationCountOutputTypeCountRequestsArgs<ExtArgs extends runtime
   where?: Prisma.RequestWhereInput
 }
 
+/**
+ * OrganizationCountOutputType without action
+ */
+export type OrganizationCountOutputTypeCountWebhooksArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.WebhookWhereInput
+}
+
 
 export type OrganizationSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -943,6 +1073,7 @@ export type OrganizationSelect<ExtArgs extends runtime.Types.Extensions.Internal
   Collection?: boolean | Prisma.Organization$CollectionArgs<ExtArgs>
   Environment?: boolean | Prisma.Organization$EnvironmentArgs<ExtArgs>
   requests?: boolean | Prisma.Organization$requestsArgs<ExtArgs>
+  webhooks?: boolean | Prisma.Organization$webhooksArgs<ExtArgs>
   _count?: boolean | Prisma.OrganizationCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["organization"]>
 
@@ -986,6 +1117,7 @@ export type OrganizationInclude<ExtArgs extends runtime.Types.Extensions.Interna
   Collection?: boolean | Prisma.Organization$CollectionArgs<ExtArgs>
   Environment?: boolean | Prisma.Organization$EnvironmentArgs<ExtArgs>
   requests?: boolean | Prisma.Organization$requestsArgs<ExtArgs>
+  webhooks?: boolean | Prisma.Organization$webhooksArgs<ExtArgs>
   _count?: boolean | Prisma.OrganizationCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type OrganizationIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -999,6 +1131,7 @@ export type $OrganizationPayload<ExtArgs extends runtime.Types.Extensions.Intern
     Collection: Prisma.$CollectionPayload<ExtArgs>[]
     Environment: Prisma.$EnvironmentPayload<ExtArgs>[]
     requests: Prisma.$RequestPayload<ExtArgs>[]
+    webhooks: Prisma.$WebhookPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1408,6 +1541,7 @@ export interface Prisma__OrganizationClient<T, Null = never, ExtArgs extends run
   Collection<T extends Prisma.Organization$CollectionArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Organization$CollectionArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CollectionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   Environment<T extends Prisma.Organization$EnvironmentArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Organization$EnvironmentArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$EnvironmentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   requests<T extends Prisma.Organization$requestsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Organization$requestsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$RequestPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  webhooks<T extends Prisma.Organization$webhooksArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Organization$webhooksArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$WebhookPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1950,6 +2084,30 @@ export type Organization$requestsArgs<ExtArgs extends runtime.Types.Extensions.I
   take?: number
   skip?: number
   distinct?: Prisma.RequestScalarFieldEnum | Prisma.RequestScalarFieldEnum[]
+}
+
+/**
+ * Organization.webhooks
+ */
+export type Organization$webhooksArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Webhook
+   */
+  select?: Prisma.WebhookSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Webhook
+   */
+  omit?: Prisma.WebhookOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.WebhookInclude<ExtArgs> | null
+  where?: Prisma.WebhookWhereInput
+  orderBy?: Prisma.WebhookOrderByWithRelationInput | Prisma.WebhookOrderByWithRelationInput[]
+  cursor?: Prisma.WebhookWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.WebhookScalarFieldEnum | Prisma.WebhookScalarFieldEnum[]
 }
 
 /**

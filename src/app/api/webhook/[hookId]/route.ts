@@ -1,11 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
-import redis from "@/lib/redis";
+import redis, { publisher, WEBHOOK_CHANNEL_PREFIX } from "@/lib/redis";
+import db from "@/lib/db";
+import type { WebhookRealtimeEvent } from "@/modules/webhooks/types/webhook.types";
 
 // Configuration
-const MAX_EVENTS_PER_HOOK = 100; // Maximum stored events per hookId
-const EVENT_TTL_SECONDS = 60 * 60 * 24 * 7; // 7 days TTL
+const MAX_EVENTS_PER_HOOK = 100; // Maximum stored events per hookId in Redis
+const EVENT_TTL_SECONDS = 60 * 60 * 24 * 7; // 7 days TTL for Redis cache
 
-interface WebhookEvent {
+interface WebhookEventData {
   id: string;
   hookId: string;
   timestamp: string;
@@ -26,6 +28,26 @@ interface WebhookEvent {
 type RouteContext = {
   params: Promise<{ hookId: string }>;
 };
+
+// CORS headers for all responses
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods":
+    "GET, POST, PUT, PATCH, DELETE, OPTIONS, HEAD",
+  "Access-Control-Allow-Headers": "*",
+  "Access-Control-Max-Age": "86400",
+  "Access-Control-Expose-Headers": "X-Webhook-Event-Id, X-Webhook-Hook-Id",
+};
+
+/**
+ * Add CORS headers to response
+ */
+function addCorsHeaders(response: NextResponse): NextResponse {
+  Object.entries(corsHeaders).forEach(([key, value]) => {
+    response.headers.set(key, value);
+  });
+  return response;
+}
 
 /**
  * Parse request body based on content type
@@ -109,29 +131,79 @@ function generateEventId(): string {
 }
 
 /**
- * Store webhook event in Redis
+ * Store webhook event in Redis (cache) and PostgreSQL (persistence)
  */
-async function storeWebhookEvent(event: WebhookEvent): Promise<void> {
+async function storeWebhookEvent(
+  event: WebhookEventData
+): Promise<string | null> {
   const listKey = `webhook:${event.hookId}:events`;
   const eventKey = `webhook:${event.hookId}:event:${event.id}`;
 
-  // Store the full event
+  // Store in Redis cache
   await redis.setex(eventKey, EVENT_TTL_SECONDS, JSON.stringify(event));
-
-  // Add to the list (prepend for newest first)
   await redis.lpush(listKey, event.id);
-
-  // Trim to max events
   await redis.ltrim(listKey, 0, MAX_EVENTS_PER_HOOK - 1);
-
-  // Set TTL on the list
   await redis.expire(listKey, EVENT_TTL_SECONDS);
+
+  // Find webhook by URL and store in database
+  const webhook = await db.webhook.findUnique({
+    where: { url: event.hookId },
+  });
+
+  if (!webhook) {
+    // Webhook not registered, still accept the event in Redis only
+    return null;
+  }
+
+  // Store in PostgreSQL for persistence
+  const dbEvent = await db.webhookEvent.create({
+    data: {
+      webhookId: webhook.id,
+      method: event.method,
+      headers: event.headers,
+      body: event.body as object,
+      bodyRaw: event.bodyRaw,
+      searchParams: event.searchParams,
+      ip: event.ip,
+      userAgent: event.userAgent,
+      contentType: event.contentType,
+      size: event.size,
+    },
+  });
+
+  // Publish realtime event via Redis pub/sub
+  const realtimeEvent: WebhookRealtimeEvent = {
+    type: "NEW_EVENT",
+    workspaceId: webhook.workspaceId,
+    webhookId: webhook.id,
+    data: {
+      id: dbEvent.id,
+      webhookId: webhook.id,
+      method: event.method,
+      headers: event.headers,
+      body: event.body,
+      bodyRaw: event.bodyRaw,
+      searchParams: event.searchParams,
+      ip: event.ip,
+      userAgent: event.userAgent,
+      contentType: event.contentType,
+      size: event.size,
+      createdAt: dbEvent.createdAt,
+    },
+  };
+
+  await publisher.publish(
+    `${WEBHOOK_CHANNEL_PREFIX}${webhook.workspaceId}`,
+    JSON.stringify(realtimeEvent)
+  );
+
+  return dbEvent.id;
 }
 
 /**
- * Get all webhook events for a hookId
+ * Get all webhook events for a hookId from Redis cache
  */
-async function getWebhookEvents(hookId: string): Promise<WebhookEvent[]> {
+async function getWebhookEvents(hookId: string): Promise<WebhookEventData[]> {
   const listKey = `webhook:${hookId}:events`;
   const eventIds = await redis.lrange(listKey, 0, -1);
 
@@ -139,7 +211,7 @@ async function getWebhookEvents(hookId: string): Promise<WebhookEvent[]> {
     return [];
   }
 
-  const events: WebhookEvent[] = [];
+  const events: WebhookEventData[] = [];
   for (const eventId of eventIds) {
     const eventKey = `webhook:${hookId}:event:${eventId}`;
     const eventData = await redis.get(eventKey);
@@ -152,9 +224,9 @@ async function getWebhookEvents(hookId: string): Promise<WebhookEvent[]> {
 }
 
 /**
- * Clear all webhook events for a hookId
+ * Clear all webhook events for a hookId from Redis
  */
-async function clearWebhookEvents(hookId: string): Promise<number> {
+async function clearWebhookEventsRedis(hookId: string): Promise<number> {
   const listKey = `webhook:${hookId}:events`;
   const eventIds = await redis.lrange(listKey, 0, -1);
 
@@ -182,7 +254,7 @@ async function handleWebhook(
     const headers = extractHeaders(req.headers);
     const searchParams = extractSearchParams(req.nextUrl.searchParams);
 
-    const event: WebhookEvent = {
+    const event: WebhookEventData = {
       id: generateEventId(),
       hookId,
       timestamp: new Date().toISOString(),
@@ -203,39 +275,43 @@ async function handleWebhook(
     };
 
     // Store the event
-    await storeWebhookEvent(event);
+    const dbEventId = await storeWebhookEvent(event);
 
-    // Return success response
-    return NextResponse.json(
+    // Return success response with CORS headers
+    const response = NextResponse.json(
       {
         success: true,
         message: "Webhook received",
-        eventId: event.id,
+        eventId: dbEventId || event.id,
         hookId,
         timestamp: event.timestamp,
       },
       {
         status: 200,
         headers: {
-          "X-Webhook-Event-Id": event.id,
+          "X-Webhook-Event-Id": dbEventId || event.id,
           "X-Webhook-Hook-Id": hookId,
         },
       }
     );
+
+    return addCorsHeaders(response);
   } catch (error) {
     console.error("Webhook handler error:", error);
-    return NextResponse.json(
+    const response = NextResponse.json(
       {
         success: false,
         error: "Internal server error",
       },
       { status: 500 }
     );
+    return addCorsHeaders(response);
   }
 }
 
 /**
- * GET - Retrieve stored webhook events for a hookId
+ * GET - Record GET webhook event OR retrieve stored events
+ * Use ?events=true to retrieve stored events, otherwise GET is recorded as webhook event
  */
 export async function GET(
   req: NextRequest,
@@ -243,23 +319,34 @@ export async function GET(
 ): Promise<NextResponse> {
   try {
     const { hookId } = await context.params;
-    const events = await getWebhookEvents(hookId);
+    const shouldGetEvents = req.nextUrl.searchParams.get("events") === "true";
 
-    return NextResponse.json({
-      success: true,
-      hookId,
-      count: events.length,
-      events,
-    });
+    // If ?events=true, return stored events
+    if (shouldGetEvents) {
+      const events = await getWebhookEvents(hookId);
+
+      const response = NextResponse.json({
+        success: true,
+        hookId,
+        count: events.length,
+        events,
+      });
+
+      return addCorsHeaders(response);
+    }
+
+    // Otherwise, record as incoming webhook
+    return handleWebhook(req, context);
   } catch (error) {
-    console.error("GET webhook events error:", error);
-    return NextResponse.json(
+    console.error("GET webhook error:", error);
+    const response = NextResponse.json(
       {
         success: false,
-        error: "Failed to retrieve events",
+        error: "Failed to process request",
       },
       { status: 500 }
     );
+    return addCorsHeaders(response);
   }
 }
 
@@ -306,26 +393,28 @@ export async function DELETE(
     const shouldClear = req.nextUrl.searchParams.get("clear") === "true";
 
     if (shouldClear) {
-      const deleted = await clearWebhookEvents(hookId);
-      return NextResponse.json({
+      const deleted = await clearWebhookEventsRedis(hookId);
+      const response = NextResponse.json({
         success: true,
         message: "Webhook events cleared",
         hookId,
         deleted,
       });
+      return addCorsHeaders(response);
     }
 
     // Otherwise, treat as incoming webhook
     return handleWebhook(req, context);
   } catch (error) {
     console.error("DELETE webhook error:", error);
-    return NextResponse.json(
+    const response = NextResponse.json(
       {
         success: false,
         error: "Failed to process request",
       },
       { status: 500 }
     );
+    return addCorsHeaders(response);
   }
 }
 
@@ -338,16 +427,15 @@ export async function OPTIONS(
 ): Promise<NextResponse> {
   const { hookId } = await context.params;
 
-  return new NextResponse(null, {
+  const response = new NextResponse(null, {
     status: 204,
     headers: {
-      "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Methods": "GET, POST, PUT, PATCH, DELETE, OPTIONS",
-      "Access-Control-Allow-Headers": "*",
-      "Access-Control-Max-Age": "86400",
+      ...corsHeaders,
       "X-Webhook-Hook-Id": hookId,
     },
   });
+
+  return response;
 }
 
 /**
@@ -361,13 +449,16 @@ export async function HEAD(
     const { hookId } = await context.params;
     const events = await getWebhookEvents(hookId);
 
-    return new NextResponse(null, {
+    const response = new NextResponse(null, {
       status: 200,
       headers: {
+        ...corsHeaders,
         "X-Webhook-Hook-Id": hookId,
         "X-Webhook-Event-Count": events.length.toString(),
       },
     });
+
+    return response;
   } catch {
     return new NextResponse(null, { status: 500 });
   }

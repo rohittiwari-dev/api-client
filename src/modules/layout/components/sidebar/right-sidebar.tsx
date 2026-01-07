@@ -1,7 +1,14 @@
 "use client";
 
 import React from "react";
-import { Code, Cookie, FileText, Zap, ShieldCheck } from "lucide-react";
+import {
+  Code,
+  Cookie,
+  FileText,
+  Zap,
+  ShieldCheck,
+  Webhook,
+} from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
@@ -11,9 +18,13 @@ import {
 import { cn } from "@/lib/utils";
 import useRightPanelStore from "../../store/right-panel.store";
 import RightPanel from "./right-panel";
+import { useRouter } from "next/navigation";
+import useWorkspaceState from "@/modules/workspace/store";
 
 const RightSidebar = () => {
+  const router = useRouter();
   const { activePanel, togglePanel } = useRightPanelStore();
+  const { activeWorkspace } = useWorkspaceState();
 
   const menuData = [
     {
@@ -21,9 +32,12 @@ const RightSidebar = () => {
       icon: FileText,
       tooltip: "Request Info",
       className: {
-        triggerClassName: "bg-emerald-500/70 border border-emerald-500/60",
-        iconParentClassName: "bg-emerald-500/70 border border-emerald-500/60",
-        iconClassName: "bg-emerald-500/70 border border-emerald-500/60",
+        triggerClassName:
+          "dark:bg-emerald-500/16! border dark:border-emerald-500/16! bg-emerald-500/80! border-emerald-500/80!",
+        iconParentClassName:
+          "dark:bg-emerald-500/16! border dark:border-emerald-500/16! bg-emerald-500/80! border-emerald-500/80!",
+        iconClassName:
+          "dark:bg-emerald-500/16! border dark:border-emerald-500/16! bg-emerald-500/80! border-emerald-500/80!",
       },
     },
     {
@@ -31,9 +45,12 @@ const RightSidebar = () => {
       icon: Zap,
       tooltip: "Environment Variables",
       className: {
-        triggerClassName: "bg-rose-500/70 border border-rose-500/60",
-        iconParentClassName: "bg-rose-500/70 border border-rose-500/60",
-        iconClassName: "bg-rose-500/70 border border-rose-500/60",
+        triggerClassName:
+          "dark:bg-rose-500/16! border dark:border-rose-500/16! bg-rose-500/80! border-rose-500/80!",
+        iconParentClassName:
+          "dark:bg-rose-500/16! border dark:border-rose-500/16! bg-rose-500/80! border-rose-500/80!",
+        iconClassName:
+          "dark:bg-rose-500/16! border dark:border-rose-500/16! bg-rose-500/80! border-rose-500/80!",
       },
     },
     {
@@ -41,9 +58,12 @@ const RightSidebar = () => {
       icon: Code,
       tooltip: "Code Snippets",
       className: {
-        triggerClassName: "bg-indigo-500/70 border border-indigo-500/60",
-        iconParentClassName: "bg-indigo-500/70 border border-indigo-500/60",
-        iconClassName: "bg-indigo-500/70 border border-indigo-500/60",
+        triggerClassName:
+          "dark:bg-indigo-500/16! border dark:border-indigo-500/16! bg-indigo-500/80! border-indigo-500/80!",
+        iconParentClassName:
+          "dark:bg-indigo-500/16! border dark:border-indigo-500/16! bg-indigo-500/80! border-indigo-500/80!",
+        iconClassName:
+          "dark:bg-indigo-500/16! border dark:border-indigo-500/16! bg-indigo-500/80! border-indigo-500/80!",
       },
     },
     {
@@ -51,9 +71,12 @@ const RightSidebar = () => {
       icon: Cookie,
       tooltip: "Cookie Manager",
       className: {
-        triggerClassName: "bg-pink-500/70 border border-pink-500/60",
-        iconParentClassName: "bg-pink-500/70 border border-pink-500/60",
-        iconClassName: "bg-pink-500/70 border border-pink-500/60",
+        triggerClassName:
+          "dark:bg-pink-500/16! border dark:border-pink-500/16! bg-pink-500/80! border-pink-500/80!",
+        iconParentClassName:
+          "dark:bg-pink-500/16! border dark:border-pink-500/16! bg-pink-500/80! border-pink-500/80!",
+        iconClassName:
+          "dark:bg-pink-500/16! border dark:border-pink-500/16! bg-pink-500/80! border-pink-500/80!",
       },
     },
     {
@@ -61,9 +84,25 @@ const RightSidebar = () => {
       icon: ShieldCheck,
       tooltip: "Global Auth",
       className: {
-        triggerClassName: "bg-amber-500/70 border border-amber-500/60",
-        iconParentClassName: "bg-amber-500/70 border border-amber-500/60",
-        iconClassName: "bg-amber-500/70 border border-amber-500/60",
+        triggerClassName:
+          "dark:bg-amber-500/16! border dark:border-amber-500/16! bg-amber-500/80! border-amber-500/80!",
+        iconParentClassName:
+          "dark:bg-amber-500/16! border dark:border-amber-500/16! bg-amber-500/80! border-amber-500/80!",
+        iconClassName:
+          "dark:bg-amber-500/16! border dark:border-amber-500/16! bg-amber-500/80! border-amber-500/80!",
+      },
+    },
+    {
+      id: "webhooks" as const,
+      icon: Webhook,
+      tooltip: "Webhooks",
+      className: {
+        triggerClassName:
+          "dark:bg-violet-500/16! border dark:border-violet-500/16! bg-violet-500/80! border-violet-500/80!",
+        iconParentClassName:
+          "dark:bg-violet-500/16! border dark:border-violet-500/16! bg-violet-500/80! border-violet-500/80!",
+        iconClassName:
+          "dark:bg-violet-500/16! border dark:border-violet-500/16! bg-violet-500/80! border-violet-500/80!",
       },
     },
   ];
@@ -81,7 +120,15 @@ const RightSidebar = () => {
             return (
               <Tooltip key={item.id}>
                 <TooltipTrigger
-                  onClick={() => togglePanel(item.id)}
+                  onClick={() => {
+                    if (item.id === "webhooks") {
+                      router.push(
+                        `/workspace/${activeWorkspace?.slug}/webhooks`
+                      );
+                    } else {
+                      togglePanel(item.id);
+                    }
+                  }}
                   className={cn(
                     "relative cursor-pointer rounded-lg ",
                     "flex items-center justify-center",
