@@ -28,14 +28,14 @@ const WebhookHeader: React.FC = () => {
   const { isConnected } = useWebhookStore();
 
   return (
-    <header className="sticky top-0 z-50 w-full h-14 shrink-0">
+    <header className="sticky top-0 backdrop-blur-3xl bg-background/40 z-50 w-full h-14 shrink-0">
       {/* Glass Background */}
       <div className="absolute inset-0 bg-background/60 backdrop-blur-xl border-b border-white/5 dark:border-white/5" />
 
       {/* Subtle Gradient Line */}
       <div className="absolute bottom-0 left-0 right-0 h-px bg-linear-to-r from-transparent via-violet-500/30 to-transparent" />
 
-      <div className="relative flex h-full items-center justify-between gap-4 px-4">
+      <div className="relative flex h-full items-center justify-between  gap-4 px-4">
         {/* Left Section - Back & Brand */}
         <div className="flex items-center gap-3">
           {/* Back to Workspace */}
@@ -78,8 +78,8 @@ const WebhookHeader: React.FC = () => {
 
           {/* Webhook Mode Indicator */}
           <div className="hidden sm:flex items-center gap-2 px-2.5 py-1 rounded-lg bg-violet-500/10 border border-violet-500/20">
-            <Zap className="size-3.5 text-violet-400" />
-            <span className="text-xs font-medium text-violet-300">
+            <Zap className="size-3.5 dark:text-violet-300 text-violet-600" />
+            <span className="text-xs font-medium dark:text-violet-300 text-violet-600">
               Webhooks
             </span>
             <div
@@ -98,47 +98,99 @@ const WebhookHeader: React.FC = () => {
               <Button
                 variant="ghost"
                 size="sm"
-                className="gap-2 text-muted-foreground hover:text-foreground"
+                className="gap-2  bg-amber-500/15 hover:bg-amber-500/20! border border-amber-500/20 hover:border-amber-500/20 dark:hover:text-orange-200/80 text-orange-900/80 dark:text-orange-300/80 cursor-pointer hover:text-orange-700/80 opacity-85"
               >
                 <HelpCircle className="size-4" />
                 <span className="hidden md:inline">How Webhooks Work</span>
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-80 p-4" align="center">
-              <div className="space-y-3">
-                <h4 className="font-semibold text-sm">Webhook Endpoints</h4>
-                <div className="space-y-2 text-xs text-muted-foreground">
-                  <p>
-                    <strong className="text-foreground">Create webhooks</strong>{" "}
-                    to generate unique URLs for receiving HTTP requests from any
-                    service.
-                  </p>
-                  <p>
-                    <strong className="text-foreground">
-                      All HTTP methods
-                    </strong>{" "}
-                    are supported: GET, POST, PUT, PATCH, DELETE, etc.
-                  </p>
-                  <p>
-                    <strong className="text-foreground">
-                      Realtime updates
-                    </strong>{" "}
-                    - See events appear instantly as they arrive.
-                  </p>
-                  <p>
-                    <strong className="text-foreground">7-day history</strong> -
-                    Events are stored for 7 days.
-                  </p>
+            <PopoverContent
+              className="w-80 p-0 overflow-hidden border-violet-500/20 bg-background/80 backdrop-blur-xl shadow-xl shadow-violet-500/5"
+              align="center"
+            >
+              {/* Header with gradient */}
+              <div className="relative px-4 py-3 border-b border-violet-500/10 bg-linear-to-r from-violet-500/10 via-fuchsia-500/5 to-transparent">
+                <div className="flex items-center gap-2">
+                  <div className="flex items-center justify-center size-7 rounded-lg bg-violet-500/20 border border-violet-500/20">
+                    <Zap className="size-3.5 text-violet-500 dark:text-violet-400" />
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-sm">Webhook Endpoints</h4>
+                    <p className="text-[10px] text-muted-foreground">
+                      Capture HTTP requests in realtime
+                    </p>
+                  </div>
                 </div>
-                <div className="pt-2 border-t">
-                  <p className="text-xs text-muted-foreground">
-                    <strong>Tip:</strong> Use{" "}
-                    <code className="px-1 py-0.5 rounded bg-muted text-[10px]">
-                      ?events=true
-                    </code>{" "}
-                    on GET requests to retrieve stored events instead of
-                    recording.
-                  </p>
+              </div>
+
+              {/* Feature Grid */}
+              <div className="p-3 space-y-2">
+                {/* Feature Cards */}
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="group p-2.5 rounded-lg bg-linear-to-br from-violet-500/5 to-transparent border border-violet-500/10 hover:border-violet-500/20 transition-colors">
+                    <div className="size-6 rounded-md bg-violet-500/10 flex items-center justify-center mb-1.5">
+                      <ExternalLink className="size-3 text-violet-500 dark:text-violet-400" />
+                    </div>
+                    <p className="text-[11px] font-medium">Unique URLs</p>
+                    <p className="text-[10px] text-muted-foreground leading-tight">
+                      Generate endpoints for any service
+                    </p>
+                  </div>
+
+                  <div className="group p-2.5 rounded-lg bg-linear-to-br from-fuchsia-500/5 to-transparent border border-fuchsia-500/10 hover:border-fuchsia-500/20 transition-colors">
+                    <div className="size-6 rounded-md bg-fuchsia-500/10 flex items-center justify-center mb-1.5">
+                      <span className="text-[10px] font-bold text-fuchsia-500 dark:text-fuchsia-400">
+                        HTTP
+                      </span>
+                    </div>
+                    <p className="text-[11px] font-medium">All Methods</p>
+                    <p className="text-[10px] text-muted-foreground leading-tight">
+                      GET, POST, PUT, DELETE & more
+                    </p>
+                  </div>
+
+                  <div className="group p-2.5 rounded-lg bg-linear-to-br from-emerald-500/5 to-transparent border border-emerald-500/10 hover:border-emerald-500/20 transition-colors">
+                    <div className="size-6 rounded-md bg-emerald-500/10 flex items-center justify-center mb-1.5">
+                      <div className="size-2 rounded-full bg-emerald-500 animate-pulse" />
+                    </div>
+                    <p className="text-[11px] font-medium">Realtime</p>
+                    <p className="text-[10px] text-muted-foreground leading-tight">
+                      Events appear instantly
+                    </p>
+                  </div>
+
+                  <div className="group p-2.5 rounded-lg bg-linear-to-br from-indigo-500/5 to-transparent border border-indigo-500/10 hover:border-indigo-500/20 transition-colors">
+                    <div className="size-6 rounded-md bg-indigo-500/10 flex items-center justify-center mb-1.5">
+                      <span className="text-[10px] font-bold text-indigo-500 dark:text-indigo-400">
+                        7d
+                      </span>
+                    </div>
+                    <p className="text-[11px] font-medium">History</p>
+                    <p className="text-[10px] text-muted-foreground leading-tight">
+                      Events stored for 7 days
+                    </p>
+                  </div>
+                </div>
+
+                {/* Pro Tip */}
+                <div className="mt-3 p-2.5 rounded-lg bg-linear-to-r from-amber-500/10 via-orange-500/5 to-transparent border border-amber-500/15">
+                  <div className="flex items-start gap-2">
+                    <div className="size-5 rounded bg-amber-500/20 flex items-center justify-center shrink-0 mt-0.5">
+                      <span className="text-[10px]">💡</span>
+                    </div>
+                    <div>
+                      <p className="text-[10px] text-muted-foreground leading-relaxed">
+                        <span className="font-medium text-foreground">
+                          Pro tip:
+                        </span>{" "}
+                        Add{" "}
+                        <code className="px-1 py-0.5 rounded bg-amber-500/10 text-amber-600 dark:text-amber-400 text-[9px] font-mono">
+                          ?events=true
+                        </code>{" "}
+                        to GET requests to retrieve stored events.
+                      </p>
+                    </div>
+                  </div>
                 </div>
               </div>
             </PopoverContent>

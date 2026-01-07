@@ -96,7 +96,14 @@ const WebhookSidebar: React.FC<WebhookSidebarProps> = ({ workspaceId }) => {
     <>
       <Sidebar
         collapsible="icon"
-        className="border-r border-border bg-background"
+        style={{
+          background: "transparent !important",
+        }}
+        className={cn(
+          "border-r! border-border/50! bg-transparent!",
+          "shadow-[inset_0_1px_0_0_rgba(255,255,255,0.1)]",
+          "dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.05)]"
+        )}
       >
         <SidebarHeader onOpenCreate={() => setIsCreateOpen(true)} />
 

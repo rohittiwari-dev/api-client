@@ -31,7 +31,7 @@ const SidebarSearch: React.FC<SidebarSearchProps> = ({ value, onChange }) => {
             placeholder="Search webhooks..."
             value={value}
             onChange={(e) => onChange(e.target.value)}
-            className="h-9 pl-9 pr-3 bg-white/80 border-neutral-300/80 dark:bg-white/5 border  hover:border-border focus:border-violet-500/20 focus:bg-white/70 dark:focus:bg-white/5 text-sm placeholder:text-muted-foreground/40 rounded-lg transition-all duration-200 ring-0 focus:ring-0"
+            className="h-9 pl-9 pr-3 bg-white/80 border-neutral-300/80 dark:border-neutral-800/80 dark:bg-white/5 border  hover:border-border focus:border-violet-500/20 focus:bg-white/70 dark:focus:bg-white/5 text-sm placeholder:text-muted-foreground/40 rounded-lg transition-all duration-200 ring-0 focus:ring-0"
           />
         </div>
       </div>

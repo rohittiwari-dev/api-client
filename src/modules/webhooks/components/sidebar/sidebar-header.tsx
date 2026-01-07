@@ -65,13 +65,13 @@ const SidebarHeader: React.FC<SidebarHeaderProps> = ({ onOpenCreate }) => {
               <Button
                 variant="ghost"
                 size="sm"
-                className="h-7 px-2 text-xs text-muted-foreground hover:text-violet-500 hover:bg-violet-500/10"
+                className="h-7 px-2 text-xs text-muted-foreground hover:text-violet-500 hover:bg-violet-500/10 cursor-pointer!"
                 onClick={onOpenCreate}
               >
                 + New
               </Button>
             </TooltipTrigger>
-            <TooltipContent side="bottom" className="text-xs">
+            <TooltipContent side="bottom" className="text-[10px] p-0.5">
               Create Webhook
             </TooltipContent>
           </Tooltip>

@@ -96,7 +96,7 @@ const CreateWebhookDialog: React.FC<CreateWebhookDialogProps> = ({
               placeholder="My Webhook"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="bg-muted/30 border-white/10 focus:bg-background transition-colors"
+              className="bg-muted/30 dark:border-white/10 focus:bg-background transition-colors"
               autoFocus
             />
           </div>
@@ -113,7 +113,7 @@ const CreateWebhookDialog: React.FC<CreateWebhookDialogProps> = ({
               placeholder="What is this webhook for?"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              className="bg-muted/30 border-white/10 min-h-[80px] resize-none focus:bg-background transition-colors"
+              className="bg-muted/30 dark:border-white/10 min-h-[80px] resize-none focus:bg-background transition-colors"
             />
           </div>
 

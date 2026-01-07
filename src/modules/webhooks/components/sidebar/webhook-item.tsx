@@ -63,7 +63,7 @@ const WebhookItem: React.FC<WebhookItemProps> = ({
         onClick={onSelect}
         tooltip={isCollapsed ? webhook.name : undefined}
         className={cn(
-          "h-auto py-2.5 px-3 rounded-xl transition-all duration-200 relative overflow-hidden",
+          "h-auto py-2.5 px-3 rounded-xl transition-all duration-200 relative overflow-hidden cursor-pointer!",
           isActive
             ? "bg-linear-to-r from-violet-500/15 via-violet-500/10 to-transparent border border-violet-500/30"
             : "hover:bg-violet-500/5 border border-transparent hover:border-violet-500/10"
@@ -137,14 +137,14 @@ const WebhookItem: React.FC<WebhookItemProps> = ({
 
       {/* Hover Actions */}
       {!isCollapsed && (
-        <div className="absolute right-1.5 top-1/2 -translate-y-1/2 opacity-0 group-hover/item:opacity-100 transition-opacity duration-150 z-10">
+        <div className="absolute right-1.5 top-3/12 -translate-y-1/2 opacity-0 group-hover/item:opacity-100 transition-opacity duration-150 z-10">
           <div className="flex items-center bg-background/95 backdrop-blur-sm border border-violet-500/10 rounded-lg p-0.5 shadow-md">
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="size-6 text-muted-foreground hover:text-violet-500 hover:bg-violet-500/10 rounded"
+                  className="size-5 text-muted-foreground hover:text-violet-500 hover:bg-violet-500/10 rounded"
                   onClick={(e) => {
                     e.stopPropagation();
                     onCopy();
@@ -153,7 +153,7 @@ const WebhookItem: React.FC<WebhookItemProps> = ({
                   <Copy className="size-3" />
                 </Button>
               </TooltipTrigger>
-              <TooltipContent side="top" className="text-xs">
+              <TooltipContent side="top" className="text-[10px] p-0.5">
                 Copy URL
               </TooltipContent>
             </Tooltip>
@@ -163,32 +163,35 @@ const WebhookItem: React.FC<WebhookItemProps> = ({
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="size-6 text-muted-foreground hover:text-foreground rounded"
+                  className="size-5 text-muted-foreground hover:text-foreground rounded"
                   onClick={(e) => e.stopPropagation()}
                 >
                   <MoreHorizontal className="size-3" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-32">
+              <DropdownMenuContent
+                align="start"
+                className="w-20! bg-background/30 backdrop-blur-2xl border border-violet-500/10 rounded-lg"
+              >
                 <DropdownMenuItem
                   onClick={(e) => {
                     e.stopPropagation();
                     onCopy();
                   }}
-                  className="text-xs"
+                  className="text-[10px] cursor-pointer "
                 >
-                  <Copy className="size-3 mr-2" />
+                  <Copy className="size-2.5 mr-1" />
                   Copy URL
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
-                  className="text-destructive focus:text-destructive text-xs"
+                  className="text-destructive focus:text-destructive text-[10px] cursor-pointer hover:bg-violet-500/20"
                   onClick={(e) => {
                     e.stopPropagation();
                     onDelete();
                   }}
                 >
-                  <Trash2 className="size-3 mr-2" />
+                  <Trash2 className="size-2.5 mr-1 focus:text-destructive hover:bg-violet-500/20" />
                   Delete
                 </DropdownMenuItem>
               </DropdownMenuContent>
