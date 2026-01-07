@@ -1,7 +1,14 @@
 "use client";
 
 import React from "react";
-import { Copy, Trash2, MoreHorizontal, Clock, Activity } from "lucide-react";
+import {
+  Copy,
+  Trash2,
+  MoreHorizontal,
+  Clock,
+  Activity,
+  Check,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -55,6 +62,13 @@ const WebhookItem: React.FC<WebhookItemProps> = ({
   onDelete,
 }) => {
   const { data: eventCount } = useWebhookEventCount(webhook.id);
+  const [isCopied, setIsCopied] = React.useState(false);
+
+  const handleCopy = () => {
+    onCopy();
+    setIsCopied(true);
+    setTimeout(() => setIsCopied(false), 2000);
+  };
 
   return (
     <SidebarMenuItem className="group/item">
@@ -147,10 +161,14 @@ const WebhookItem: React.FC<WebhookItemProps> = ({
                   className="size-5 text-muted-foreground hover:text-violet-500 hover:bg-violet-500/10 rounded"
                   onClick={(e) => {
                     e.stopPropagation();
-                    onCopy();
+                    handleCopy();
                   }}
                 >
-                  <Copy className="size-3" />
+                  {isCopied ? (
+                    <Check className="size-3" />
+                  ) : (
+                    <Copy className="size-3" />
+                  )}
                 </Button>
               </TooltipTrigger>
               <TooltipContent side="top" className="text-[10px] p-0.5">
@@ -176,7 +194,7 @@ const WebhookItem: React.FC<WebhookItemProps> = ({
                 <DropdownMenuItem
                   onClick={(e) => {
                     e.stopPropagation();
-                    onCopy();
+                    handleCopy();
                   }}
                   className="text-[10px] cursor-pointer "
                 >

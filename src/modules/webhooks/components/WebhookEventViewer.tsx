@@ -369,16 +369,16 @@ const EventItem = ({
           <Button
             variant="ghost"
             size="icon"
-            className="size-6 rounded text-muted-foreground/40 hover:text-foreground hover:bg-muted/10"
+            className="size-6 rounded dark:text-muted-foreground/60 cursor-pointer text-muted-foreground hover:text-foreground hover:bg-muted/10"
             onClick={handleDownload}
             title="Download Event JSON"
           >
             <Download className="size-3" />
           </Button>
-          <span className="hidden sm:inline text-muted-foreground/60 font-mono">
+          <span className="hidden sm:inline dark:text-muted-foreground/60 text-muted-foreground font-mono">
             {event.size}B
           </span>
-          <span className="text-muted-foreground/60 font-mono">
+          <span className="dark:text-muted-foreground/60 text-muted-foreground font-mono">
             {format(new Date(event.createdAt), "HH:mm:ss")}
           </span>
         </div>
@@ -433,7 +433,7 @@ const EventItem = ({
                 onCopy={() =>
                   onCopy(JSON.stringify(event.headers, null, 2), "Headers")
                 }
-                className="w-full! max-w-full h-auto max-h-32 border-white/10 bg-muted/30 dark:bg-zinc-900/50 rounded-lg overflow-hidden"
+                className="w-full! max-w-full h-auto max-h-32 border-slate-400/20 dark:border-white/10 bg-muted/30 dark:bg-zinc-900/50 rounded-lg overflow-hidden"
                 contentClassName="p-3"
               >
                 {headersString}
@@ -458,7 +458,7 @@ const EventItem = ({
                     "Query Params"
                   )
                 }
-                className="w-full! max-w-full h-auto max-h-32 border-white/10 bg-muted/30 dark:bg-zinc-900/50 rounded-lg overflow-hidden"
+                className="w-full! max-w-full h-auto max-h-32 border-slate-400/20 dark:border-white/10 bg-muted/30 dark:bg-zinc-900/50 rounded-lg overflow-hidden"
                 contentClassName="p-3"
               >
                 {queryString}
@@ -476,7 +476,7 @@ const EventItem = ({
                 copyButton={true}
                 writing={false}
                 onCopy={() => onCopy(bodyString, "Body")}
-                className="w-full! max-w-full h-auto max-h-32 border-white/10 bg-muted/30 dark:bg-zinc-900/50 rounded-lg overflow-hidden"
+                className="w-full! max-w-full h-auto max-h-32 border-slate-400/20 dark:border-white/10 bg-muted/30 dark:bg-zinc-900/50 rounded-lg overflow-hidden"
                 contentClassName="p-3"
               >
                 {bodyString}
