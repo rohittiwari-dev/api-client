@@ -3,7 +3,9 @@ import {
   acceptInvitation,
   deleteInvitation,
   inviteMember,
+  listInvitations,
   listMembers,
+  listUserInvitations,
   rejectInvitation,
   removeMember,
   updateMemberRole,
@@ -12,7 +14,6 @@ import useWorkspaceState from "../store";
 
 export const useListMembersQuery = () => {
   const { activeWorkspace } = useWorkspaceState();
-  console.log(activeWorkspace);
   return useQuery({
     queryKey: ["members", activeWorkspace?.id],
     queryFn: async () => {
@@ -23,6 +24,43 @@ export const useListMembersQuery = () => {
       return { members: members?.data, total: members?.data?.length || 0 };
     },
     enabled: !!activeWorkspace?.id,
+  });
+};
+
+export const useListInvitationsQuery = () => {
+  const { activeWorkspace } = useWorkspaceState();
+  return useQuery({
+    queryKey: ["invitations", activeWorkspace?.id],
+    queryFn: async () => {
+      const invitations = await listInvitations(activeWorkspace?.id || "");
+      if (invitations?.error) {
+        return [];
+      }
+      return invitations?.data || [];
+    },
+    enabled: !!activeWorkspace?.id,
+  });
+};
+
+export const useUserInvitationsQuery = () => {
+  const { data: activeMember } = useActiveMember();
+
+  return useQuery({
+    queryKey: ["user-invitations", activeMember?.user?.email],
+    queryFn: async () => {
+      // The IDE might complain about listUserInvitations if I don't import it,
+      // but I added it to the import list in a previous step (step 135).
+      // If that import failed too, I'll need to double check imports.
+      // But let's assume imports are okay for a moment or fix them in next step if needed.
+      const invitations = await listUserInvitations(
+        activeMember?.user?.email || ""
+      );
+      if (invitations?.error) {
+        return [];
+      }
+      return invitations?.data || [];
+    },
+    enabled: !!activeMember?.user?.email,
   });
 };
 
@@ -53,6 +91,9 @@ export const useInviteMemberMutation = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ["members", activeWorkspace?.id],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["invitations", activeWorkspace?.id],
       });
     },
   });
@@ -110,6 +151,9 @@ export const useCancelInvitationMutation = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ["members", activeWorkspace?.id],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["invitations", activeWorkspace?.id],
       });
     },
   });

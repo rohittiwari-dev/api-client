@@ -31,6 +31,60 @@ export const listMembers = async (workspaceId: string) => {
   }
 };
 
+export const listInvitations = async (workspaceId: string) => {
+  try {
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
+
+    if (!session?.user?.id) {
+      return null;
+    }
+
+    const invitations = await auth.api.listInvitations({
+      headers: await headers(),
+      query: {
+        organizationId: workspaceId,
+      },
+    });
+
+    return {
+      data: invitations || [],
+      error: null,
+      msg: "Invitations fetched successfully",
+    };
+  } catch (error) {
+    return { data: [], error: error, msg: "Failed to fetch invitations" };
+  }
+};
+
+export const listUserInvitations = async (email: string) => {
+  try {
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
+
+    if (!session?.user?.id) {
+      return null;
+    }
+
+    const invitations = await auth.api.listUserInvitations({
+      headers: await headers(),
+      query: {
+        email: email,
+      },
+    });
+
+    return {
+      data: invitations || [],
+      error: null,
+      msg: "Invitations fetched successfully",
+    };
+  } catch (error) {
+    return { data: [], error: error, msg: "Failed to fetch invitations" };
+  }
+};
+
 export const inviteMember = async ({
   workspaceId,
   email,

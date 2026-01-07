@@ -40,6 +40,7 @@ import {
 } from "@/modules/workspace/hooks/use-invitaions-query";
 import { InputField } from "@/components/app-ui/inputs";
 import InviteMemberModal from "@/modules/workspace/components/InviteMemberModal";
+import PendingInvitationsList from "@/modules/workspace/components/PendingInvitationsList";
 import z from "zod";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
@@ -179,9 +180,6 @@ export default function TeamSettingsPage() {
   const canInvite = permissions?.canInvite ?? false;
   const canUpdateRole = permissions?.canUpdateRole ?? false;
   const canRemoveMember = permissions?.canRemoveMember ?? false;
-  const isCurrentUserOwner = activeMember?.role === "owner";
-
-  // Check if member is the current user
   const isCurrentUser = (memberId: string) => activeMember?.id === memberId;
 
   return (
@@ -246,6 +244,9 @@ export default function TeamSettingsPage() {
             <Separator />
           </>
         )}
+
+        {/* Pending Invitations */}
+        <PendingInvitationsList />
 
         {/* Team Members List */}
         {isInitialLoading ? (

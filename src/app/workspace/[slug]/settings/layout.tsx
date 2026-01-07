@@ -12,6 +12,7 @@ import {
   Layers,
   LogOut,
   Loader2,
+  MailPlus,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -31,6 +32,12 @@ const navItems = (slug: string) => [
     href: `/workspace/${slug}/settings/profile`,
     icon: User,
     description: "Manage your personal information",
+  },
+  {
+    title: "Your Invitations",
+    href: `/workspace/${slug}/settings/invitations`,
+    icon: MailPlus,
+    description: "Manage your invitations",
   },
   {
     title: "Security",
