@@ -10,6 +10,17 @@ import {
   useSidebar,
   SidebarRail,
 } from "@/components/ui/sidebar";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 import useWebhookStore from "../store/webhook.store";
@@ -37,6 +48,7 @@ const WebhookSidebar: React.FC<WebhookSidebarProps> = ({ workspaceId }) => {
 
   const { activeWebhook, setActiveWebhook } = useWebhookStore();
   const deleteWebhook = useDeleteWebhook();
+  const [webhookToDelete, setWebhookToDelete] = useState<Webhook | null>(null);
 
   // Data Fetching & Sorting
   const { data: webhooks = [], isLoading } = useWebhooks(workspaceId);
@@ -72,22 +84,25 @@ const WebhookSidebar: React.FC<WebhookSidebarProps> = ({ workspaceId }) => {
     toast.success("Webhook URL copied to clipboard");
   };
 
-  const handleDeleteWebhook = async (webhook: Webhook) => {
-    if (!confirm(`Delete "${webhook.name}"? This action cannot be undone.`)) {
-      return;
-    }
+  const handleDeleteWebhook = (webhook: Webhook) => {
+    setWebhookToDelete(webhook);
+  };
+
+  const confirmDeleteWebhook = async () => {
+    if (!webhookToDelete) return;
 
     try {
       await deleteWebhook.mutateAsync({
-        id: webhook.id,
+        id: webhookToDelete.id,
         workspaceId,
       });
       toast.success("Webhook deleted");
 
-      if (activeWebhook?.id === webhook.id) {
+      if (activeWebhook?.id === webhookToDelete.id) {
         setActiveWebhook(null);
         router.push(`/workspace/${params.slug}/webhooks`);
       }
+      setWebhookToDelete(null);
     } catch {
       toast.error("Failed to delete webhook");
     }
@@ -145,6 +160,39 @@ const WebhookSidebar: React.FC<WebhookSidebarProps> = ({ workspaceId }) => {
         onOpenChange={setIsCreateOpen}
         workspaceId={workspaceId}
       />
+
+      <AlertDialog
+        open={!!webhookToDelete}
+        onOpenChange={(open) => !open && setWebhookToDelete(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Webhook?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete &quot;{webhookToDelete?.name}
+              &quot;? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleteWebhook.isPending}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => {
+                e.preventDefault();
+                confirmDeleteWebhook();
+              }}
+              disabled={deleteWebhook.isPending}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deleteWebhook.isPending && (
+                <Loader2 className="mr-2 size-4 animate-spin" />
+              )}
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 };
