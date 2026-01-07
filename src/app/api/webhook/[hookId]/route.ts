@@ -419,47 +419,21 @@ export async function DELETE(
 }
 
 /**
- * OPTIONS - Handle CORS preflight
+ * OPTIONS - Receive webhook event (also handles CORS preflight logically via handleWebhook)
  */
 export async function OPTIONS(
   req: NextRequest,
   context: RouteContext
 ): Promise<NextResponse> {
-  const { hookId } = await context.params;
-
-  const response = new NextResponse(null, {
-    status: 204,
-    headers: {
-      ...corsHeaders,
-      "X-Webhook-Hook-Id": hookId,
-    },
-  });
-
-  return response;
+  return handleWebhook(req, context);
 }
 
 /**
- * HEAD - Check if hookId exists
+ * HEAD - Receive webhook event
  */
 export async function HEAD(
   req: NextRequest,
   context: RouteContext
 ): Promise<NextResponse> {
-  try {
-    const { hookId } = await context.params;
-    const events = await getWebhookEvents(hookId);
-
-    const response = new NextResponse(null, {
-      status: 200,
-      headers: {
-        ...corsHeaders,
-        "X-Webhook-Hook-Id": hookId,
-        "X-Webhook-Event-Count": events.length.toString(),
-      },
-    });
-
-    return response;
-  } catch {
-    return new NextResponse(null, { status: 500 });
-  }
+  return handleWebhook(req, context);
 }
