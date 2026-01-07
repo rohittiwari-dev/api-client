@@ -42,25 +42,22 @@ export const useListInvitationsQuery = () => {
   });
 };
 
+import { useAuthStore } from "@/modules/authentication/store";
+
 export const useUserInvitationsQuery = () => {
-  const { data: activeMember } = useActiveMember();
+  const { data: session } = useAuthStore();
+  const email = session?.user?.email;
 
   return useQuery({
-    queryKey: ["user-invitations", activeMember?.user?.email],
+    queryKey: ["user-invitations", email],
     queryFn: async () => {
-      // The IDE might complain about listUserInvitations if I don't import it,
-      // but I added it to the import list in a previous step (step 135).
-      // If that import failed too, I'll need to double check imports.
-      // But let's assume imports are okay for a moment or fix them in next step if needed.
-      const invitations = await listUserInvitations(
-        activeMember?.user?.email || ""
-      );
+      const invitations = await listUserInvitations(email || "");
       if (invitations?.error) {
         return [];
       }
       return invitations?.data || [];
     },
-    enabled: !!activeMember?.user?.email,
+    enabled: !!email,
   });
 };
 

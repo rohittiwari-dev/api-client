@@ -26,6 +26,7 @@ import { CreateWorkspaceSchema } from "@/lib/form-schemas/workspace";
 import { cn } from "@/lib/utils";
 import { useDebounce } from "@/hooks/use-debounce";
 import { redirect, useRouter } from "next/navigation";
+import WorkspaceUserButton from "../../authentication/components/mini-user-button";
 
 const WorkspaceSetup = ({
   type = "get-started-page",
@@ -330,8 +331,9 @@ const WorkspaceSetup = ({
       </motion.div>
 
       {/* Theme Switcher absolute position */}
-      <div className="absolute top-4 right-4 z-20">
+      <div className="absolute top-4 right-4 z-20 flex items-center gap-2">
         <ThemeSwitcher variant="multiple" />
+        <WorkspaceUserButton />
       </div>
     </div>
   );

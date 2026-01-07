@@ -1,48 +1,13 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Check, Loader2, Mail, X } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Loader2, Mail } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
-import { Badge } from "@/components/ui/badge";
-import {
-  useAcceptInvitationMutation,
-  useRejectInvitationMutation,
-  useUserInvitationsQuery,
-} from "@/modules/workspace/hooks/use-invitaions-query";
-import { toast } from "sonner";
-import Avatar from "@/modules/authentication/components/avatar";
-import { getInitialsFromName } from "@/lib/utils";
+import { useUserInvitationsQuery } from "@/modules/workspace/hooks/use-invitaions-query";
+import UserInvitationItem from "@/modules/workspace/components/UserInvitationItem";
 
 export default function UserInvitationsPage() {
   const { data: invitations, isPending: isLoading } = useUserInvitationsQuery();
-  const { mutate: acceptInvitation, isPending: isAccepting } =
-    useAcceptInvitationMutation();
-  const { mutate: rejectInvitation, isPending: isRejecting } =
-    useRejectInvitationMutation();
-
-  const handleAccept = (invitationId: string) => {
-    acceptInvitation(invitationId, {
-      onSuccess: () => {
-        toast.success("Invitation accepted successfully");
-        // Optionally redirect or refresh
-      },
-      onError: () => {
-        toast.error("Failed to accept invitation");
-      },
-    });
-  };
-
-  const handleReject = (invitationId: string) => {
-    rejectInvitation(invitationId, {
-      onSuccess: () => {
-        toast.success("Invitation declined");
-      },
-      onError: () => {
-        toast.error("Failed to decline invitation");
-      },
-    });
-  };
 
   return (
     <motion.div
@@ -83,67 +48,11 @@ export default function UserInvitationsPage() {
           <h3 className="text-sm font-medium">Pending Requests</h3>
           <div className="space-y-2">
             {invitations.map((invitation: any) => (
-              <div
+              <UserInvitationItem
                 key={invitation.id}
-                className="flex items-center justify-between p-3 rounded-lg border border-border/40 bg-background/40 hover:bg-background/60 transition-colors group"
-              >
-                <div className="flex items-center gap-3">
-                  <Avatar
-                    className="size-10 rounded-lg opacity-70"
-                    fallbackClassName="rounded-lg"
-                    href={"https://avatar.iran.liara.run/public"}
-                    initial={getInitialsFromName(invitation.organizationName)}
-                    alt={invitation.organizationName}
-                  />
-                  <div className="space-y-1">
-                    <p className="text-sm font-medium leading-none">
-                      {invitation.organizationName || "Unknown Workspace"}
-                    </p>
-                    <div className="flex items-center -ml-2 gap-2">
-                      <Badge
-                        variant="secondary"
-                        className="text-[10px] h-5 font-normal capitalize bg-muted/50 text-muted-foreground group-hover:bg-muted group-hover:text-foreground transition-colors"
-                      >
-                        Role: {invitation.role}
-                      </Badge>
-                      <span className="text-[11px] text-muted-foreground/60">
-                        Invited by {invitation.inviterEmail}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <Button
-                    size="sm"
-                    onClick={() => handleAccept(invitation.id)}
-                    disabled={isAccepting || isRejecting}
-                    className="h-8 gap-2 bg-emerald-500/10 cursor-pointer text-emerald-600 hover:bg-emerald-500/20 hover:text-emerald-700 border-emerald-500/20 shadow-none"
-                    variant="outline"
-                  >
-                    {isAccepting ? (
-                      <Loader2 className="size-3.5 animate-spin" />
-                    ) : (
-                      <Check className="size-3.5" />
-                    )}
-                    Accept
-                  </Button>
-                  <Button
-                    size="sm"
-                    onClick={() => handleReject(invitation.id)}
-                    disabled={isAccepting || isRejecting}
-                    className="h-8 gap-2 text-muted-foreground cursor-pointer hover:text-red-500 hover:bg-red-500/10"
-                    variant="ghost"
-                  >
-                    {isRejecting ? (
-                      <Loader2 className="size-3.5 animate-spin" />
-                    ) : (
-                      <X className="size-3.5" />
-                    )}
-                    Decline
-                  </Button>
-                </div>
-              </div>
+                invitation={invitation}
+                variant="default"
+              />
             ))}
           </div>
         </div>
