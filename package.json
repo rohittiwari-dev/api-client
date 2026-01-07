@@ -27,7 +27,7 @@
     "name": "Rohit Tiwari",
     "url": "https://github.com/rohittiwari-dev"
   },
-  "license": "MIT",
+  "license": "AGPL-3.0-only",
   "type": "module",
   "scripts": {
     "dev": "next dev",

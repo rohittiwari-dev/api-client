@@ -30,7 +30,7 @@ const footerLinks = {
   ],
   legal: [
     {
-      label: "MIT License",
+      label: "AGPL-3.0 License",
       href: "https://github.com/rohittiwari-dev/api-client/blob/main/LICENSE",
       external: true,
     },
@@ -172,7 +172,7 @@ export default function Footer() {
         {/* Bottom Bar */}
         <div className="mt-12 pt-8 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-sm text-muted-foreground">
-            © {new Date().getFullYear()} Api Studio. MIT License.
+            © {new Date().getFullYear()} Api Studio. AGPL-3.0 License.
           </p>
           <motion.p
             className="text-sm text-muted-foreground flex items-center gap-2"

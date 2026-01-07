@@ -5,7 +5,7 @@ A modern, powerful API testing and development tool built with Next.js 16 and Re
 ![Api Studio](https://img.shields.io/badge/version-1.1.0-blue.svg)
 ![Next.js](https://img.shields.io/badge/Next.js-16-black.svg)
 ![React](https://img.shields.io/badge/React-19-61dafb.svg)
-![License](https://img.shields.io/badge/license-MIT-green.svg)
+![License](https://img.shields.io/badge/license-AGPL-3.0-only-green.svg)
 
 ## ✨ Features
 
@@ -215,7 +215,7 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## 📝 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the AGPL-3.0-only License - see the [LICENSE](LICENSE) file for details.
 
 ## 🙏 Acknowledgments
 

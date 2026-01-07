@@ -168,7 +168,7 @@ export default function CTA() {
                 className="mt-8 text-sm text-muted-foreground flex items-center justify-center gap-2"
               >
                 <Heart className="w-3.5 h-3.5 text-pink-500 fill-pink-500" />
-                No credit card • MIT Licensed • Self-host anytime
+                No credit card • AGPL-3.0-only Licensed • Self-host anytime
               </motion.p>
             </div>
           </div>

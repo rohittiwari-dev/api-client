@@ -11,9 +11,11 @@ import {
 import db from "@/lib/db";
 import env from "@/lib/env";
 import { getActiveOrganization } from "@/modules/workspace/server/workspace.actions";
+import redis from "./redis";
+import sendEmail from "./mailing";
 
 const auth = betterAuth({
-  appName: "Api-Client",
+  appName: "Api Studio",
   database: prismaAdapter(db, {
     provider: "postgresql",
   }),
@@ -22,22 +24,22 @@ const auth = betterAuth({
     autoSignIn: true,
     requireEmailVerification: true,
     sendResetPassword: async ({ user, url }) => {
-      // await sendEmail({
-      //     to: user.email,
-      //     subject: "Reset Your Password | Plug Point",
-      //     text: `Click the link to verify your email: ${url}`,
-      // });
+      await sendEmail({
+        to: user.email,
+        subject: "Reset Your Password | Plug Point",
+        text: `Click the link to verify your email: ${url}`,
+      });
     },
   },
   emailVerification: {
     sendOnSignUp: true,
     autoSignInAfterVerification: true,
     sendVerificationEmail: async ({ user, url }) => {
-      // await sendEmail({
-      //     to: user.email,
-      //     subject: "Verify your email address | Plug Point",
-      //     text: `Click the link to verify your email: ${url}`,
-      // });
+      await sendEmail({
+        to: user.email,
+        subject: "Verify your email address | Plug Point",
+        text: `Click the link to verify your email: ${url}`,
+      });
     },
   },
   account: {
@@ -58,8 +60,10 @@ const auth = betterAuth({
   session: {
     cookieCache: {
       enabled: true,
-      maxAge: 5 * 60, // Cache duration in seconds
+      refreshCache: true,
+      maxAge: 5 * 60,
     },
+    updateAge: 5 * 60,
   },
   plugins: [
     openAPI({
@@ -74,11 +78,11 @@ const auth = betterAuth({
       organizationLimit: 5,
       allowInvitationToUnverifiedEmail: true,
       sendInvitationEmail: async (data, request) => {
-        // await sendEmail({
-        //     to: data.email,
-        //     subject: "You have been invited to join an organization | Plug Point",
-        //     text: `Click the link to accept your invitation: ${request.url}`,
-        // });
+        await sendEmail({
+          to: data.email,
+          subject: "You have been invited to join an organization | Plug Point",
+          text: `Click the link to accept your invitation: ${request?.url}`,
+        });
       },
       schema: {
         organization: {
@@ -113,8 +117,89 @@ const auth = betterAuth({
       },
     },
   },
+  secondaryStorage: {
+    delete: async (key: string) => {
+      await redis.del(key);
+    },
+    get: async (key: string) => {
+      return await redis.get(key);
+    },
+    set: async (key: string, value: string) => {
+      await redis.set(key, value);
+    },
+  },
+  advanced: {
+    useSecureCookies: true,
+  },
+  rateLimit: {
+    enabled: true,
+    window: 60,
+    max: 100,
+    storage: "database",
+    customRules: {
+      "/sign-in/*": {
+        window: 60,
+        max: 5,
+      },
+      "/sign-up/*": {
+        window: 60,
+        max: 3,
+      },
+      "/forget-password": {
+        window: 300,
+        max: 3,
+      },
+      "/reset-password": {
+        window: 60,
+        max: 5,
+      },
+      "/two-factor/*": {
+        window: 60,
+        max: 5,
+      },
+      "/verify-email": {
+        window: 300,
+        max: 5,
+      },
+      "/organization/invite": {
+        window: 60,
+        max: 10,
+      },
+      "/session": {
+        window: 60,
+        max: 30,
+      },
+    },
+    customStorage: {
+      get: async (key: string) => {
+        const countStr = await redis.get(key);
+        if (!countStr) return undefined;
+        const lastRequestStr = await redis.get(`${key}:lastRequest`);
+        return {
+          key,
+          count: parseInt(countStr, 10) || 0,
+          lastRequest: parseInt(lastRequestStr || "0", 10),
+        };
+      },
+      set: async (
+        key: string,
+        value: { key: string; count: number; lastRequest: number }
+      ) => {
+        await redis.set(key, value.count.toString());
+        await redis.set(`${key}:lastRequest`, value.lastRequest.toString());
+      },
+      setEx: async (key: string, value: string, ex: number) => {
+        return await redis.setex(key, ex, value);
+      },
+      delete: async (key: string) => {
+        return await redis.del(key);
+      },
+    },
+  },
+
   telemetry: {
     enabled: false,
+    debug: true,
   },
   onAPIError: {
     errorURL: "/sign-in",
