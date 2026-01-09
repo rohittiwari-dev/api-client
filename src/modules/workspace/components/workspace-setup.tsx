@@ -54,7 +54,8 @@ const WorkspaceSetup = ({
 
     try {
       const result = await authClient.organization.create({
-        ...data,
+        slug: data.slug?.trim(),
+        name: data.name?.trim(),
         globalAuth: {},
       });
 
@@ -85,7 +86,7 @@ const WorkspaceSetup = ({
     async (slugToCheck: string) => {
       try {
         const response = await authClient.organization.checkSlug({
-          slug: slugToCheck,
+          slug: slugToCheck?.trim(),
         });
         if (response.data?.status) {
           form.clearErrors("slug");

@@ -12,7 +12,12 @@ import db from "@/lib/db";
 import env from "@/lib/env";
 import { getActiveOrganization } from "@/modules/workspace/server/workspace.actions";
 import redis from "./redis";
-import sendEmail from "./mailing";
+import sendEmail, { sendEmailWithTemplate } from "./mailing";
+import {
+  PasswordResetEmail,
+  VerificationEmail,
+  WelcomeEmail,
+} from "./mailing/templates";
 
 const auth = betterAuth({
   appName: "Api Studio",
@@ -24,21 +29,43 @@ const auth = betterAuth({
     autoSignIn: true,
     requireEmailVerification: true,
     sendResetPassword: async ({ user, url }) => {
-      await sendEmail({
+      await sendEmailWithTemplate({
         to: user.email,
-        subject: "Reset Your Password | Plug Point",
-        text: `Click the link to verify your email: ${url}`,
+        subject: "Reset Your Password | Api Studio",
+        template: PasswordResetEmail({
+          appName: "Api Studio",
+          resetUrl: url,
+          userName: user.email,
+          expiresIn: "10 minutes",
+        }),
       });
     },
   },
   emailVerification: {
     sendOnSignUp: true,
     autoSignInAfterVerification: true,
-    sendVerificationEmail: async ({ user, url }) => {
-      await sendEmail({
+    afterEmailVerification: async (user, request) => {
+      await sendEmailWithTemplate({
         to: user.email,
-        subject: "Verify your email address | Plug Point",
-        text: `Click the link to verify your email: ${url}`,
+        subject: "Welcome to Api Studio",
+        template: WelcomeEmail({
+          appName: "Api Studio",
+          userName: user.name,
+          userEmail: user.email,
+        }),
+      });
+    },
+    sendVerificationEmail: async ({ user, url }) => {
+      await sendEmailWithTemplate({
+        to: user.email,
+        subject: "Verify your email address | Api Studio",
+        template: VerificationEmail({
+          userName: user.name,
+          verificationCode: "123456",
+          verificationUrl: url,
+          expiresIn: "10 minutes",
+          appName: "Api Studio",
+        }),
       });
     },
   },

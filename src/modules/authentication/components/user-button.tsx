@@ -106,19 +106,21 @@ function UserButton({
               "bg-secondary/50! hover:bg-accent/90 h-fit w-fit rounded-full p-1 pr-3 border-transparent"
           )}
         >
-          <Avatar
-            className={cn(
-              "h-9 w-9 border border-border/50",
-              variant === "sidebar" && "rounded-xl"
-            )}
-            fallbackClassName={cn(
-              "h-9 w-9",
-              variant === "sidebar" && "rounded-xl"
-            )}
-            href={image || ""}
-            alt={name}
-            initial={getInitialsFromName(name || "")}
-          />
+          {!!image && (
+            <Avatar
+              className={cn(
+                "h-9 w-9 border border-border/50",
+                variant === "sidebar" && "rounded-xl"
+              )}
+              fallbackClassName={cn(
+                "h-9 w-9",
+                variant === "sidebar" && "rounded-xl"
+              )}
+              href={image || ""}
+              alt={name}
+              initial={getInitialsFromName(name || "")}
+            />
+          )}
           {variant === "sidebar" && (
             <div className="grid flex-1 text-left leading-tight">
               <span className="truncate font-semibold text-sm">{name}</span>

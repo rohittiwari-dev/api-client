@@ -4,7 +4,7 @@ export const APP_VERSION = "1.1.1";
 export const APP_NAME = "Api Studio";
 export const APP_TITLE = "Api Studio - The API Testing Tool for Developers";
 export const APP_DESCRIPTION =
-  "Api Studio is a free, open source API testing and development tool. The best Postman alternative for developers. Build, test, and debug REST APIs, GraphQL endpoints with ease. Better than Insomnia, API Dog, and Requestly.";
+  "Api Studio is a free, open source API testing and development tool. The best Postman alternative for developers. Build, test, and debug REST APIs. Better than Insomnia, API Dog, and Requestly.";
 
 // URLs
 export const APP_URL = "https://apistudio.rohittiwari.me"; // Update with your actual domain
@@ -29,7 +29,7 @@ export const APP_KEYWORDS = [
   "api client",
   "api studio",
   "rest api testing",
-  "graphql client",
+  "client",
   "http client",
 
   // Competitor alternatives (high search intent)

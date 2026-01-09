@@ -33,11 +33,11 @@ Debug incoming webhooks with ease. Create unique endpoints to capture, inspect, 
 
 ### 🚀 Advanced Request Builder
 
-Craft complex HTTP and GraphQL requests with a refined UI.
+Craft complex HTTP requests with a refined UI.
 
 - **All HTTP Methods**: GET, POST, PUT, PATCH, DELETE, HEAD, OPTIONS.
 - **Smart Body Editor**: JSON/XML syntax highlighting with error detection.
-- **Multi-Format Support**: Form-data, URL-encoded, Binary files, and GraphQL queries.
+- **Multi-Format Support**: Form-data, URL-encoded, Binary files.
 - **Code Generation**: Export requests to curl, Python, JavaScript, Go, and more.
 
 ### 🔐 Robust Authentication
