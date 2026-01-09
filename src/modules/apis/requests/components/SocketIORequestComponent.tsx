@@ -33,7 +33,9 @@ import SocketIOMessageComposer, {
 import SocketIOEventsManager, {
   type SocketIOEvent,
 } from "./shared/SocketIOEventsManager";
-import WebSocketSavedMessages from "./shared/WebSocketSavedMessages";
+import SocketIOSavedArgs, {
+  type SavedSocketIOMessage,
+} from "./shared/SocketIOSavedArgs";
 import ParameterComponent from "./api-request-components/parameter-component";
 import HeaderComponent from "./api-request-components/header-component";
 import useRequestSyncStoreState from "../hooks/requestSyncStore";
@@ -208,31 +210,25 @@ const SocketIORequestComponent = () => {
   );
 
   // Handle selecting a saved message
-  const handleSelectSavedMessage = useCallback((message: any) => {
-    if (message.eventName) {
-      setEventName(message.eventName);
-    }
-    if (message.args && Array.isArray(message.args)) {
-      setArgs(
-        message.args.map((arg: any) => ({
-          ...arg,
-          id: crypto.randomUUID(),
-        }))
-      );
-    } else if (message.content) {
-      // Fallback: if content exists but not args, treat content as single text arg
-      setArgs([
-        {
-          id: crypto.randomUUID(),
-          content: message.content,
-          format: message.format || "text",
-        },
-      ]);
-    }
-    if (typeof message.ack === "boolean") {
-      setAck(message.ack);
-    }
-  }, []);
+  const handleSelectSavedMessage = useCallback(
+    (message: SavedSocketIOMessage) => {
+      if (message.eventName) {
+        setEventName(message.eventName);
+      }
+      if (message.args && Array.isArray(message.args)) {
+        setArgs(
+          message.args.map((arg: any) => ({
+            ...arg,
+            id: crypto.randomUUID(),
+          }))
+        );
+      }
+      if (typeof message.ack === "boolean") {
+        setAck(message.ack);
+      }
+    },
+    []
+  );
 
   const handleEventsChange = (newEvents: SocketIOEvent[]) => {
     setEvents(newEvents);
@@ -518,10 +514,9 @@ const SocketIORequestComponent = () => {
               maxSize={"30%"}
               className="bg-muted/5"
             >
-              <WebSocketSavedMessages
+              <SocketIOSavedArgs
                 requestId={requestId}
                 onSelect={handleSelectSavedMessage}
-                type="SOCKET_IO"
               />
             </ResizablePanel>
           </ResizablePanelGroup>

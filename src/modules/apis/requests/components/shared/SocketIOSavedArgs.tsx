@@ -8,7 +8,6 @@ import {
   IconBraces,
   IconFileText,
   IconBinary,
-  IconPlus,
   IconSearch,
   IconDeviceFloppy,
 } from "@tabler/icons-react";
@@ -43,8 +42,10 @@ import {
 } from "@/components/ui/alert-dialog";
 import { cn } from "@/lib/utils";
 import { type ArgFormat, type SocketIOArg } from "./SocketIOMessageComposer";
+import useRequestSyncStoreState from "../../hooks/requestSyncStore";
+import { updateRequestAction } from "../../actions";
 
-export interface SavedSocketIOArgs {
+export interface SavedSocketIOMessage {
   id: string;
   name: string;
   eventName: string;
@@ -54,9 +55,8 @@ export interface SavedSocketIOArgs {
 }
 
 interface SocketIOSavedArgsProps {
-  savedArgs: SavedSocketIOArgs[];
-  onSavedArgsChange: (args: SavedSocketIOArgs[]) => void;
-  onSelect: (savedArgs: SavedSocketIOArgs) => void;
+  requestId: string;
+  onSelect: (savedMessage: SavedSocketIOMessage) => void;
   className?: string;
 }
 
@@ -67,32 +67,79 @@ const formatIcons: Record<ArgFormat, React.ReactNode> = {
 };
 
 const SocketIOSavedArgs: React.FC<SocketIOSavedArgsProps> = ({
-  savedArgs,
-  onSavedArgsChange,
+  requestId,
   onSelect,
   className,
 }) => {
+  const { getRequestById, updateRequest } = useRequestSyncStoreState();
+  const request = getRequestById(requestId);
+  const rawSavedMessages: any[] = (request as any)?.savedMessages || [];
+
+  // Get saved messages from request - memoized to avoid recalculating on each render
+  const savedMessages: SavedSocketIOMessage[] = useMemo(() => {
+    return rawSavedMessages.map((msg, index) => ({
+      id: msg.id || `msg-${index}`,
+      name: msg.name || msg.eventName || `Message ${index + 1}`,
+      eventName: msg.eventName || "message",
+      args: Array.isArray(msg.args)
+        ? msg.args.map((arg: any) => ({
+            id: arg.id || crypto.randomUUID(),
+            content: arg.content || "",
+            format: arg.format || "text",
+          }))
+        : [
+            {
+              id: crypto.randomUUID(),
+              content: msg.content || "",
+              format: "text" as const,
+            },
+          ],
+      ack: msg.ack || false,
+      createdAt: msg.createdAt || 0,
+    }));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [JSON.stringify(rawSavedMessages)]);
+
   const [searchQuery, setSearchQuery] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingName, setEditingName] = useState("");
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
-  const [detailsItem, setDetailsItem] = useState<SavedSocketIOArgs | null>(
+  const [detailsItem, setDetailsItem] = useState<SavedSocketIOMessage | null>(
     null
   );
 
-  // Filter saved args by search
-  const filteredArgs = useMemo(() => {
-    if (!searchQuery) return savedArgs;
+  // Filter saved messages by search
+  const filteredMessages = useMemo(() => {
+    if (!searchQuery) return savedMessages;
     const query = searchQuery.toLowerCase();
-    return savedArgs.filter(
+    return savedMessages.filter(
       (item) =>
         item.name.toLowerCase().includes(query) ||
         item.eventName.toLowerCase().includes(query)
     );
-  }, [savedArgs, searchQuery]);
+  }, [savedMessages, searchQuery]);
+
+  // Update saved messages in store
+  const updateSavedMessages = (newMessages: SavedSocketIOMessage[]) => {
+    if (!requestId) return;
+    // Transform to the format expected by the store
+    const storeMessages = newMessages.map((msg) => ({
+      id: msg.id,
+      name: msg.name,
+      eventName: msg.eventName,
+      args: msg.args,
+      ack: msg.ack,
+      createdAt: msg.createdAt,
+    }));
+    updateRequest(requestId, {
+      savedMessages: storeMessages as any,
+      unsaved: true,
+    });
+    updateRequestAction(requestId, { savedMessages: storeMessages as any });
+  };
 
   // Start editing name
-  const handleStartEdit = (item: SavedSocketIOArgs) => {
+  const handleStartEdit = (item: SavedSocketIOMessage) => {
     setEditingId(item.id);
     setEditingName(item.name);
   };
@@ -100,11 +147,10 @@ const SocketIOSavedArgs: React.FC<SocketIOSavedArgsProps> = ({
   // Save edited name
   const handleSaveEdit = () => {
     if (!editingId || !editingName.trim()) return;
-    onSavedArgsChange(
-      savedArgs.map((item) =>
-        item.id === editingId ? { ...item, name: editingName.trim() } : item
-      )
+    const updatedMessages = savedMessages.map((item) =>
+      item.id === editingId ? { ...item, name: editingName.trim() } : item
     );
+    updateSavedMessages(updatedMessages);
     setEditingId(null);
     setEditingName("");
   };
@@ -115,10 +161,13 @@ const SocketIOSavedArgs: React.FC<SocketIOSavedArgsProps> = ({
     setEditingName("");
   };
 
-  // Delete saved args
+  // Delete saved message
   const handleDelete = () => {
     if (!deleteConfirmId) return;
-    onSavedArgsChange(savedArgs.filter((item) => item.id !== deleteConfirmId));
+    const updatedMessages = savedMessages.filter(
+      (item) => item.id !== deleteConfirmId
+    );
+    updateSavedMessages(updatedMessages);
     setDeleteConfirmId(null);
   };
 
@@ -142,12 +191,12 @@ const SocketIOSavedArgs: React.FC<SocketIOSavedArgsProps> = ({
           variant="secondary"
           className="text-[10px] px-1.5 py-0 h-4 rounded-full bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20 font-bold"
         >
-          {savedArgs.length}
+          {savedMessages.length}
         </Badge>
       </div>
 
       {/* Search */}
-      {savedArgs.length > 3 && (
+      {savedMessages.length > 3 && (
         <div className="px-3 py-2 border-b border-border/30">
           <div className="relative">
             <IconSearch className="absolute left-2.5 top-1/2 -translate-y-1/2 size-3.5 text-indigo-500/50" />
@@ -161,30 +210,32 @@ const SocketIOSavedArgs: React.FC<SocketIOSavedArgsProps> = ({
         </div>
       )}
 
-      {/* Saved Args List */}
+      {/* Saved Messages List */}
       <ScrollArea className="flex-1 min-h-0">
         <div className="p-2 space-y-1">
-          {filteredArgs.length === 0 ? (
+          {filteredMessages.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-8 text-muted-foreground gap-2">
-              {savedArgs.length === 0 ? (
+              {savedMessages.length === 0 ? (
                 <>
                   <div className="size-12 rounded-lg bg-linear-to-br from-indigo-500/20 to-violet-500/10 border border-indigo-500/20 flex items-center justify-center">
                     <IconDeviceFloppy className="size-6 text-indigo-500/40" />
                   </div>
                   <span className="text-[11px] text-center px-4">
-                    No saved args yet. Save args from the composer for quick
+                    No saved messages yet. Save from the composer for quick
                     access.
                   </span>
                 </>
               ) : (
                 <>
                   <IconSearch className="size-6 text-muted-foreground/40" />
-                  <span className="text-[11px]">No matching args found</span>
+                  <span className="text-[11px]">
+                    No matching messages found
+                  </span>
                 </>
               )}
             </div>
           ) : (
-            filteredArgs.map((item) => (
+            filteredMessages.map((item) => (
               <div
                 key={item.id}
                 className="group relative rounded-md border border-border/40 hover:border-border bg-card/30 hover:bg-card/50 transition-all overflow-hidden"
@@ -334,10 +385,10 @@ const SocketIOSavedArgs: React.FC<SocketIOSavedArgsProps> = ({
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete saved args?</AlertDialogTitle>
+            <AlertDialogTitle>Delete saved message?</AlertDialogTitle>
             <AlertDialogDescription>
               This action cannot be undone. This will permanently delete the
-              saved args configuration.
+              saved message configuration.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -463,7 +514,7 @@ const SocketIOSavedArgs: React.FC<SocketIOSavedArgsProps> = ({
               className="h-8 text-xs font-medium gap-1.5 bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-600 dark:text-indigo-400 border border-indigo-500/30"
             >
               <IconPlayerPlay className="size-3.5" />
-              Load Args
+              Load Message
             </Button>
           </DialogFooter>
         </DialogContent>
