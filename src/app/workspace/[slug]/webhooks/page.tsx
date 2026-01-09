@@ -19,18 +19,7 @@ import {
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
 import useWorkspaceState from "@/modules/workspace/store";
 import useWebhookStore from "@/modules/webhooks/store/webhook.store";
@@ -43,7 +32,6 @@ import {
   WebhookEmptyState,
 } from "@/modules/webhooks/components";
 import type { Webhook } from "@/modules/webhooks/types/webhook.types";
-import { Separator } from "@/components/ui/separator";
 
 const WebhooksPage = () => {
   const router = useRouter();
@@ -238,7 +226,7 @@ const WebhooksPage = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="rounded-lg bg-black/40 border border-white/5 p-3 font-mono text-xs text-muted-foreground overflow-x-auto">
+              <div className="rounded-lg bg-sidebar border backdrop-blur-2xl border-slate-200 dark:bg-black/40 dark:border-white/5 p-3 font-mono text-xs text-muted-foreground overflow-x-auto">
                 <div className="flex justify-between items-center mb-2 pb-2 border-b border-white/5">
                   <span className="text-violet-400">cURL Example</span>
                   <Copy className="size-3 cursor-pointer hover:text-white transition-colors" />
@@ -303,10 +291,10 @@ const WebhookCard: React.FC<WebhookCardProps> = ({
   return (
     <div
       onClick={onSelect}
-      className="group relative flex flex-col justify-between p-5 h-full min-h-[180px] rounded-2xl bg-muted/20 border border-white/5 hover:bg-muted/30 hover:border-violet-500/20 hover:shadow-lg hover:shadow-violet-500/5 transition-all duration-300 cursor-pointer overflow-hidden"
+      className="group relative flex flex-col justify-between p-5 h-full min-h-[180px] rounded-2xl bg-muted/20 border dark:border-white/5 hover:bg-muted/30 hover:border-violet-500/20 hover:shadow border-slate-200 hover:shadow-violet-500/5 transition-all duration-300 cursor-pointer overflow-hidden"
     >
-      <div className="absolute top-0 right-0 p-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300 transform translate-x-2 group-hover:translate-x-0">
-        <ArrowRight className="size-5 text-violet-400" />
+      <div className="absolute top-10 right-2.5 transition-all duration-300 p-4 opacity-0 group-hover:opacity-100 transform translate-x-2 group-hover:translate-x-0">
+        <ArrowRight className="size-5 text-violet-400 transition-all duration-300" />
       </div>
 
       <div className="space-y-4">
@@ -354,7 +342,7 @@ const WebhookCard: React.FC<WebhookCardProps> = ({
       </div>
 
       <div className="mt-4 pt-4 border-t border-white/5 flex items-center justify-between text-xs text-muted-foreground">
-        <code className="font-mono bg-black/20 px-1.5 py-0.5 rounded text-[10px] opacity-70 group-hover:opacity-100 transition-opacity">
+        <code className="font-mono dark:bg-black/20! bg-white! border-slate-500! px-2.5 py-1 rounded text-[10px] opacity-70 group-hover:opacity-100 transition-opacity">
           /{webhook.url}
         </code>
         <div className="flex items-center gap-3">

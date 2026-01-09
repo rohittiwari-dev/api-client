@@ -63,10 +63,10 @@ export function AppSidebar({
       {...props}
     >
       <SidebarContent className="pt-2 bg-transparent">
-        <SidebarGroup className="px-2">
+        <SidebarGroup className="w-full p-0">
           {/* Header Section */}
-          <SidebarGroupLabel className="group/label sticky top-0 z-10 flex min-h-[36px] items-center justify-between gap-2 px-2 py-1 mb-2 rounded-lg bg-transparent hover:bg-muted/50 transition-colors">
-            <div className="flex items-center gap-2 text-muted-foreground group-hover/label:text-foreground transition-colors">
+          <SidebarGroupLabel className="group/label sticky -top-2 w-full! z-10 flex min-h-[36px] items-center justify-between gap-2 px-2 py-1 mb-2 rounded-none rounded-b-lg bg-sidebar/90 dark:bg-[#1d1c25]/90! backdrop-blur-3xl!">
+            <div className="flex items-center select-none gap-2 text-muted-foreground transition-colors">
               <IconFolderFilled className="size-3.5 opacity-70" />
               <span className="font-medium text-xs uppercase tracking-wider">
                 Collections
@@ -77,7 +77,7 @@ export function AppSidebar({
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-6 w-6 rounded-md hover:bg-background/80 hover:shadow-sm transition-all"
+                className="h-6 w-6 rounded-md cursor-pointer hover:bg-background/80 hover:shadow-sm transition-all"
                 onClick={handleCollapseAll}
                 title="Collapse All Folders"
               >
@@ -88,7 +88,7 @@ export function AppSidebar({
           </SidebarGroupLabel>
 
           {/* Tree Content */}
-          <SidebarGroupContent className="pr-1">
+          <SidebarGroupContent className="pr-0.5!">
             <DraggableSidebarTree
               workspaceId={workspaceId}
               collapseKey={collapseKey}
@@ -113,7 +113,7 @@ const AddNewCollectionOption = ({ workspaceId }: { workspaceId: string }) => {
           <Button
             variant="ghost"
             size="icon"
-            className="h-6 w-6 hover:bg-accent/60"
+            className="h-6 w-6 hover:bg-accent/60 cursor-pointer"
           >
             <Plus className="size-4" />
           </Button>

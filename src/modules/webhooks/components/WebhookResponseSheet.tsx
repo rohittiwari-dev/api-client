@@ -160,7 +160,7 @@ export default function WebhookResponseSheet({
           <span className="hidden sm:inline">Configure Response</span>
         </Button>
       </SheetTrigger>
-      <SheetContent className="w-full sm:max-w-md md:max-w-lg lg:max-w-xl p-0 flex flex-col backdrop-blur-3xl! bg-background/30! border-l">
+      <SheetContent className="w-full sm:max-w-md md:max-w-lg lg:max-w-xl p-0 flex flex-col backdrop-blur-3xl! bg-background/90 dark:bg-background/30! border-l">
         <SheetHeader className="px-6 py-6 border-b space-y-1">
           <div className="flex items-center justify-between gap-2 mb-2">
             <div className="flex items-center gap-2">
@@ -245,7 +245,7 @@ export default function WebhookResponseSheet({
                         setStatus(parseInt(e.target.value) || 200)
                       }
                       className={cn(
-                        "font-mono font-medium pl-3 pr-16 h-11 border-border/50 bg-background/50 focus:bg-background transition-colors",
+                        "font-mono font-medium pl-3 py-1 pr-16 border-border/50 bg-background/50 focus:bg-background transition-colors",
                         getStatusColor(status).split(" ")[0] // Apply text color
                       )}
                     />
@@ -381,7 +381,7 @@ export default function WebhookResponseSheet({
                   id="body"
                   value={body}
                   onChange={(e) => setBody(e.target.value)}
-                  className="font-mono text-sm min-h-[300px] resize-y bg-slate-950 text-slate-50 border-slate-800 focus:border-slate-700 p-4 leading-relaxed"
+                  className="font-mono text-sm min-h-[300px] resize-y bg-slate-100 tex-slate-700 dark:bg-slate-950 dark:text-slate-50 border-slate-300 dark:border-slate-800 focus:border-slate-700 p-4 leading-relaxed"
                   placeholder="Enter response body..."
                   spellCheck={false}
                 />
