@@ -94,7 +94,7 @@ const FormDataComponent = ({
     };
     body[listKey] = body[listKey].filter((_: any, i: number) => i !== index);
 
-    updateRequest(activeRequest?.id!, {
+    updateRequest(activeRequest?.id || "", {
       body,
       unsaved: true,
     });
@@ -105,8 +105,8 @@ const FormDataComponent = ({
       {/* Empty State */}
       {data.length === 0 && (
         <div className="flex-1 flex flex-col items-center justify-center gap-4 py-16">
-          <div className="size-14 rounded-2xl bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/10 flex items-center justify-center">
-            <FormInput className="size-6 text-primary/60" />
+          <div className="size-14 rounded-2xl bg-linear-to-br from-indigo-500/20 to-violet-500/10 border border-indigo-500/20 flex items-center justify-center">
+            <FormInput className="size-6 text-indigo-500/60" />
           </div>
           <div className="text-center space-y-1">
             <p className="text-sm font-semibold text-foreground">
@@ -122,7 +122,7 @@ const FormDataComponent = ({
             variant="outline"
             size="sm"
             onClick={addField}
-            className="h-9 text-xs gap-2 rounded-lg mt-1 border-primary/20 text-primary hover:bg-primary/5 hover:border-primary/30"
+            className="h-9 text-xs gap-2 rounded-lg mt-1 border-indigo-500/30 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-500/10 hover:border-indigo-500/40"
           >
             <Plus className="size-3.5" /> Add Field
           </Button>
@@ -135,7 +135,7 @@ const FormDataComponent = ({
           {/* Header Row */}
           <div
             className={cn(
-              "grid gap-3 px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-muted-foreground/60",
+              "grid gap-3 px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-indigo-600/60 dark:text-indigo-400/60",
               isFormData
                 ? "grid-cols-[32px_1fr_1fr_80px_1fr_32px]"
                 : "grid-cols-[32px_1fr_1fr_1fr_32px]"
@@ -156,7 +156,7 @@ const FormDataComponent = ({
                 key={index}
                 className={cn(
                   "group grid gap-3 px-3 py-1.5 rounded-lg border border-transparent transition-all duration-200 items-center",
-                  "hover:bg-muted/50 dark:hover:bg-accent/30",
+                  "hover:bg-indigo-500/5 dark:hover:bg-indigo-500/10 hover:border-indigo-500/20",
                   !param.isActive && "opacity-50",
                   isFormData
                     ? "grid-cols-[32px_1fr_1fr_80px_1fr_32px]"
@@ -170,7 +170,7 @@ const FormDataComponent = ({
                     onCheckedChange={(checked) =>
                       updateField(index, "isActive", Boolean(checked))
                     }
-                    className="size-4 rounded-md data-[state=checked]:bg-primary data-[state=checked]:border-primary shadow-sm"
+                    className="size-4 rounded-md data-[state=checked]:bg-indigo-500 data-[state=checked]:border-indigo-500 shadow-sm"
                   />
                 </div>
 
@@ -180,7 +180,7 @@ const FormDataComponent = ({
                     placeholder="e.g. username"
                     value={param.key}
                     onChange={(e) => updateField(index, "key", e.target.value)}
-                    className="h-8 font-mono text-xs border-transparent bg-transparent hover:bg-muted/60 focus-visible:bg-background focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/10 px-2.5 rounded-md transition-all"
+                    className="h-8 font-mono text-xs border-transparent bg-transparent hover:bg-muted/60 focus-visible:bg-background focus-visible:border-indigo-500/40 focus-visible:ring-2 focus-visible:ring-indigo-500/20 px-2.5 rounded-md transition-all"
                   />
                 </div>
 
@@ -188,8 +188,8 @@ const FormDataComponent = ({
                 <div className="relative">
                   {param.type === "FILE" ? (
                     <div className="flex items-center gap-2">
-                      <label className="flex items-center gap-2 h-8 px-2.5 rounded-md text-xs border border-dashed border-border/50 hover:border-primary/30 hover:bg-primary/5 cursor-pointer transition-all flex-1">
-                        <FileUp className="size-3.5 text-muted-foreground" />
+                      <label className="flex items-center gap-2 h-8 px-2.5 rounded-md text-xs border border-dashed border-indigo-500/30 hover:border-indigo-500/50 hover:bg-indigo-500/5 cursor-pointer transition-all flex-1">
+                        <FileUp className="size-3.5 text-indigo-500/60" />
                         <span className="text-muted-foreground truncate">
                           {param.value || "Choose file..."}
                         </span>
@@ -209,7 +209,7 @@ const FormDataComponent = ({
                       placeholder="e.g. john_doe or {{user}}"
                       value={param.value || ""}
                       onChange={(val) => updateField(index, "value", val)}
-                      className="h-8 font-mono text-xs border-transparent bg-transparent hover:bg-muted/60 focus-visible:bg-background focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/10 px-2.5 rounded-md transition-all"
+                      className="h-8 font-mono text-xs border-transparent bg-transparent hover:bg-muted/60 focus-visible:bg-background focus-visible:border-indigo-500/40 focus-visible:ring-2 focus-visible:ring-indigo-500/20 px-2.5 rounded-md transition-all"
                     />
                   )}
                 </div>
@@ -221,10 +221,10 @@ const FormDataComponent = ({
                       value={param.type || "TEXT"}
                       onValueChange={(val) => updateField(index, "type", val)}
                     >
-                      <SelectTrigger className="h-8 text-xs border-transparent bg-transparent hover:bg-muted/60 focus:bg-background focus:border-primary px-2 rounded-md transition-all">
+                      <SelectTrigger className="h-8 text-xs border-transparent bg-transparent hover:bg-muted/60 focus:bg-background focus:border-indigo-500/40 px-2 rounded-md transition-all">
                         <SelectValue placeholder="Type" />
                       </SelectTrigger>
-                      <SelectContent className="rounded-lg shadow-lg">
+                      <SelectContent className="rounded-lg shadow-lg border-indigo-500/20">
                         {["TEXT", "FILE", "NUMBER", "BOOLEAN"].map((t) => (
                           <SelectItem
                             key={t}
@@ -247,7 +247,7 @@ const FormDataComponent = ({
                     onChange={(e) =>
                       updateField(index, "description", e.target.value)
                     }
-                    className="h-8 text-xs text-muted-foreground border-transparent bg-transparent hover:bg-muted/60 focus-visible:bg-background focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/10 px-2.5 rounded-md transition-all"
+                    className="h-8 text-xs text-muted-foreground border-transparent bg-transparent hover:bg-muted/60 focus-visible:bg-background focus-visible:border-indigo-500/40 focus-visible:ring-2 focus-visible:ring-indigo-500/20 px-2.5 rounded-md transition-all"
                   />
                 </div>
 
@@ -269,7 +269,7 @@ const FormDataComponent = ({
           {/* Add Button */}
           <button
             onClick={addField}
-            className="flex items-center justify-center gap-2 h-9 text-xs rounded-lg text-muted-foreground/60 hover:text-primary border border-dashed border-border/50 hover:border-primary/30 hover:bg-primary/5 w-full transition-all duration-200"
+            className="flex items-center justify-center gap-2 h-9 text-xs rounded-lg text-muted-foreground/60 hover:text-indigo-600 dark:hover:text-indigo-400 border border-dashed border-border/50 hover:border-indigo-500/40 hover:bg-indigo-500/5 w-full transition-all duration-200"
           >
             <Plus className="size-3.5" /> Add Field
           </button>

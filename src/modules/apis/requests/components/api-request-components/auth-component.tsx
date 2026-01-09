@@ -290,10 +290,10 @@ const AuthComponent = () => {
               type="button"
               onClick={() => handleAuthDataChange({ ...data, addTo: "header" })}
               className={cn(
-                "flex-1 rounded border px-3 py-1.5 text-[10px] transition-colors",
+                "flex-1 rounded-lg border px-3 py-1.5 text-[10px] font-medium transition-all",
                 data.addTo === "header"
-                  ? "bg-primary text-primary-foreground border-primary"
-                  : "bg-background hover:bg-muted text-foreground"
+                  ? "bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 border-indigo-500/40"
+                  : "bg-background hover:bg-indigo-500/5 text-foreground border-border/50 hover:border-indigo-500/30"
               )}
             >
               Header
@@ -302,10 +302,10 @@ const AuthComponent = () => {
               type="button"
               onClick={() => handleAuthDataChange({ ...data, addTo: "query" })}
               className={cn(
-                "flex-1 rounded border px-3 py-1.5 text-[10px] transition-colors",
+                "flex-1 rounded-lg border px-3 py-1.5 text-[10px] font-medium transition-all",
                 data.addTo === "query"
-                  ? "bg-primary text-primary-foreground border-primary"
-                  : "bg-background hover:bg-muted text-foreground"
+                  ? "bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 border-indigo-500/40"
+                  : "bg-background hover:bg-indigo-500/5 text-foreground border-border/50 hover:border-indigo-500/30"
               )}
             >
               Query Params
@@ -442,7 +442,9 @@ const AuthComponent = () => {
                 className="bg-muted/30 h-7 text-xs font-mono px-2"
                 placeholder="auth or auth-int"
               />
-              <FieldDescription>Usually 'auth' - from server</FieldDescription>
+              <FieldDescription>
+                Usually &apos;auth&apos; - from server
+              </FieldDescription>
             </div>
             <div>
               <FieldLabel tooltip="Opaque string from server (pass back unchanged)">
@@ -847,10 +849,10 @@ const AuthComponent = () => {
                 })
               }
               className={cn(
-                "flex-1 rounded border px-3 py-1.5 text-[10px] transition-colors",
+                "flex-1 rounded-lg border px-3 py-1.5 text-[10px] font-medium transition-all",
                 data.clientAuthentication === "header"
-                  ? "bg-primary text-primary-foreground border-primary"
-                  : "bg-background hover:bg-muted text-foreground"
+                  ? "bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 border-indigo-500/40"
+                  : "bg-background hover:bg-indigo-500/5 text-foreground border-border/50 hover:border-indigo-500/30"
               )}
             >
               Send as Basic Auth Header
@@ -861,10 +863,10 @@ const AuthComponent = () => {
                 handleAuthDataChange({ ...data, clientAuthentication: "body" })
               }
               className={cn(
-                "flex-1 rounded border px-3 py-1.5 text-[10px] transition-colors",
+                "flex-1 rounded-lg border px-3 py-1.5 text-[10px] font-medium transition-all",
                 data.clientAuthentication === "body"
-                  ? "bg-primary text-primary-foreground border-primary"
-                  : "bg-background hover:bg-muted text-foreground"
+                  ? "bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 border-indigo-500/40"
+                  : "bg-background hover:bg-indigo-500/5 text-foreground border-border/50 hover:border-indigo-500/30"
               )}
             >
               Send in Request Body
@@ -900,7 +902,7 @@ const AuthComponent = () => {
             </p>
             <p className="text-xs text-muted-foreground mt-1 max-w-xs">
               This request will use the authentication configured in your
-              workspace's global auth settings.
+              workspace&apos;s global auth settings.
             </p>
             <div className="mt-4 px-3 py-2 rounded-lg bg-amber-500/5 border border-amber-500/20">
               <p className="text-[10px] text-amber-600 dark:text-amber-400">
@@ -951,7 +953,7 @@ const AuthComponent = () => {
               handleAuthTypeChange(val as ExtendedAuthType)
             }
           >
-            <SelectTrigger className="h-8 text-xs bg-muted/30">
+            <SelectTrigger className="h-9 text-xs rounded-lg bg-muted/30 border-indigo-500/20 focus:ring-2 focus:ring-indigo-500/30">
               <SelectValue placeholder="Select auth type" />
             </SelectTrigger>
             <SelectContent>

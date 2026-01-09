@@ -30,9 +30,9 @@ const BodyComponent = () => {
       }}
       className="flex flex-1 min-h-0 flex-col w-full overflow-hidden"
     >
-      {/* Modern Tab List */}
+      {/* Modern Tab List with Indigo Theme */}
       <div className="flex items-center py-2 sticky top-0 z-10">
-        <TabsList className="h-8 gap-0.5 p-1 rounded-lg bg-muted/50">
+        <TabsList className="h-9 gap-1 p-1 rounded-lg bg-muted">
           {bodyTypes.map((type) => {
             const Icon = type.icon;
             return (
@@ -40,10 +40,10 @@ const BodyComponent = () => {
                 key={type.value}
                 value={type.value}
                 className={cn(
-                  "h-6 px-3 rounded-md text-[11px] font-medium cursor-pointer gap-1.5",
+                  "h-7 px-3 rounded-md text-[11px] font-medium cursor-pointer gap-1.5",
                   "transition-all duration-200",
-                  "data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:text-foreground",
-                  "data-[state=inactive]:text-muted-foreground data-[state=inactive]:hover:text-foreground"
+                  "data-[state=active]:bg-indigo-500/20 dark:data-[state=active]:bg-indigo-500/25 data-[state=active]:text-indigo-600 dark:data-[state=active]:text-indigo-300 data-[state=active]:border data-[state=active]:border-indigo-500/40",
+                  "data-[state=inactive]:text-muted-foreground data-[state=inactive]:hover:text-foreground data-[state=inactive]:hover:bg-accent"
                 )}
               >
                 {Icon && <Icon className="size-3" />}
@@ -62,8 +62,8 @@ const BodyComponent = () => {
           className="h-full mt-0 data-[state=active]:flex flex-col"
         >
           <div className="flex-1 flex flex-col items-center justify-center gap-4 py-16">
-            <div className="size-14 rounded-2xl bg-gradient-to-br from-muted/50 to-muted/30 border border-dashed border-border/50 flex items-center justify-center">
-              <FileJson className="size-6 text-muted-foreground/40" />
+            <div className="size-14 rounded-2xl bg-linear-to-br from-indigo-500/10 to-violet-500/5 border border-dashed border-indigo-500/20 flex items-center justify-center">
+              <FileJson className="size-6 text-indigo-500/40" />
             </div>
             <div className="text-center space-y-1">
               <p className="text-sm font-medium text-muted-foreground">
