@@ -28,11 +28,11 @@ const BodyComponent = () => {
           bodyType: val as BodyType,
         });
       }}
-      className="flex flex-1 min-h-0 flex-col w-full overflow-hidden"
+      className="flex flex-1 m-0! p-0! min-h-0 flex-col w-full overflow-hidden"
     >
       {/* Modern Tab List with Indigo Theme */}
-      <div className="flex items-center py-2 sticky top-0 z-10">
-        <TabsList className="h-9 gap-1 p-1 rounded-lg bg-muted">
+      <div className="flex items-center m-0!  p-0! py-2 sticky top-0 z-10">
+        <TabsList className="h-9 gap-1 mt-0!  pt-0! p-1 rounded-lg bg-muted">
           {bodyTypes.map((type) => {
             const Icon = type.icon;
             return (
@@ -55,7 +55,7 @@ const BodyComponent = () => {
       </div>
 
       {/* Content Area */}
-      <div className="flex-1 min-h-0 overflow-auto">
+      <div className="flex-1 min-h-0 h-full flex flex-col overflow-hidden">
         {/* None - Empty State */}
         <TabsContent
           value={BodyType.NONE}

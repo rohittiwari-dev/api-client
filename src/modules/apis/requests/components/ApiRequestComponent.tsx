@@ -576,12 +576,12 @@ const ApiRequestComponent = () => {
       {/* Tabs */}
       <Tabs
         value={requestInfoTab}
-        className="flex flex-1 min-h-0 flex-col w-full overflow-hidden"
+        className="flex flex-1 p-0! min-h-0 flex-col w-full overflow-hidden"
         onValueChange={(val) => {
           setRequestInfoTab(val);
         }}
       >
-        <div className="px-4 py-2 border-b border-border">
+        <div className="px-4 py-2 pt-0! border-b border-border">
           <TabsList className="h-9 gap-1 p-1 rounded-lg bg-muted">
             {[
               {
@@ -639,7 +639,7 @@ const ApiRequestComponent = () => {
               value="parameters"
               className="w-full flex-1 min-h-0 overflow-y-auto data-[state=active]:flex data-[state=active]:flex-col"
             >
-              <div className="flex-1 p-4">
+              <div className="flex-1 h-full min-h-0 p-4">
                 <ParameterComponent />
               </div>
             </TabsContent>
@@ -647,7 +647,7 @@ const ApiRequestComponent = () => {
               value="headers"
               className="w-full flex-1 min-h-0 overflow-y-auto data-[state=active]:flex data-[state=active]:flex-col"
             >
-              <div className="flex-1 p-4">
+              <div className="flex-1 h-full min-h-0 p-4">
                 <HeaderComponent />
               </div>
             </TabsContent>
@@ -655,7 +655,7 @@ const ApiRequestComponent = () => {
               value="body"
               className="w-full flex-1 min-h-0 overflow-y-auto data-[state=active]:flex data-[state=active]:flex-col"
             >
-              <div className="flex-1 p-4">
+              <div className="flex-1 h-full min-h-0 p-2 px-4 pt-1 flex flex-col">
                 <BodyComponent />
               </div>
             </TabsContent>
@@ -663,7 +663,7 @@ const ApiRequestComponent = () => {
               value="auth"
               className="w-full flex-1 min-h-0 overflow-y-auto data-[state=active]:flex data-[state=active]:flex-col"
             >
-              <div className="flex-1 p-4">
+              <div className="flex-1 h-full min-h-0 p-2 px-4 pt-1">
                 <AuthComponent />
               </div>
             </TabsContent>

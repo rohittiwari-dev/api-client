@@ -91,7 +91,7 @@ const JsonAndRawBodyComponent = ({
   };
 
   return (
-    <div className="flex flex-col gap-2 flex-1 min-h-0 relative">
+    <div className="flex flex-col gap-2 h-full w-full min-h-0">
       <link
         rel="stylesheet"
         href={
@@ -151,7 +151,7 @@ const JsonAndRawBodyComponent = ({
           </TooltipProvider>
         </div>
       )}
-      <div className="relative flex-1 min-h-0 overflow-auto">
+      <div className="relative flex-1 min-h-0 h-full w-full">
         <Editor
           value={data}
           lang={type === "json" ? "json" : "text"}
@@ -164,7 +164,6 @@ const JsonAndRawBodyComponent = ({
             lineHeight: "1.4",
             fontFamily:
               'ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace',
-
             color: resolvedTheme === "dark" ? "#becad3ff" : "#45505eff",
             border: error
               ? resolvedTheme === "dark"
@@ -174,7 +173,8 @@ const JsonAndRawBodyComponent = ({
               ? "0.5px solid #202327ff"
               : "0.5px solid #dee6f0ff",
             borderRadius: "6px",
-            minHeight: "100%",
+            height: "100%",
+            overflow: "auto",
           }}
           textareaClassName="focus:outline-none resize-none !text-xs"
           preClassName="language-json !text-xs"
