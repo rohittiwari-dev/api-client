@@ -92,7 +92,7 @@ const TabItem = ({
   return (
     <>
       <ContextMenu>
-        <ContextMenuTrigger asChild>
+        <ContextMenuTrigger asChild className="bg-transparent!">
           <div
             className={cn(
               "relative flex items-center",
@@ -124,17 +124,17 @@ const TabItem = ({
               onDragLeave={onDragLeave}
               onDrop={(e) => onDrop(e, id)}
               className={cn(
-                "group relative flex items-center justify-between gap-2 px-3",
+                "group! relative! flex! items-center! justify-between! gap-2! px-3!",
                 // Inactive state - Visible glass background
-                "bg-muted/20 hover:bg-muted/30 text-muted-foreground border-transparent",
+                "bg-muted/20! hover:bg-muted/30! text-muted-foreground! border-transparent!",
                 // Active state - Blended with content
-                "data-[state=active]:bg-background/60 data-[state=active]:backdrop-blur-xl data-[state=active]:text-foreground data-[state=active]:shadow-none",
-                "data-[state=active]:border-b-transparent", // Seamless transition to content
+                "data-[state=active]:bg-background/60! data-[state=active]:backdrop-blur-xl! data-[state=active]:text-foreground! data-[state=active]:shadow-none!",
+                "data-[state=active]:border-b-transparent!", // Seamless transition to content
 
                 // Shape & Layout
-                "rounded-t-md rounded-b-none w-44 max-w-44 !h-[38px]",
-                "text-xs cursor-pointer transition-all duration-200",
-                "border-r border-t border-l border-white/5", // Subtle border definition
+                "rounded-t-md! rounded-b-none! w-44! max-w-44! h-[38px]!",
+                "text-xs! cursor-pointer! transition-all! duration-200!",
+                "border-r! border-t! border-l! border-white/5!", // Subtle border definition
 
                 showDropIndicator && "ml-1",
                 unsaved && "italic"

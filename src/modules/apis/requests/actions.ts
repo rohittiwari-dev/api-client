@@ -138,6 +138,7 @@ export async function upsertRequestAction(
       body: data.body,
       auth: data.auth,
       bodyType: data.bodyType,
+      savedMessages: data.savedMessages,
     });
   } else {
     // Create new request
