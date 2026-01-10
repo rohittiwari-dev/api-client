@@ -15,7 +15,6 @@ import {
 
 interface VerificationEmailProps {
   userName: string;
-  verificationCode: string;
   verificationUrl?: string;
   expiresIn?: string;
   appName?: string;
@@ -23,7 +22,6 @@ interface VerificationEmailProps {
 
 export function VerificationEmail({
   userName,
-  verificationCode,
   verificationUrl,
   expiresIn = "15 minutes",
   appName = "API Studio",
@@ -31,9 +29,7 @@ export function VerificationEmail({
   return (
     <Html>
       <Head />
-      <Preview>
-        Your {appName} verification code is {verificationCode}
-      </Preview>
+      <Preview>Your {appName} verification link</Preview>
       <Body style={main}>
         <Container style={container}>
           {/* Header */}
@@ -46,19 +42,12 @@ export function VerificationEmail({
             <Text style={greeting}>Hi {userName},</Text>
 
             <Text style={paragraph}>
-              Please use the verification code below to complete your email
-              verification for {appName}:
+              Please click the button below to complete your email verification
+              for {appName}:
             </Text>
-
-            {/* Code Display */}
-            <Section style={codeSection}>
-              <Text style={codeLabel}>VERIFICATION CODE</Text>
-              <Text style={code}>{verificationCode}</Text>
-            </Section>
 
             {verificationUrl && (
               <>
-                <Text style={orText}>Or click the button below:</Text>
                 <Section style={buttonSection}>
                   <Button style={button} href={verificationUrl}>
                     Verify Email
@@ -107,6 +96,7 @@ const container = {
   padding: "20px 0 48px",
   marginBottom: "64px",
   borderRadius: "12px",
+  marginTop: "30px",
   boxShadow: "0 2px 8px rgba(0, 0, 0, 0.05)",
   maxWidth: "600px",
 };

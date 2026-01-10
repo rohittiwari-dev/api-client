@@ -232,7 +232,7 @@ const AuthForm = ({
           }));
         },
         onSuccess(context) {
-          toast.success("Successfully logged in");
+          toast.success("Redirecting to signup....");
         },
         onError(context) {
           console.log(context);
@@ -280,15 +280,15 @@ const AuthForm = ({
             {isTwoFactor
               ? "Two-Factor Authentication"
               : type === "sign-in"
-              ? "Welcome back"
-              : "Create an account"}
+                ? "Welcome back"
+                : "Create an account"}
           </h1>
           <p className="text-sm text-muted-foreground">
             {isTwoFactor
               ? "Enter the code from your authenticator app"
               : type === "sign-in"
-              ? "Enter your credentials to access your workspace"
-              : "Enter your details to get started for free"}
+                ? "Enter your credentials to access your workspace"
+                : "Enter your details to get started for free"}
           </p>
         </div>
       </div>

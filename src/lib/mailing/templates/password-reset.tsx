@@ -34,7 +34,7 @@ export function PasswordResetEmail({
         <Container style={container}>
           {/* Header */}
           <Section style={header}>
-            <Heading style={h1}>Reset Your Password 🔐</Heading>
+            <Heading style={h1}>Reset Your Password</Heading>
           </Section>
 
           {/* Content */}
@@ -103,6 +103,7 @@ const container = {
   margin: "0 auto",
   padding: "20px 0 48px",
   marginBottom: "64px",
+  marginTop: "30px",
   borderRadius: "12px",
   boxShadow: "0 2px 8px rgba(0, 0, 0, 0.05)",
   maxWidth: "600px",

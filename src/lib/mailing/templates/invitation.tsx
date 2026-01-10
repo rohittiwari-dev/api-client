@@ -113,6 +113,7 @@ const container = {
   backgroundColor: "#ffffff",
   margin: "0 auto",
   padding: "20px 0 48px",
+  marginTop: "30px",
   marginBottom: "64px",
   borderRadius: "12px",
   boxShadow: "0 2px 8px rgba(0, 0, 0, 0.05)",

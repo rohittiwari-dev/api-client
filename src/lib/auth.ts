@@ -12,12 +12,15 @@ import db from "@/lib/db";
 import env from "@/lib/env";
 import { getActiveOrganization } from "@/modules/workspace/server/workspace.actions";
 import redis from "./redis";
-import sendEmail, { sendEmailWithTemplate } from "./mailing";
+import { sendEmailWithTemplate } from "./mailing";
 import {
+  InvitationEmail,
+  PasswordChangedEmail,
   PasswordResetEmail,
   VerificationEmail,
   WelcomeEmail,
 } from "./mailing/templates";
+import { format } from "date-fns";
 
 const auth = betterAuth({
   appName: "Api Studio",
@@ -35,8 +38,28 @@ const auth = betterAuth({
         template: PasswordResetEmail({
           appName: "Api Studio",
           resetUrl: url,
-          userName: user.email,
+          userName: user.name,
           expiresIn: "10 minutes",
+        }),
+      });
+    },
+    onPasswordReset: async (data, request) => {
+      await sendEmailWithTemplate({
+        to: data.user.email,
+        subject: "Your password has been changed | Api Studio",
+        template: PasswordChangedEmail({
+          appName: "Api Studio",
+          userName: data.user.name,
+          userEmail: data.user.email,
+          changedAt: format(data.user.updatedAt || new Date(), "PPpp"),
+          deviceInfo:
+            request?.headers.get("user-agent")?.split("(")[1].split(")")[0] ||
+            "",
+          ipAddress:
+            request?.headers.get("cf-connecting-ip") ||
+            request?.headers.get("x-forwarded-for") ||
+            request?.headers.get("x-real-ip") ||
+            "",
         }),
       });
     },
@@ -61,7 +84,6 @@ const auth = betterAuth({
         subject: "Verify your email address | Api Studio",
         template: VerificationEmail({
           userName: user.name,
-          verificationCode: "123456",
           verificationUrl: url,
           expiresIn: "10 minutes",
           appName: "Api Studio",
@@ -105,10 +127,17 @@ const auth = betterAuth({
       organizationLimit: 5,
       allowInvitationToUnverifiedEmail: true,
       sendInvitationEmail: async (data, request) => {
-        await sendEmail({
+        await sendEmailWithTemplate({
           to: data.email,
-          subject: "You have been invited to join an organization | Plug Point",
-          text: `Click the link to accept your invitation: ${request?.url}`,
+          subject: "You have been invited to join an organization | Api Studio",
+          template: InvitationEmail({
+            inviterEmail: data?.inviter?.user?.email,
+            inviterName: data?.inviter?.user?.name,
+            inviteUrl: request?.url || "",
+            workspaceName: data?.organization?.name,
+            appName: "Api Studio",
+            recipientName: data?.email,
+          }),
         });
       },
       schema: {
