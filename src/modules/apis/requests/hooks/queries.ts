@@ -20,6 +20,36 @@ import useSidebarStore, {
 import { getAllRequests } from "../server/request";
 import useRequestStore from "../store/request.store";
 
+/**
+ * Helper to sync request store with server data in background
+ * This ensures the Zustand store stays in sync after operations
+ */
+const syncRequestStoreWithServer = async (workspaceId: string) => {
+  try {
+    const dbRequests = await getAllRequests(workspaceId);
+    const store = useRequestStore.getState();
+
+    // Update store with fresh data from server for requests that exist in store
+    dbRequests.forEach((dbRequest) => {
+      const existingRequest = store.requests.find((r) => r.id === dbRequest.id);
+      if (existingRequest && !existingRequest.unsaved) {
+        // Only update if not currently being edited (unsaved = false)
+        store.addRequest({
+          ...dbRequest,
+          headers: dbRequest.headers as any[],
+          parameters: dbRequest.parameters as any[],
+          body: dbRequest.body as any,
+          auth: dbRequest.auth as any,
+          savedMessages: dbRequest.savedMessages as any[],
+          unsaved: false,
+        });
+      }
+    });
+  } catch (error) {
+    console.error("Background sync failed:", error);
+  }
+};
+
 export function useCreateRequest(
   workspaceId: string,
   {
@@ -71,7 +101,49 @@ export function useDeleteRequest(
 
   return useMutation({
     mutationFn: async (requestId: string) => deleteRequestAction(requestId),
-    onError: (error) => {
+    onMutate: async (requestId) => {
+      // Cancel refetches
+      await queryClient.cancelQueries({
+        queryKey: ["requests-side-bar-tree", workspaceId],
+      });
+
+      // Snapshot previous value
+      const previousSidebarTree = queryClient.getQueryData([
+        "requests-side-bar-tree",
+        workspaceId,
+      ]);
+
+      // Helper to remove from tree
+      const removeFromTree = (items: any[]): any[] => {
+        return items
+          .filter((item) => item.id !== requestId)
+          .map((item) => {
+            if (item.type === "COLLECTION" && item.children) {
+              return { ...item, children: removeFromTree(item.children) };
+            }
+            return item;
+          });
+      };
+
+      // Optimistically remove from sidebar cache
+      queryClient.setQueryData(
+        ["requests-side-bar-tree", workspaceId],
+        (old: any[] | undefined) => (old ? removeFromTree(old) : old)
+      );
+
+      // Optimistically remove from request store
+      useRequestStore.getState().removeRequest(requestId);
+
+      return { previousSidebarTree };
+    },
+    onError: (error, requestId, context) => {
+      // Rollback sidebar cache
+      if (context?.previousSidebarTree) {
+        queryClient.setQueryData(
+          ["requests-side-bar-tree", workspaceId],
+          context.previousSidebarTree
+        );
+      }
       onError?.(error);
     },
     onSuccess: () => {
@@ -82,9 +154,8 @@ export function useDeleteRequest(
       queryClient.invalidateQueries({
         queryKey: ["requests-top-level", workspaceId],
       });
-      queryClient.invalidateQueries({
-        queryKey: ["requests-side-bar-tree", workspaceId],
-      });
+      // Background sync request store
+      syncRequestStoreWithServer(workspaceId);
     },
   });
 }
@@ -147,7 +218,50 @@ export function useRenameRequest(
       requestId: string;
       name: string;
     }) => renameRequestAction(requestId, name),
-    onError: (error) => {
+    onMutate: async ({ requestId, name }) => {
+      // Cancel refetches
+      await queryClient.cancelQueries({
+        queryKey: ["requests-side-bar-tree", workspaceId],
+      });
+
+      // Snapshot previous value
+      const previousSidebarTree = queryClient.getQueryData([
+        "requests-side-bar-tree",
+        workspaceId,
+      ]);
+
+      // Helper to update name in tree
+      const updateNameInTree = (items: any[]): any[] => {
+        return items.map((item) => {
+          if (item.id === requestId) {
+            return { ...item, name };
+          }
+          if (item.type === "COLLECTION" && item.children) {
+            return { ...item, children: updateNameInTree(item.children) };
+          }
+          return item;
+        });
+      };
+
+      // Optimistically update sidebar cache
+      queryClient.setQueryData(
+        ["requests-side-bar-tree", workspaceId],
+        (old: any[] | undefined) => (old ? updateNameInTree(old) : old)
+      );
+
+      // Optimistically update request store
+      useRequestStore.getState().updateRequest(requestId, { name });
+
+      return { previousSidebarTree };
+    },
+    onError: (error, variables, context) => {
+      // Rollback sidebar cache
+      if (context?.previousSidebarTree) {
+        queryClient.setQueryData(
+          ["requests-side-bar-tree", workspaceId],
+          context.previousSidebarTree
+        );
+      }
       onError?.(error);
     },
     onSuccess: () => {
@@ -158,9 +272,8 @@ export function useRenameRequest(
       queryClient.invalidateQueries({
         queryKey: ["requests-top-level", workspaceId],
       });
-      queryClient.invalidateQueries({
-        queryKey: ["requests-side-bar-tree", workspaceId],
-      });
+      // Background sync request store
+      syncRequestStoreWithServer(workspaceId);
     },
   });
 }
@@ -210,21 +323,138 @@ export function useUpsertRequest(
         bodyType: data.bodyType,
         savedMessages: data.savedMessages,
       }),
-    onError: (error) => {
+    // Optimistic update for sidebar
+    onMutate: async (data) => {
+      // Cancel outgoing refetches
+      await queryClient.cancelQueries({
+        queryKey: ["requests-side-bar-tree", workspaceId],
+      });
+
+      // Snapshot previous value for rollback
+      const previousSidebarTree = queryClient.getQueryData([
+        "requests-side-bar-tree",
+        workspaceId,
+      ]);
+
+      // Optimistically update sidebar tree cache
+      queryClient.setQueryData(
+        ["requests-side-bar-tree", workspaceId],
+        (old: any[] | undefined) => {
+          if (!old) return old;
+
+          // Helper to find and update request in tree
+          const updateRequestInTree = (items: any[]): any[] => {
+            return items.map((item) => {
+              if (item.id === data.requestId) {
+                // Update existing request
+                return {
+                  ...item,
+                  name: data.name,
+                  path: data.url,
+                  method: data.method || "GET",
+                  type: data.type,
+                };
+              }
+              if (item.type === "COLLECTION" && item.children) {
+                return {
+                  ...item,
+                  children: updateRequestInTree(item.children),
+                };
+              }
+              return item;
+            });
+          };
+
+          // Check if request exists in tree
+          const findInTree = (items: any[], id: string): boolean => {
+            for (const item of items) {
+              if (item.id === id) return true;
+              if (item.type === "COLLECTION" && item.children) {
+                if (findInTree(item.children, id)) return true;
+              }
+            }
+            return false;
+          };
+
+          if (findInTree(old, data.requestId)) {
+            // Update existing
+            return updateRequestInTree(old);
+          } else {
+            // Add new request (at end if no collection, or inside collection)
+            const newRequest = {
+              id: data.requestId,
+              name: data.name,
+              path: data.url,
+              method: data.method || "GET",
+              type: data.type,
+              workspaceId: data.workspaceId,
+              collectionId: data.collectionId || null,
+            };
+
+            if (data.collectionId) {
+              const addToCollection = (items: any[]): any[] => {
+                return items.map((item) => {
+                  if (
+                    item.id === data.collectionId &&
+                    item.type === "COLLECTION"
+                  ) {
+                    return {
+                      ...item,
+                      children: [...(item.children || []), newRequest],
+                    };
+                  }
+                  if (item.type === "COLLECTION" && item.children) {
+                    return {
+                      ...item,
+                      children: addToCollection(item.children),
+                    };
+                  }
+                  return item;
+                });
+              };
+              return addToCollection(old);
+            }
+            return [...old, newRequest];
+          }
+        }
+      );
+
+      return { previousSidebarTree };
+    },
+    onError: (error, variables, context) => {
+      // Rollback to previous cache on error
+      if (context?.previousSidebarTree) {
+        queryClient.setQueryData(
+          ["requests-side-bar-tree", workspaceId],
+          context.previousSidebarTree
+        );
+      }
       onError?.(error);
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      // Add/update the saved request in the store so it's available in listings
+      if (data) {
+        useRequestStore.getState().addRequest({
+          ...data,
+          headers: data.headers as any[],
+          parameters: data.parameters as any[],
+          body: data.body as any,
+          auth: data.auth as any,
+          savedMessages: data.savedMessages as any[],
+          unsaved: false,
+        });
+      }
+
       onSuccess?.();
-      // Invalidate all relevant queries to refresh the sidebar
+      // Invalidate to ensure consistency with server
       queryClient.invalidateQueries({
         queryKey: ["requests", workspaceId],
       });
       queryClient.invalidateQueries({
         queryKey: ["requests-top-level", workspaceId],
       });
-      queryClient.invalidateQueries({
-        queryKey: ["requests-side-bar-tree", workspaceId],
-      });
+      // Background sync request store with server
+      syncRequestStoreWithServer(workspaceId);
     },
   });
 }

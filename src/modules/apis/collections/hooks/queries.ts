@@ -68,39 +68,145 @@ export function useCreateCollection(
   });
 }
 
-export function useDeleteCollection(collectionId: string) {
+export function useDeleteCollection(
+  workspaceId: string,
+  {
+    onSuccess,
+    onError,
+  }: {
+    onSuccess?: () => void;
+    onError?: (error: unknown) => void;
+  } = {}
+) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async () => deleteCollectionAction(collectionId),
+    mutationFn: async (collectionId: string) =>
+      deleteCollectionAction(collectionId),
+    onMutate: async (collectionId) => {
+      // Cancel refetches
+      await queryClient.cancelQueries({
+        queryKey: ["requests-side-bar-tree", workspaceId],
+      });
+
+      // Snapshot previous value
+      const previousSidebarTree = queryClient.getQueryData([
+        "requests-side-bar-tree",
+        workspaceId,
+      ]);
+
+      // Helper to remove collection from tree (deep)
+      const removeFromTree = (items: any[]): any[] => {
+        return items
+          .filter((item) => item.id !== collectionId)
+          .map((item) => {
+            if (item.type === "COLLECTION" && item.children) {
+              return { ...item, children: removeFromTree(item.children) };
+            }
+            return item;
+          });
+      };
+
+      // Optimistically remove from sidebar cache
+      queryClient.setQueryData(
+        ["requests-side-bar-tree", workspaceId],
+        (old: any[] | undefined) => (old ? removeFromTree(old) : old)
+      );
+
+      return { previousSidebarTree };
+    },
+    onError: (error, collectionId, context) => {
+      // Rollback sidebar cache
+      if (context?.previousSidebarTree) {
+        queryClient.setQueryData(
+          ["requests-side-bar-tree", workspaceId],
+          context.previousSidebarTree
+        );
+      }
+      onError?.(error);
+    },
     onSuccess: () => {
+      onSuccess?.();
       queryClient.invalidateQueries({
         queryKey: ["collections"],
       });
       queryClient.invalidateQueries({
         queryKey: ["collections-top-level"],
-      });
-      queryClient.invalidateQueries({
-        queryKey: ["requests-side-bar-tree"],
       });
     },
   });
 }
 
-export function useRenameCollection(collectionId: string, name: string) {
+export function useRenameCollection(
+  workspaceId: string,
+  {
+    onSuccess,
+    onError,
+  }: {
+    onSuccess?: () => void;
+    onError?: (error: unknown) => void;
+  } = {}
+) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async () => renameCollectionAction(collectionId, name),
+    mutationFn: async ({
+      collectionId,
+      name,
+    }: {
+      collectionId: string;
+      name: string;
+    }) => renameCollectionAction(collectionId, name),
+    onMutate: async ({ collectionId, name }) => {
+      // Cancel refetches
+      await queryClient.cancelQueries({
+        queryKey: ["requests-side-bar-tree", workspaceId],
+      });
+
+      // Snapshot previous value
+      const previousSidebarTree = queryClient.getQueryData([
+        "requests-side-bar-tree",
+        workspaceId,
+      ]);
+
+      // Helper to update name in tree (deep)
+      const updateNameInTree = (items: any[]): any[] => {
+        return items.map((item) => {
+          if (item.id === collectionId) {
+            return { ...item, name };
+          }
+          if (item.type === "COLLECTION" && item.children) {
+            return { ...item, children: updateNameInTree(item.children) };
+          }
+          return item;
+        });
+      };
+
+      // Optimistically update sidebar cache
+      queryClient.setQueryData(
+        ["requests-side-bar-tree", workspaceId],
+        (old: any[] | undefined) => (old ? updateNameInTree(old) : old)
+      );
+
+      return { previousSidebarTree };
+    },
+    onError: (error, variables, context) => {
+      // Rollback sidebar cache
+      if (context?.previousSidebarTree) {
+        queryClient.setQueryData(
+          ["requests-side-bar-tree", workspaceId],
+          context.previousSidebarTree
+        );
+      }
+      onError?.(error);
+    },
     onSuccess: () => {
+      onSuccess?.();
       queryClient.invalidateQueries({
         queryKey: ["collections"],
       });
       queryClient.invalidateQueries({
         queryKey: ["collections-top-level"],
-      });
-      queryClient.invalidateQueries({
-        queryKey: ["requests-side-bar-tree"],
       });
     },
   });

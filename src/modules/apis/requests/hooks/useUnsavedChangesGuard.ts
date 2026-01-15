@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { RequestStateInterface } from "../types/request.types";
 import { upsertRequestAction } from "../actions";
@@ -28,7 +29,9 @@ export function useUnsavedChangesGuard() {
   const [isDiscarding, setIsDiscarding] = useState(false);
 
   const { activeWorkspace } = useWorkspaceState();
-  const { requests, tabIds, updateRequest, removeRequest } = useRequestStore();
+  const queryClient = useQueryClient();
+  const { requests, tabIds, updateRequest, removeRequest, addRequest } =
+    useRequestStore();
 
   // Get all tabs for current workspace
   const getWorkspaceTabs = useCallback(() => {
@@ -67,7 +70,7 @@ export function useUnsavedChangesGuard() {
     const savePromises = requestsToSave
       .filter((req) => req.type !== "NEW")
       .map(async (request) => {
-        await upsertRequestAction(request.id, {
+        const savedRequest = await upsertRequestAction(request.id, {
           name: request.name,
           url: request.url || "",
           workspaceId: request.workspaceId,
@@ -82,11 +85,35 @@ export function useUnsavedChangesGuard() {
           savedMessages: request.savedMessages ?? [],
         });
 
-        // Mark as saved in store
-        updateRequest(request.id, { unsaved: false });
+        // Add saved request back to store so it's available in listings
+        if (savedRequest) {
+          addRequest({
+            ...savedRequest,
+            headers: savedRequest.headers as any[],
+            parameters: savedRequest.parameters as any[],
+            body: savedRequest.body as any,
+            auth: savedRequest.auth as any,
+            savedMessages: savedRequest.savedMessages as any[],
+            unsaved: false,
+          });
+        }
       });
 
     await Promise.all(savePromises);
+
+    // Invalidate sidebar queries to refresh the list
+    const workspaceId = activeWorkspace?.id;
+    if (workspaceId) {
+      queryClient.invalidateQueries({
+        queryKey: ["requests", workspaceId],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["requests-top-level", workspaceId],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["requests-side-bar-tree", workspaceId],
+      });
+    }
   };
 
   // Revert request to database state
@@ -166,20 +193,33 @@ export function useUnsavedChangesGuard() {
   const handleDiscard = async () => {
     if (!pendingAction) return;
 
-    const requestsToProcess = pendingAction.unsavedRequests.filter(
+    // Separate NEW type requests (never saved) from existing requests
+    const newTypeRequests = pendingAction.unsavedRequests.filter(
+      (req) => req.type === "NEW"
+    );
+    const existingRequests = pendingAction.unsavedRequests.filter(
       (req) => req.type !== "NEW"
     );
     const currentPendingAction = pendingAction;
 
     setIsDiscarding(true);
     try {
-      // Optimistic: close dialog and proceed immediately
+      // Optimistically remove NEW type requests immediately (they never existed in DB)
+      newTypeRequests.forEach((req) => removeRequest(req.id));
+
+      // For existing requests, optimistically mark as saved (reverted) BEFORE closing tab
+      // This prevents closeTab from removing them from the store
+      existingRequests.forEach((req) =>
+        updateRequest(req.id, { unsaved: false })
+      );
+
+      // Close dialog and proceed immediately (optimistic)
       setDialogOpen(false);
       currentPendingAction.onConfirm();
       setPendingAction(null);
 
-      // Revert all unsaved requests from database in background
-      await Promise.all(requestsToProcess.map((r) => revertRequest(r)));
+      // Revert existing requests from database in background to restore original data
+      await Promise.all(existingRequests.map((r) => revertRequest(r)));
     } catch (error) {
       console.error("Failed to discard changes:", error);
       toast.error("Failed to discard changes");

@@ -87,17 +87,25 @@ const useRequestStore = create<RequestsStoreState & RequestStoreStateActions>()(
             const existingRequest = state.requests.find(
               (r) => r.id === request.id
             );
+            const isActiveRequest = state.activeRequest?.id === request.id;
+
             if (existingRequest) {
               return {
                 ...state,
                 requests: state.requests.map((r) =>
                   r.id === request.id ? { ...r, ...request } : r
                 ),
+                // Also update activeRequest if this is the active one
+                activeRequest: isActiveRequest
+                  ? { ...state.activeRequest, ...request }
+                  : state.activeRequest,
               };
             }
             return {
               ...state,
               requests: [...state.requests, request],
+              // If adding a new request and it's marked as active, set it
+              activeRequest: isActiveRequest ? request : state.activeRequest,
             };
           }),
         getState: () => get(),
@@ -140,9 +148,10 @@ const useRequestStore = create<RequestsStoreState & RequestStoreStateActions>()(
             const isActiveRequest = state.activeRequest?.id === tabId;
             const currentIndex = state.tabIds.indexOf(tabId);
 
-            // Check if the request being closed is of type "NEW" (not persisted to DB)
+            // Check if the request is unsaved or NEW type
             const requestToClose = state.requests.find((r) => r.id === tabId);
-            const isNewRequest = requestToClose?.type === "NEW";
+            const shouldRemoveFromStore =
+              requestToClose?.type === "NEW" || requestToClose?.unsaved;
 
             // Calculate next active tab if closing the active tab
             let nextActiveRequest: RequestStateInterface | null = null;
@@ -161,8 +170,8 @@ const useRequestStore = create<RequestsStoreState & RequestStoreStateActions>()(
             return {
               ...state,
               tabIds: state.tabIds.filter((id) => id !== tabId),
-              // Remove "NEW" type requests from requests array as they are not persisted
-              requests: isNewRequest
+              // Only remove unsaved/NEW requests from store, keep saved ones for listings
+              requests: shouldRemoveFromStore
                 ? state.requests.filter((r) => r.id !== tabId)
                 : state.requests,
               activeRequest: nextActiveRequest,

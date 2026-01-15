@@ -121,6 +121,10 @@ const ApiRequestComponent = () => {
     onError: (error) => {
       console.error("Failed to save request", error);
       toast.error("Failed to save request");
+      // Revert optimistic update on error
+      if (activeRequest?.id) {
+        updateRequest(activeRequest.id, { unsaved: true });
+      }
       setIsSaving(false);
     },
   });
@@ -411,6 +415,12 @@ const ApiRequestComponent = () => {
   const handleSave = () => {
     if (!activeRequest?.id || isSaving || upsertMutation.isPending) return;
     setIsSaving(true);
+
+    // Optimistically update store immediately
+    updateRequest(activeRequest.id, {
+      unsaved: false,
+      type: "API" as any, // Ensure type is set correctly for saved requests
+    });
 
     upsertMutation.mutate({
       requestId: activeRequest.id,

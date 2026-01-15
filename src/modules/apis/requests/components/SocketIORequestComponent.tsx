@@ -98,12 +98,14 @@ const SocketIORequestComponent = () => {
   // Use the upsert mutation hook for saving
   const upsertMutation = useUpsertRequest(activeRequest?.workspaceId || "", {
     onSuccess: () => {
-      if (activeRequest?.id) {
-        updateRequest(activeRequest.id, { unsaved: false });
-      }
+      // Store already updated optimistically
     },
     onError: (error) => {
       console.error("Failed to save request", error);
+      // Revert optimistic update on error
+      if (activeRequest?.id) {
+        updateRequest(activeRequest.id, { unsaved: true });
+      }
     },
   });
 
@@ -254,6 +256,12 @@ const SocketIORequestComponent = () => {
   const handleSave = useCallback(() => {
     if (!activeRequest?.id) return;
 
+    // Optimistically update store immediately
+    updateRequest(activeRequest.id, {
+      unsaved: false,
+      type: "SOCKET_IO" as any,
+    });
+
     // Store events in body.socketio_events
     const currentBody = (activeRequest.body as any) || {};
     const bodyWithEvents = {
@@ -275,7 +283,7 @@ const SocketIORequestComponent = () => {
       savedMessages: (activeRequest as any).savedMessages || [],
       type: "SOCKET_IO",
     } as any);
-  }, [activeRequest, events, upsertMutation]);
+  }, [activeRequest, events, upsertMutation, updateRequest]);
 
   // Keyboard shortcut for Ctrl+S to save
   useEffect(() => {

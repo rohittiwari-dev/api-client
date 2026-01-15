@@ -333,8 +333,8 @@ const SearchPanel = () => {
                         request.type === "WEBSOCKET"
                           ? "bg-violet-500/10"
                           : request.type === "SOCKET_IO"
-                          ? "bg-indigo-500/10"
-                          : "bg-muted"
+                            ? "bg-indigo-500/10"
+                            : "bg-muted"
                       )}
                     >
                       {getTypeIcon(request.type || "API", request.method)}

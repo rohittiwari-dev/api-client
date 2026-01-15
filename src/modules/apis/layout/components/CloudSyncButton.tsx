@@ -19,7 +19,7 @@ const CloudSyncButton = () => {
   const [isSyncing, setIsSyncing] = useState(false);
   const [justSynced, setJustSynced] = useState(false);
 
-  const { requests, updateRequest } = useRequestStore();
+  const { requests } = useRequestStore();
   const { activeWorkspace } = useWorkspaceState();
 
   // Get unsaved requests that are NOT of type "NEW"
@@ -38,7 +38,7 @@ const CloudSyncButton = () => {
     setIsSyncing(true);
     try {
       const savePromises = unsavedRequests.map(async (request) => {
-        await upsertRequestAction(request.id, {
+        const savedRequest = await upsertRequestAction(request.id, {
           name: request.name,
           url: request.url || "",
           workspaceId: request.workspaceId,
@@ -53,8 +53,18 @@ const CloudSyncButton = () => {
           savedMessages: request.savedMessages ?? [],
         });
 
-        // Mark as saved in store
-        updateRequest(request.id, { unsaved: false });
+        // Add saved request back to store so it's available in listings
+        if (savedRequest) {
+          useRequestStore.getState().addRequest({
+            ...savedRequest,
+            headers: savedRequest.headers as any[],
+            parameters: savedRequest.parameters as any[],
+            body: savedRequest.body as any,
+            auth: savedRequest.auth as any,
+            savedMessages: savedRequest.savedMessages as any[],
+            unsaved: false,
+          });
+        }
       });
 
       await Promise.all(savePromises);
@@ -116,10 +126,10 @@ const CloudSyncButton = () => {
           {isSyncing
             ? "Syncing changes..."
             : justSynced
-            ? "All changes synced!"
-            : `Sync ${unsavedRequests.length} unsaved request${
-                unsavedRequests.length > 1 ? "s" : ""
-              } to cloud`}
+              ? "All changes synced!"
+              : `Sync ${unsavedRequests.length} unsaved request${
+                  unsavedRequests.length > 1 ? "s" : ""
+                } to cloud`}
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>

@@ -60,13 +60,14 @@ const WebsocketRequestComponent = () => {
   // Use the upsert mutation hook for saving
   const upsertMutation = useUpsertRequest(activeRequest?.workspaceId || "", {
     onSuccess: () => {
-      // Mark as saved in both request and tab stores
-      if (activeRequest?.id) {
-        updateRequest(activeRequest.id, { unsaved: false });
-      }
+      // Store already updated optimistically
     },
     onError: (error) => {
       console.error("Failed to save request", error);
+      // Revert optimistic update on error
+      if (activeRequest?.id) {
+        updateRequest(activeRequest.id, { unsaved: true });
+      }
     },
   });
 
@@ -138,6 +139,13 @@ const WebsocketRequestComponent = () => {
 
   const handleSave = () => {
     if (!activeRequest?.id) return;
+
+    // Optimistically update store immediately
+    updateRequest(activeRequest.id, {
+      unsaved: false,
+      type: "WEBSOCKET" as any,
+    });
+
     upsertMutation.mutate({
       requestId: activeRequest.id,
       name: activeRequest.name || "Untitled WebSocket",
