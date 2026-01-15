@@ -28,7 +28,7 @@ export function useUnsavedChangesGuard() {
   const [isDiscarding, setIsDiscarding] = useState(false);
 
   const { activeWorkspace } = useWorkspaceState();
-  const { requests, tabIds, updateRequest } = useRequestStore();
+  const { requests, tabIds, updateRequest, removeRequest } = useRequestStore();
 
   // Get all tabs for current workspace
   const getWorkspaceTabs = useCallback(() => {
@@ -114,62 +114,77 @@ export function useUnsavedChangesGuard() {
           unsaved: false,
         });
       } else {
-        // Request doesn't exist in DB (new request), just mark as not unsaved
-        updateRequest(request.id, { unsaved: false });
+        // Request doesn't exist in DB - remove it from the store
+        removeRequest(request.id);
       }
     } catch (error) {
       console.error("Failed to revert request:", error);
-      // On error, still mark as not unsaved so close can proceed
-      updateRequest(request.id, { unsaved: false });
+      // On error, remove non-existent requests from store
+      removeRequest(request.id);
     }
   };
 
-  // Handle save action
+  // Handle save action (optimistic)
   const handleSave = async () => {
     if (!pendingAction) return;
 
+    const requestsToSave = pendingAction.unsavedRequests.filter(
+      (req) => req.type !== "NEW"
+    );
+    const currentPendingAction = pendingAction;
+
     setIsSaving(true);
     try {
-      await saveAllRequests(
-        pendingAction.unsavedRequests.filter((req) => req.type !== "NEW")
+      // Optimistically mark as saved immediately
+      requestsToSave.forEach((req) =>
+        updateRequest(req.id, { unsaved: false })
       );
-      toast.success(
-        pendingAction.unsavedRequests.length === 1
-          ? "Request saved"
-          : `${pendingAction.unsavedRequests.length} requests saved`
-      );
+
+      // Close dialog and proceed immediately (optimistic)
       setDialogOpen(false);
-      pendingAction.onConfirm();
+      currentPendingAction.onConfirm();
+      setPendingAction(null);
+
+      // Then save to database in background
+      await saveAllRequests(requestsToSave);
+      toast.success(
+        requestsToSave.length === 1
+          ? "Request saved"
+          : `${requestsToSave.length} requests saved`
+      );
     } catch (error) {
       console.error("Failed to save requests:", error);
       toast.error("Failed to save requests");
+      // Revert optimistic update on failure
+      requestsToSave.forEach((req) => updateRequest(req.id, { unsaved: true }));
     } finally {
       setIsSaving(false);
-      setPendingAction(null);
     }
   };
 
-  // Handle discard action
+  // Handle discard action (optimistic)
   const handleDiscard = async () => {
     if (!pendingAction) return;
 
+    const requestsToProcess = pendingAction.unsavedRequests.filter(
+      (req) => req.type !== "NEW"
+    );
+    const currentPendingAction = pendingAction;
+
     setIsDiscarding(true);
     try {
-      // Revert all unsaved requests from database
-      const revertPromises = pendingAction.unsavedRequests
-        .filter((req) => req.type !== "NEW")
-        .map((r) => revertRequest(r));
-
-      await Promise.all(revertPromises);
-
+      // Optimistic: close dialog and proceed immediately
       setDialogOpen(false);
-      pendingAction.onConfirm();
+      currentPendingAction.onConfirm();
+      setPendingAction(null);
+
+      // Revert all unsaved requests from database in background
+      await Promise.all(requestsToProcess.map((r) => revertRequest(r)));
     } catch (error) {
       console.error("Failed to discard changes:", error);
       toast.error("Failed to discard changes");
     } finally {
       setIsDiscarding(false);
-      setPendingAction(null);
     }
   };
 
