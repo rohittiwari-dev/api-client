@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import auth from "./lib/auth";
 
 /**
  * Lightweight middleware for Netlify Edge compatibility.
@@ -8,12 +9,9 @@ import { NextRequest, NextResponse } from "next/server";
 export async function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
 
-  // Check for session cookie (better-auth uses this cookie name)
-  const sessionCookie =
-    request.cookies.get("better-auth.session_token") ||
-    request.cookies.get("__Secure-better-auth.session_token");
-
-  const hasSession = !!sessionCookie?.value;
+  const hasSession = (
+    await auth.api.getSession({ headers: request.headers }).catch(() => null)
+  )?.session;
 
   const isAuthPage =
     pathname.startsWith("/sign-in") || pathname.startsWith("/sign-up");

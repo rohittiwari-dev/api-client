@@ -106,7 +106,7 @@ const WorkspaceSetup = ({
         });
       }
     },
-    { delay: 1000 }
+    { delay: 400 }
   );
 
   // Format slug value (lowercase, only alphanumeric and hyphens)
