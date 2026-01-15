@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import auth from "./lib/auth";
+import { betterFetch } from "@better-fetch/fetch";
+import { Session } from "better-auth";
 
 /**
  * Lightweight middleware for Netlify Edge compatibility.
@@ -9,9 +10,18 @@ import auth from "./lib/auth";
 export async function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
 
-  const hasSession = (
-    await auth.api.getSession({ headers: request.headers }).catch(() => null)
-  )?.session;
+  const { data: session } = await betterFetch<Session>(
+    "/api/auth/get-session",
+    {
+      baseURL: process.env["BETTER_AUTH_URL"],
+      headers: {
+        //get the cookie from the request
+        cookie: request.headers.get("cookie") || "",
+      },
+    }
+  );
+
+  const hasSession = !!session;
 
   const isAuthPage =
     pathname.startsWith("/sign-in") || pathname.startsWith("/sign-up");
